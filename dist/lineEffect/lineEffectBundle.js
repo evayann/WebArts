@@ -2595,7 +2595,6 @@ let tColor = "#58c823";
 let backgroundColor;
 let fromColor;
 let toColor;
-let previousMillis = 0;
 let crossing = false;
 let nbPts = 50;
 let distToDraw = 250;
@@ -2679,29 +2678,23 @@ class Line {
         this.size = size;
         this.alphaPercent = alphaPercent;
     }
+    static reduceLine(l, percent) {
+        let length = p5.createVector(l.end.x - l.start.x, l.end.y - l.start.y);
+        return new Line(p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(l.start, (p5__WEBPACK_IMPORTED_MODULE_1__.Vector.mult(length, percent))), p5__WEBPACK_IMPORTED_MODULE_1__.Vector.sub(l.end, (p5__WEBPACK_IMPORTED_MODULE_1__.Vector.mult(length, percent))), l.size, l.alphaPercent);
+    }
     draw() {
         p5.strokeWeight(this.size);
         let lineColor = (useColor) ? p5.lerpColor(fromColor, toColor, this.start.y / height) : p5.color("#a59d9d");
-        p5.stroke(p5.red(lineColor), p5.green(lineColor), p5.blue(lineColor), transparentCompute(this.alphaPercent) * 255);
+        lineColor.setAlpha(transparentCompute(this.alphaPercent) * 255);
+        p5.stroke(lineColor);
         p5.line(this.start.x, this.start.y, this.end.x, this.end.y);
     }
     intersection(l) {
         // Don't take the extremity of each segment
-        let s1, e1;
-        let xLength = (this.end.x - this.start.x);
-        let yLength = (this.end.y - this.start.y);
-        s1 = p5.createVector(this.start.x + xLength * 0.01, this.start.y + yLength * 0.01);
-        e1 = p5.createVector(this.start.x + xLength * 0.99, this.start.y + yLength * 0.99);
-        let s2, e2;
-        xLength = (l.end.x - l.start.x);
-        yLength = (l.end.y - l.start.y);
-        s2 = p5.createVector(l.start.x + xLength * 0.01, l.start.y + yLength * 0.01);
-        e2 = p5.createVector(l.start.x + xLength * 0.99, l.start.y + yLength * 0.99);
-        let o1 = orientation(s1, e1, s2);
-        let o2 = orientation(s1, e1, e2);
-        let o3 = orientation(s2, e2, s1);
-        let o4 = orientation(s2, e2, e1);
-        return o1 != o2 && o3 != o4;
+        let l1 = Line.reduceLine(this, 0.01);
+        let l2 = Line.reduceLine(l, 0.01);
+        return orientation(l1.start, l1.end, l2.start) != orientation(l1.start, l1.end, l2.end)
+            && orientation(l2.start, l2.end, l1.start) != orientation(l2.start, l2.end, l1.end);
     }
 }
 function draw(p) {

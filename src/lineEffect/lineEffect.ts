@@ -13,7 +13,6 @@ let backgroundColor: P5.Color;
 let fromColor: P5.Color;
 let toColor: P5.Color;
 
-let previousMillis: number = 0;
 let crossing: boolean = false;
 
 let nbPts: number = 50;
@@ -110,15 +109,15 @@ function orientation(p: P5.Vector, q: P5.Vector, r: P5.Vector) {
     return (val > 0) ? 1 : 2; // clock or counterclock wise
 }
 
-function transparentCompute(x: number): number{
+function transparentCompute(x: number): number {
     return 10 * p5.pow(x, 3);
 }
 
 class Line {
     private start: P5.Vector;
     private end: P5.Vector;
-    private size: number;
-    private alphaPercent: number;
+    private readonly size: number;
+    private readonly alphaPercent: number;
 
     constructor (start: P5.Vector, end: P5.Vector, size: number, alphaPercent: number) {
         this.start = start;
@@ -127,33 +126,27 @@ class Line {
         this.alphaPercent = alphaPercent;
     }
 
-    draw(): void {
+    static reduceLine(l: Line, percent: number): Line {
+        let length: P5.Vector = p5.createVector(l.end.x - l.start.x, l.end.y - l.start.y);
+        return new Line(P5.Vector.add(l.start, (P5.Vector.mult(length, percent))),
+            P5.Vector.sub(l.end, (P5.Vector.mult(length, percent))), l.size, l.alphaPercent);
+    }
+
+    public draw(): void {
         p5.strokeWeight(this.size);
         let lineColor: P5.Color = (useColor) ? p5.lerpColor(fromColor, toColor, this.start.y / height) : p5.color("#a59d9d");
-        p5.stroke(p5.red(lineColor), p5.green(lineColor), p5.blue(lineColor), transparentCompute(this.alphaPercent) * 255);
+        lineColor.setAlpha(transparentCompute(this.alphaPercent) * 255);
+        p5.stroke(lineColor);
         p5.line(this.start.x, this.start.y, this.end.x, this.end.y);
     }
 
     intersection(l: Line): boolean {
         // Don't take the extremity of each segment
-        let s1: P5.Vector, e1: P5.Vector;
-        let xLength: number = (this.end.x - this.start.x);
-        let yLength: number = (this.end.y - this.start.y);
-        s1 = p5.createVector(this.start.x + xLength * 0.01, this.start.y + yLength * 0.01);
-        e1 = p5.createVector(this.start.x + xLength * 0.99, this.start.y + yLength * 0.99);
+        let l1: Line = Line.reduceLine(this, 0.01);
+        let l2: Line = Line.reduceLine(l, 0.01);
 
-        let s2: P5.Vector, e2: P5.Vector;
-        xLength = (l.end.x - l.start.x);
-        yLength = (l.end.y - l.start.y);
-        s2 = p5.createVector(l.start.x + xLength * 0.01, l.start.y + yLength * 0.01);
-        e2 = p5.createVector(l.start.x + xLength * 0.99, l.start.y + yLength * 0.99);
-
-        let o1: number = orientation(s1, e1, s2);
-        let o2: number = orientation(s1, e1, e2);
-        let o3: number = orientation(s2, e2, s1);
-        let o4: number = orientation(s2, e2, e1);
-
-        return o1 != o2 && o3 != o4;
+        return orientation(l1.start, l1.end, l2.start) != orientation(l1.start, l1.end, l2.end)
+            && orientation(l2.start, l2.end, l1.start) != orientation(l2.start, l2.end, l1.end);
     }
 }
 
