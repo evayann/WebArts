@@ -2585,28 +2585,30 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
 
 
-let width;
-let height;
-let widthGrid = 80;
-let heightGrid = 80;
+let width = window.innerWidth;
+let height = window.innerHeight;
 let p5;
 let useColor = true;
-let fColor = "#4e7de0";
-let tColor = "#886400";
+let bColor = "#21304d";
+let fColor = "#adf8e8";
+let tColor = "#58c823";
+let backgroundColor;
 let fromColor;
 let toColor;
-let nbLines = 1;
-let spaceBetweenLine = 2;
+let previousMillis = 0;
+let crossing = false;
+let nbPts = 50;
+let distToDraw = 250;
+let strokeSize = 3;
+let speedFactor = 1;
+let pause = false;
 let seed = 0;
 let pm;
 class PointManager {
-    constructor(nbPts, distToDraw, ss) {
-        this.nbPoints = nbPts;
-        this.distanceToDraw = distToDraw;
-        this.strokeSize = ss;
+    constructor() {
         this.pts = new Array();
         this.lines = new Array();
-        for (let i = 0; i < this.nbPoints; i++)
+        for (let i = 0; i < nbPts; i++)
             this.pts.push(new Point(p5.random(width), p5.random(height)));
     }
     update(deltaTime) {
@@ -2616,23 +2618,22 @@ class PointManager {
         // Make lines
         this.pts.forEach(p1 => {
             this.pts.forEach(p2 => {
-                let pos1 = p1.pos;
-                let pos2 = p2.pos;
+                let pos1 = p1.pos, pos2 = p2.pos;
                 let distance = p5.dist(pos1.x, pos1.y, pos2.x, pos2.y);
-                if (distance < this.distanceToDraw) {
-                    let newLine = new Line(pos1, pos2, (distance / this.distanceToDraw) * this.strokeSize, 1 - distance / this.distanceToDraw);
+                if (distance < distToDraw) {
+                    let newLine = new Line(pos1, pos2, (distance / distToDraw) * strokeSize, 1 - distance / distToDraw);
                     if (crossing) {
                         this.lines.push(newLine);
                     }
                     else {
                         // Test if make intersection
                         let intersect = false;
-                        this.lines.forEach(l => {
-                            if (newLine.intersection(l)) {
+                        for (let i = 0; i < this.lines.length; i++) {
+                            if (newLine.intersection(this.lines[i])) {
                                 intersect = true;
-                                // break;
+                                break;
                             }
-                        });
+                        }
                         if (!intersect)
                             this.lines.push(newLine);
                     }
@@ -2641,10 +2642,7 @@ class PointManager {
         });
     }
     draw() {
-        this.lines.forEach(l => {
-            p5.stroke(255, 0, 255);
-            l.draw();
-        });
+        this.lines.forEach(l => l.draw());
     }
 }
 class Point {
@@ -2683,18 +2681,18 @@ class Line {
     }
     draw() {
         p5.strokeWeight(this.size);
-        let lineColor = p5.lerpColor(startColor, endColor, this.start.y / height);
+        let lineColor = (useColor) ? p5.lerpColor(fromColor, toColor, this.start.y / height) : p5.color("#a59d9d");
         p5.stroke(p5.red(lineColor), p5.green(lineColor), p5.blue(lineColor), transparentCompute(this.alphaPercent) * 255);
         p5.line(this.start.x, this.start.y, this.end.x, this.end.y);
     }
     intersection(l) {
-        // Don't take the extremeity of each segment
-        let s1 = this.start.copy(), e1 = this.end.copy();
+        // Don't take the extremity of each segment
+        let s1, e1;
         let xLength = (this.end.x - this.start.x);
         let yLength = (this.end.y - this.start.y);
         s1 = p5.createVector(this.start.x + xLength * 0.01, this.start.y + yLength * 0.01);
         e1 = p5.createVector(this.start.x + xLength * 0.99, this.start.y + yLength * 0.99);
-        let s2 = l.start.copy(), e2 = l.end.copy();
+        let s2, e2;
         xLength = (l.end.x - l.start.x);
         yLength = (l.end.y - l.start.y);
         s2 = p5.createVector(l.start.x + xLength * 0.01, l.start.y + yLength * 0.01);
@@ -2703,62 +2701,77 @@ class Line {
         let o2 = orientation(s1, e1, e2);
         let o3 = orientation(s2, e2, s1);
         let o4 = orientation(s2, e2, e1);
-        if (o1 != o2 && o3 != o4)
-            return true;
-        return false;
+        return o1 != o2 && o3 != o4;
     }
 }
-let previousMillis = 0;
-let crossing = false;
-let startColor;
-let endColor;
 function draw(p) {
     p.clear();
     p.randomSeed(seed);
-    p.background(20);
-    startColor = p.color("#A3F5A7");
-    endColor = p.color("#003C00");
-    let millis = p.millis();
-    let millisElapsed = millis - previousMillis;
-    previousMillis = millis;
-    let speed = 1;
-    pm.update(speed * (millisElapsed / 100));
+    p.background(backgroundColor);
+    pm.update(speedFactor * 0.2);
     pm.draw();
+}
+function reset() {
+    pm = new PointManager();
 }
 function setupP5(p) {
     p5 = p;
-    pm = new PointManager(40, 250, 3);
+    backgroundColor = p5.color(bColor);
+    fromColor = p5.color(fColor);
+    toColor = p5.color(tColor);
     p.frameRate(60);
-    p.resizeCanvas(800, 800);
+    reset();
     draw(p);
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
-    const params = { width: widthGrid, height: heightGrid, useColor: useColor,
+    const params = { intersect: () => crossing = !crossing,
+        speed: speedFactor,
+        nbPts: nbPts,
+        distToDraw: distToDraw,
+        strokeSize: strokeSize,
+        useColor: useColor,
         fromColor: fColor, toColor: tColor,
-        spaceBetweenLine: spaceBetweenLine,
-        nbLines: nbLines,
+        backgroundColor: bColor,
+        pause: () => {
+            pause = !pause;
+            (pause) ? p5.noLoop() : p5.loop();
+        },
         seed: seed,
-        reset: () => draw(p5) };
-    const guiCanvas = gui.addFolder("Canvas");
-    guiCanvas
-        .add(params, "width", 10, 500, 1)
+        reset: () => {
+            reset();
+            draw(p5);
+        } };
+    const guiEffect = gui.addFolder("Effect & Speed");
+    guiEffect
+        .add(params, "nbPts", 25, 300, 1)
         .onChange(value => {
-        widthGrid = value;
-        draw(p5);
-    });
-    guiCanvas
-        .add(params, "height", 10, 500, 1)
-        .onChange(value => {
-        heightGrid = value;
-        draw(p5);
-    });
-    guiCanvas.open();
+        nbPts = value;
+        reset();
+    })
+        .name("Nomber of Points");
+    guiEffect
+        .add(params, "distToDraw", 0, 500, 1)
+        .onChange(value => distToDraw = value)
+        .name("Distance to draw Lines");
+    guiEffect
+        .add(params, "strokeSize", 0.1, 5, 0.1)
+        .onChange(value => strokeSize = value)
+        .name("Stroke Size");
+    guiEffect
+        .add(params, "speed", 0.1, 5, 0.1)
+        .onChange(value => speedFactor = value)
+        .name("SpeedFactor");
+    let intersect = guiEffect
+        .add(params, "intersect")
+        .onChange(() => (crossing) ? intersect.name("Intersect") : intersect.name("Not Intersect"))
+        .name("Not Intersect");
+    guiEffect.open();
     const guiColor = gui.addFolder("Colors");
     guiColor.add(params, "useColor")
         .onChange(value => {
         useColor = value;
-        draw(p5);
+        pm.draw();
     });
     guiColor.addColor(params, "fromColor")
         .onChange(value => {
@@ -2770,20 +2783,17 @@ function setupDatGUI() {
         toColor = p5.color(value);
         draw(p5);
     });
+    guiColor.addColor(params, "backgroundColor")
+        .onChange(value => {
+        backgroundColor = p5.color(value);
+        draw(p5);
+    });
     guiColor.open();
     const guiMisc = gui.addFolder("Misc");
-    guiMisc
-        .add(params, "nbLines", 1, 5, 1)
-        .onChange(value => {
-        nbLines = value;
-        draw(p5);
-    });
-    guiMisc
-        .add(params, "spaceBetweenLine", 1, 10, 1)
-        .onChange(value => {
-        spaceBetweenLine = value;
-        draw(p5);
-    });
+    let ps = guiMisc
+        .add(params, "pause")
+        .name("Pause")
+        .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
     guiMisc
         .add(params, "seed", 0, Number.MAX_SAFE_INTEGER, 1)
         .onChange(value => {

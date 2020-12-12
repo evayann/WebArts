@@ -1,38 +1,39 @@
 import * as dat from 'dat.gui';
 import * as P5 from 'p5';
 
-let width: number;
-let height: number;
-let widthGrid: number = 80;
-let heightGrid: number = 80;
+let width: number = window.innerWidth;
+let height: number = window.innerHeight;
 
 let p5: P5;
 let useColor: boolean = true;
-let fColor: string = "#4e7de0";
-let tColor: string = "#886400";
+let bColor: string = "#21304d";
+let fColor: string = "#adf8e8";
+let tColor: string = "#58c823";
+let backgroundColor: P5.Color;
 let fromColor: P5.Color;
 let toColor: P5.Color;
 
-let nbLines: number = 1;
-let spaceBetweenLine: number = 2;
+let previousMillis: number = 0;
+let crossing: boolean = false;
+
+let nbPts: number = 50;
+let distToDraw: number = 250;
+let strokeSize: number = 3;
+
+let speedFactor: number = 1;
+let pause: boolean = false;
 let seed: number = 0;
 
 let pm: PointManager;
 
 class PointManager {
-    private nbPoints: number;
-    private distanceToDraw: number;
-    private strokeSize: number;
     private pts: Array<Point>;
-    private lines: Array<Line>;
+    private readonly lines: Array<Line>;
 
-    constructor (nbPts: number, distToDraw: number, ss: number) {
-        this.nbPoints = nbPts;
-        this.distanceToDraw = distToDraw;
-        this.strokeSize = ss;
+    constructor () {
         this.pts = new Array<Point>();
         this.lines = new Array<Line>();
-        for (let i: number = 0; i < this.nbPoints; i++)
+        for (let i: number = 0; i < nbPts; i++)
             this.pts.push(new Point(p5.random(width), p5.random(height)));
     }
 
@@ -45,25 +46,25 @@ class PointManager {
         // Make lines
         this.pts.forEach(p1 => {
             this.pts.forEach(p2 => {
-                let pos1: P5.Vector = p1.pos;
-                let pos2: P5.Vector = p2.pos;
+                let pos1: P5.Vector = p1.pos, pos2: P5.Vector = p2.pos;
                 let distance: number = p5.dist(pos1.x, pos1.y, pos2.x, pos2.y);
-                if (distance < this.distanceToDraw) {
-                    let newLine: Line = new Line(pos1, pos2, (distance / this.distanceToDraw) * this.strokeSize, 1 - distance / this.distanceToDraw);
+                if (distance < distToDraw) {
+                    let newLine: Line = new Line(pos1, pos2, (distance / distToDraw) * strokeSize, 1 - distance / distToDraw);
 
                     if (crossing) {
                         this.lines.push(newLine);
-                    } else {
+                    }
+                    else {
                         // Test if make intersection
                         let intersect: boolean = false;
-                        this.lines.forEach(l => {
-                            if (newLine.intersection(l)) {
+                        for (let i: number = 0; i < this.lines.length; i++) {
+                            if (newLine.intersection(this.lines[i])) {
                                 intersect = true;
-                                // break;
+                                break;
                             }
-                        });
+                        }
 
-                        if (!intersect)
+                        if (! intersect)
                             this.lines.push(newLine);
                     }
                 }
@@ -72,12 +73,8 @@ class PointManager {
     }
 
     draw(): void {
-        this.lines.forEach(l => {
-            p5.stroke(255, 0, 255);
-            l.draw();
-        });
+        this.lines.forEach(l => l.draw());
     }
-
 }
 
 class Point {
@@ -132,20 +129,20 @@ class Line {
 
     draw(): void {
         p5.strokeWeight(this.size);
-        let lineColor: P5.Color = p5.lerpColor(startColor, endColor, this.start.y / height);
+        let lineColor: P5.Color = (useColor) ? p5.lerpColor(fromColor, toColor, this.start.y / height) : p5.color("#a59d9d");
         p5.stroke(p5.red(lineColor), p5.green(lineColor), p5.blue(lineColor), transparentCompute(this.alphaPercent) * 255);
         p5.line(this.start.x, this.start.y, this.end.x, this.end.y);
     }
 
     intersection(l: Line): boolean {
-        // Don't take the extremeity of each segment
-        let s1: P5.Vector = this.start.copy(), e1 = this.end.copy();
+        // Don't take the extremity of each segment
+        let s1: P5.Vector, e1: P5.Vector;
         let xLength: number = (this.end.x - this.start.x);
         let yLength: number = (this.end.y - this.start.y);
         s1 = p5.createVector(this.start.x + xLength * 0.01, this.start.y + yLength * 0.01);
         e1 = p5.createVector(this.start.x + xLength * 0.99, this.start.y + yLength * 0.99);
 
-        let s2: P5.Vector = l.start.copy(), e2 = l.end.copy();
+        let s2: P5.Vector, e2: P5.Vector;
         xLength = (l.end.x - l.start.x);
         yLength = (l.end.y - l.start.y);
         s2 = p5.createVector(l.start.x + xLength * 0.01, l.start.y + yLength * 0.01);
@@ -156,70 +153,84 @@ class Line {
         let o3: number = orientation(s2, e2, s1);
         let o4: number = orientation(s2, e2, e1);
 
-        if (o1 != o2 && o3 != o4)
-            return true;
-
-        return false;
+        return o1 != o2 && o3 != o4;
     }
 }
-
-let previousMillis: number = 0;
-let crossing: boolean = false;
-let startColor: P5.Color;
-let endColor: P5.Color;
 
 function draw(p: P5): void {
     p.clear();
     p.randomSeed(seed);
-    p.background(20);
-    startColor = p.color("#A3F5A7");
-    endColor = p.color("#003C00");
-    let millis: number = p.millis();
-    let millisElapsed: number = millis - previousMillis;
-    previousMillis = millis;
+    p.background(backgroundColor);
 
-    let speed: number = 1;
-    pm.update(speed * (millisElapsed / 100));
+    pm.update(speedFactor * 0.2);
     pm.draw();
+}
+
+function reset(): void {
+    pm = new PointManager();
 }
 
 function setupP5(p: P5): void {
     p5 = p;
-    pm = new PointManager(40, 250, 3);
+    backgroundColor = p5.color(bColor);
+    fromColor = p5.color(fColor);
+    toColor = p5.color(tColor);
     p.frameRate(60);
-    p.resizeCanvas(800, 800);
+    reset();
     draw(p);
 }
 
 function setupDatGUI(): void {
     const gui = new dat.GUI();
-    const params = {width: widthGrid, height: heightGrid, useColor: useColor,
+    const params = {intersect: () => crossing = ! crossing,
+        speed: speedFactor,
+        nbPts: nbPts,
+        distToDraw: distToDraw,
+        strokeSize: strokeSize,
+        useColor: useColor,
         fromColor: fColor, toColor: tColor,
-        spaceBetweenLine: spaceBetweenLine,
-        nbLines: nbLines,
+        backgroundColor: bColor,
+        pause: () => {
+            pause = ! pause;
+            (pause) ? p5.noLoop() : p5.loop();
+        },
         seed: seed,
-        reset: () => draw(p5)};
+        reset: () => {
+            reset();
+            draw(p5);
+        }};
 
-    const guiCanvas = gui.addFolder("Canvas");
-    guiCanvas
-        .add(params, "width",10, 500, 1)
+    const guiEffect = gui.addFolder("Effect & Speed");
+    guiEffect
+        .add(params, "nbPts",25, 300, 1)
         .onChange(value => {
-            widthGrid = value;
-            draw(p5);
-        });
-    guiCanvas
-        .add(params, "height", 10, 500, 1)
-        .onChange(value => {
-            heightGrid = value;
-            draw(p5);
-        });
-    guiCanvas.open();
+            nbPts = value;
+            reset();
+        })
+        .name("Nomber of Points");
+    guiEffect
+        .add(params, "distToDraw",0, 500, 1)
+        .onChange(value => distToDraw = value)
+        .name("Distance to draw Lines");
+    guiEffect
+        .add(params, "strokeSize",0.1, 5, 0.1)
+        .onChange(value => strokeSize = value)
+        .name("Stroke Size");
+    guiEffect
+        .add(params, "speed",0.1, 5, 0.1)
+        .onChange(value => speedFactor = value)
+        .name("SpeedFactor");
+    let intersect = guiEffect
+        .add(params, "intersect")
+        .onChange(() => (crossing) ? intersect.name("Intersect") : intersect.name("Not Intersect"))
+        .name("Not Intersect");
+    guiEffect.open();
 
     const guiColor = gui.addFolder("Colors");
     guiColor.add(params, "useColor")
         .onChange(value => {
             useColor = value;
-            draw(p5);
+            pm.draw();
         });
     guiColor.addColor(params, "fromColor")
         .onChange(value => {
@@ -231,21 +242,18 @@ function setupDatGUI(): void {
             toColor = p5.color(value);
             draw(p5);
         });
+    guiColor.addColor(params, "backgroundColor")
+        .onChange(value => {
+            backgroundColor = p5.color(value);
+            draw(p5);
+        });
     guiColor.open();
 
     const guiMisc = gui.addFolder("Misc");
-    guiMisc
-        .add(params, "nbLines", 1, 5, 1)
-        .onChange(value => {
-            nbLines = value;
-            draw(p5);
-        });
-    guiMisc
-        .add(params, "spaceBetweenLine", 1, 10, 1)
-        .onChange(value => {
-            spaceBetweenLine = value;
-            draw(p5);
-        });
+    let ps = guiMisc
+        .add(params, "pause")
+        .name("Pause")
+        .onChange(() => (! pause) ? ps.name("Play") : ps.name("Pause"));
     guiMisc
         .add(params, "seed", 0, Number.MAX_SAFE_INTEGER, 1)
         .onChange(value => {
