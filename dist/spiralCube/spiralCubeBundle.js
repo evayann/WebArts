@@ -2569,10 +2569,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/squareSpiralTunnel/squareSpiralTunnel.ts":
-/*!******************************************************!*\
-  !*** ./src/squareSpiralTunnel/squareSpiralTunnel.ts ***!
-  \******************************************************/
+/***/ "./src/spiralCube/spiralCube.ts":
+/*!**************************************!*\
+  !*** ./src/spiralCube/spiralCube.ts ***!
+  \**************************************/
 /*! namespace exports */
 /*! exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_require__.r, __webpack_exports__, __webpack_require__.* */
@@ -2583,151 +2583,105 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
+// Inspiration of https://twitter.com/beesandbombs/status/1334573053053972485
 
 
-// Recreate from gif : https://jacobjoaquin.tumblr.com/post/108139240121/red-yellow-spiral-tunnel-built-with-processing
 let width = window.innerWidth;
 let height = window.innerHeight;
 let centerX = width / 2;
 let centerY = height / 2;
 let p5;
-let sColor = "#8d8585";
-let fColor = "#0a0e15";
-let tColor = "#efefef";
-let fromColor;
-let toColor;
+let bColor = "#0a0e15";
+let sColor = "#ffffff";
+let backgroundColor;
 let strokeColor;
 let strokeSize = 1.7;
 let counter = 0;
-let cycle = 60;
-let startPos;
-let move = 10;
-let distanceBetweenDepth = 50;
+let cubeSize = 50;
+let halfCube = cubeSize / 2;
 let speedFactor = 1;
-let cycleFactor = 1;
-let globalDepth;
-let elementPerDepth = 8;
-let angleRotation;
+let waveFactor = 0.25;
+let scaleBox = false;
 let pause = false;
-let coloredPositions = [];
-function computeColor(currDepth, el) {
-    const toDist = (d, e) => d * elementPerDepth + e;
-    let distance = toDist(currDepth, el);
-    let distanceColor = toDist(globalDepth, elementPerDepth - 1);
-    for (let [d, e] of coloredPositions) {
-        let dist = distance - toDist(d, e);
-        if (dist >= 0)
-            distanceColor = Math.min(distanceColor, dist);
-    }
-    return p5.lerpColor(toColor, fromColor, distanceColor / toDist(-startPos[0], startPos[0])); //toDist(globalDepth, elementPerDepth - 1));
+function computeScale(x, y) {
+    return p5.map(p5.cos(computeRotation(x, y) + counter * 0.1 * speedFactor), -1, 1, 0, 1);
 }
-function incrementCurrentPostion() {
-    coloredPositions.forEach(([d, el], i) => {
-        // Increment position
-        (el == elementPerDepth - 1) ?
-            coloredPositions[i] = [d + 1, 0] : coloredPositions[i] = [d, el + 1];
-        // Remove overlaps elements
-        if (d > globalDepth)
-            coloredPositions.splice(i, 1);
-    });
-    // Add new element periodically before the first squares
-    if (counter % (cycle / cycleFactor) == 0)
-        coloredPositions.push(startPos);
-    // Increment counter
-    counter += 1;
-}
-function square(depth, depthIndex, offset, start) {
-    for (let j = start; j < elementPerDepth; j += 2) {
-        p5.fill(computeColor(depthIndex, j));
-        p5.rect(0, depth + 25 + offset, depth * 3, depth);
-        p5.rotate(angleRotation * 2);
-    }
+function computeRotation(x, y) {
+    // radius * factor + theta
+    return p5.dist(x, y, 0, 0) * waveFactor + p5.atan2(y, x);
 }
 function draw() {
     p5.clear();
-    p5.frameRate(60 * speedFactor);
+    p5.background(backgroundColor);
+    p5.ortho();
+    p5.rotateX(-30);
     p5.stroke(strokeColor);
     p5.strokeWeight(strokeSize);
-    p5.background("black");
-    p5.translate(centerX, centerY);
-    for (let i = distanceBetweenDepth; i <= globalDepth * distanceBetweenDepth; i += distanceBetweenDepth) {
-        let depthIndex = i / distanceBetweenDepth;
-        square(i, depthIndex, 0, 0);
-        p5.rotate(angleRotation);
-        square(i, depthIndex, move, 1);
-        p5.rotate(-angleRotation);
+    p5.fill(0, 0, 0, 0);
+    let offsetX = halfCube / 2;
+    for (let j = -1 * cubeSize; j < height + cubeSize; j += cubeSize) {
+        for (let i = 0; i < width; i += cubeSize) {
+            p5.push();
+            p5.translate(offsetX + i - centerX, j - centerY);
+            p5.rotateY(computeRotation(-(offsetX + i - centerX), -(j - centerY)) + counter * speedFactor);
+            p5.box((!scaleBox) ? halfCube : halfCube - computeScale(-(offsetX + i - centerX), -(j - centerY)) * halfCube);
+            p5.pop();
+        }
+        offsetX = -offsetX;
     }
-    incrementCurrentPostion();
-}
-function resetPosition() {
-    startPos = [-Math.floor(cycle / elementPerDepth), cycle % elementPerDepth];
+    counter += 100;
 }
 function reset() {
-    coloredPositions = [];
-    angleRotation = 360 / elementPerDepth;
-    globalDepth = Math.max(height / distanceBetweenDepth, width / distanceBetweenDepth);
-    resetPosition();
+    counter = 0;
+    halfCube = cubeSize / 2;
+    p5.loop();
+    draw();
+    (pause) ? p5.noLoop() : p5.loop();
 }
 function setupP5(p) {
     p5 = p;
+    backgroundColor = p5.color(bColor);
     strokeColor = p5.color(sColor);
-    fromColor = p5.color(fColor);
-    toColor = p5.color(tColor);
-    p.createCanvas(width, height);
-    p.rectMode(p.CENTER);
+    p.createCanvas(width, height, p.WEBGL);
+    p.frameRate(60);
     p.angleMode(p.DEGREES);
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
-    const params = {
-        cycle: cycleFactor,
-        speed: speedFactor,
-        space: distanceBetweenDepth,
+    const params = { speed: speedFactor,
+        wave: waveFactor,
         strokeSize: strokeSize,
-        fromColor: fColor,
-        toColor: tColor,
         strokeColor: sColor,
-        nbElement: elementPerDepth,
-        move: move,
+        backgroundColor: bColor,
+        scaleBox: scaleBox,
+        cubeSize: cubeSize,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
         },
         reset: () => {
             reset();
-        }
-    };
+        } };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "cycle", 0.5, 2, 0.01)
+        .add(params, "cubeSize", 30, 300, 1)
         .onChange(value => {
-        cycleFactor = value;
-        resetPosition();
-    })
-        .name("CycleFactor");
+        cubeSize = value;
+        reset();
+    });
     guiEffect
-        .add(params, "speed", 0.1, 1, 0.01)
+        .add(params, "scaleBox")
+        .onChange(value => scaleBox = value)
+        .name("Active scale");
+    guiEffect
+        .add(params, "speed", 0.7, 1.3, 0.01)
         .onChange(value => speedFactor = value)
         .name("SpeedFactor");
     guiEffect
-        .add(params, "nbElement", 2, 32, 2)
-        .onChange(value => {
-        elementPerDepth = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "space", 20, 100, 1)
-        .onChange(value => {
-        distanceBetweenDepth = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "move", 0, 50, 1)
-        .onChange(value => {
-        move = value;
-        reset();
-    });
+        .add(params, "wave", 0.01, 1, 0.01)
+        .onChange(value => waveFactor = value)
+        .name("WaveFactor");
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
     guiVisual.add(params, "strokeSize", 0.1, 5, 0.1)
@@ -2735,19 +2689,14 @@ function setupDatGUI() {
         strokeSize = value;
         draw();
     });
-    guiVisual.addColor(params, "toColor")
-        .onChange(value => {
-        toColor = p5.color(value);
-        draw();
-    });
-    guiVisual.addColor(params, "fromColor")
-        .onChange(value => {
-        fromColor = p5.color(value);
-        draw();
-    });
     guiVisual.addColor(params, "strokeColor")
         .onChange(value => {
         strokeColor = p5.color(value);
+        draw();
+    });
+    guiVisual.addColor(params, "backgroundColor")
+        .onChange(value => {
+        backgroundColor = p5.color(value);
         draw();
     });
     guiVisual.open();
@@ -2866,8 +2815,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/squareSpiralTunnel/squareSpiralTunnel.ts");
+/******/ 	__webpack_require__("./src/spiralCube/spiralCube.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=squareSpiralTunnelBundle.js.map
+//# sourceMappingURL=spiralCubeBundle.js.map

@@ -5,10 +5,10 @@ let ignore = new webpack.IgnorePlugin(new RegExp("/(node_modules|ckeditor)/"))
 
 module.exports = {
     mode: "development",
-    entry: "./src/cubeCircle/cubeCircle.ts",
+    entry: "./src/spiralCube/spiralCube.ts",
     output: {
-        path: path.join(__dirname, "../../dist/cubeCircle"),
-        filename: "cubeCircleBundle.js"
+        path: path.join(__dirname, "../../dist/spiralCube"),
+        filename: "spiralCubeBundle.js"
     },
     devtool: "source-map",
     module: {

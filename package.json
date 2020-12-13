@@ -4,8 +4,8 @@
   "scripts": {
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
     "lineEffect": "webpack --config src/lineEffect/webpackage.config.js",
-    "cubeCircle": "webpack --config src/cubeCircle/webpackage.config.js",
-    "squareSpiralTunnel": "webpack --config src/squareSpiralTunnel/webpackage.config.js"
+    "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
+    "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js"
   },
   "dependencies": {
     "dat.gui": "^0.7.5",
