@@ -2585,122 +2585,149 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
 
 
+// Recreate from gif : https://jacobjoaquin.tumblr.com/post/108139240121/red-yellow-spiral-tunnel-built-with-processing
 let width = window.innerWidth;
 let height = window.innerHeight;
 let centerX = width / 2;
 let centerY = height / 2;
 let p5;
-let bColor = "#0a0e15";
-let sColor = "#ffffff";
-let backgroundColor;
+let sColor = "#8d8585";
+let fColor = "#0a0e15";
+let tColor = "#efefef";
+let fromColor;
+let toColor;
 let strokeColor;
 let strokeSize = 1.7;
 let counter = 0;
-let cubeSize = 50;
-let halfCube = cubeSize / 2;
+let cycle = 60;
+let startPos;
+let move = 10;
+let distanceBetweenDepth = 50;
 let speedFactor = 1;
-let waveFactor = 0.25;
-let scaleBox = false;
+let cycleFactor = 1;
+let globalDepth;
+let elementPerDepth = 8;
+let angleRotation;
 let pause = false;
-let currentPosition = [1, 0];
-function computeColor(depth, el) {
-    return (arrayEquals([depth, el], currentPosition)) ? 255 : 10;
+let coloredPositions = [];
+function computeColor(currDepth, el) {
+    const toDist = (d, e) => d * elementPerDepth + e;
+    let distance = toDist(currDepth, el);
+    let distanceColor = toDist(globalDepth, elementPerDepth - 1);
+    for (let [d, e] of coloredPositions) {
+        let dist = distance - toDist(d, e);
+        if (dist >= 0)
+            distanceColor = Math.min(distanceColor, dist);
+    }
+    return p5.lerpColor(toColor, fromColor, distanceColor / toDist(-startPos[0], startPos[0])); //toDist(globalDepth, elementPerDepth - 1));
 }
 function incrementCurrentPostion() {
-    let d, el;
-    [d, el] = currentPosition;
-    if (el == 7)
-        currentPosition = [d + 1, 0];
-    else
-        currentPosition = [d, el + 1];
+    coloredPositions.forEach(([d, el], i) => {
+        // Increment position
+        (el == elementPerDepth - 1) ?
+            coloredPositions[i] = [d + 1, 0] : coloredPositions[i] = [d, el + 1];
+        // Remove overlaps elements
+        if (d > globalDepth)
+            coloredPositions.splice(i, 1);
+    });
+    // Add new element periodically before the first squares
+    if (counter % (cycle / cycleFactor) == 0)
+        coloredPositions.push(startPos);
+    // Increment counter
+    counter += 1;
+}
+function square(depth, depthIndex, offset, start) {
+    for (let j = start; j < elementPerDepth; j += 2) {
+        p5.fill(computeColor(depthIndex, j));
+        p5.rect(0, depth + 25 + offset, depth * 3, depth);
+        p5.rotate(angleRotation * 2);
+    }
 }
 function draw() {
     p5.clear();
-    p5.background(backgroundColor);
+    p5.frameRate(60 * speedFactor);
     p5.stroke(strokeColor);
     p5.strokeWeight(strokeSize);
-    p5.fill(255, 0, 0, 255);
-    let depth = 20;
-    let offset = 60;
+    p5.background("black");
     p5.translate(centerX, centerY);
-    for (let i = offset; i <= depth * offset; i += offset) {
-        for (let j = 0; j < 8; j += 2) {
-            p5.fill(computeColor(i / offset, j));
-            p5.rect(0, i + 25, i * 3, i);
-            p5.rotate(90);
-        }
-        p5.rotate(45);
-        for (let j = 1; j < 8; j += 2) {
-            p5.fill(computeColor(i / offset, j));
-            p5.rect(0, i + 25, i * 3, i);
-            p5.rotate(90);
-        }
-        p5.rotate(-45);
-        /*for (let j: number = 0; j < 8; j++) {
-            p5.fill(computeColor(i / offset, j))
-            p5.rect(0, i, i, i);
-            p5.rotate(45);
-        }*/
+    for (let i = distanceBetweenDepth; i <= globalDepth * distanceBetweenDepth; i += distanceBetweenDepth) {
+        let depthIndex = i / distanceBetweenDepth;
+        square(i, depthIndex, 0, 0);
+        p5.rotate(angleRotation);
+        square(i, depthIndex, move, 1);
+        p5.rotate(-angleRotation);
     }
     incrementCurrentPostion();
-    counter += 100;
+}
+function resetPosition() {
+    startPos = [-Math.floor(cycle / elementPerDepth), cycle % elementPerDepth];
 }
 function reset() {
-    counter = 0;
-    halfCube = cubeSize / 2;
-    draw();
+    coloredPositions = [];
+    angleRotation = 360 / elementPerDepth;
+    globalDepth = Math.max(height / distanceBetweenDepth, width / distanceBetweenDepth);
+    resetPosition();
 }
 function setupP5(p) {
     p5 = p;
-    backgroundColor = p5.color(bColor);
     strokeColor = p5.color(sColor);
+    fromColor = p5.color(fColor);
+    toColor = p5.color(tColor);
     p.createCanvas(width, height);
-    p.frameRate(2);
     p.rectMode(p.CENTER);
     p.angleMode(p.DEGREES);
     reset();
 }
-function arrayEquals(a, b) {
-    return Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index]);
-}
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
-    const params = { speed: speedFactor,
-        wave: waveFactor,
+    const params = {
+        cycle: cycleFactor,
+        speed: speedFactor,
+        space: distanceBetweenDepth,
         strokeSize: strokeSize,
+        fromColor: fColor,
+        toColor: tColor,
         strokeColor: sColor,
-        backgroundColor: bColor,
-        scaleBox: scaleBox,
-        cubeSize: cubeSize,
+        nbElement: elementPerDepth,
+        move: move,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
         },
         reset: () => {
             reset();
-        } };
+        }
+    };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "cubeSize", 30, 300, 1)
+        .add(params, "cycle", 0.5, 2, 0.01)
         .onChange(value => {
-        cubeSize = value;
-        reset();
-    });
+        cycleFactor = value;
+        resetPosition();
+    })
+        .name("CycleFactor");
     guiEffect
-        .add(params, "scaleBox")
-        .onChange(value => scaleBox = value)
-        .name("Active scale");
-    guiEffect
-        .add(params, "speed", 0.7, 1.3, 0.01)
+        .add(params, "speed", 0.1, 1, 0.01)
         .onChange(value => speedFactor = value)
         .name("SpeedFactor");
     guiEffect
-        .add(params, "wave", 0.01, 1, 0.01)
-        .onChange(value => waveFactor = value)
-        .name("WaveFactor");
+        .add(params, "nbElement", 2, 32, 2)
+        .onChange(value => {
+        elementPerDepth = value;
+        reset();
+    });
+    guiEffect
+        .add(params, "space", 20, 100, 1)
+        .onChange(value => {
+        distanceBetweenDepth = value;
+        reset();
+    });
+    guiEffect
+        .add(params, "move", 0, 50, 1)
+        .onChange(value => {
+        move = value;
+        reset();
+    });
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
     guiVisual.add(params, "strokeSize", 0.1, 5, 0.1)
@@ -2708,14 +2735,19 @@ function setupDatGUI() {
         strokeSize = value;
         draw();
     });
+    guiVisual.addColor(params, "toColor")
+        .onChange(value => {
+        toColor = p5.color(value);
+        draw();
+    });
+    guiVisual.addColor(params, "fromColor")
+        .onChange(value => {
+        fromColor = p5.color(value);
+        draw();
+    });
     guiVisual.addColor(params, "strokeColor")
         .onChange(value => {
         strokeColor = p5.color(value);
-        draw();
-    });
-    guiVisual.addColor(params, "backgroundColor")
-        .onChange(value => {
-        backgroundColor = p5.color(value);
         draw();
     });
     guiVisual.open();

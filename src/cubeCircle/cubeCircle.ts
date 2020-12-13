@@ -1,3 +1,5 @@
+// Inspiration of https://twitter.com/beesandbombs/status/1334573053053972485
+
 import * as dat from 'dat.gui';
 import * as P5 from 'p5';
 
@@ -97,7 +99,7 @@ function setupDatGUI(): void {
         .onChange(value => {
             cubeSize = value;
             reset();
-        })
+        });
     guiEffect
         .add(params, "scaleBox")
         .onChange(value => scaleBox = value)
