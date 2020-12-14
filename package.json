@@ -4,6 +4,7 @@
   "scripts": {
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
     "lineEffect": "webpack --config src/lineEffect/webpackage.config.js",
+    "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
     "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js"
   },
