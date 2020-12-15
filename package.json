@@ -6,7 +6,8 @@
     "lineEffect": "webpack --config src/lineEffect/webpackage.config.js",
     "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
-    "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js"
+    "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js",
+    "planetsCircle": "webpack --config src/planetsCircle/webpackage.config.js"
   },
   "dependencies": {
     "dat.gui": "^0.7.5",
