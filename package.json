@@ -2,6 +2,7 @@
   "name": "WebEffects",
   "version": "1.0.0",
   "scripts": {
+    "asciiCam": "webpack --config src/asciiCam/webpackage.config.js",
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
     "lineEffect": "webpack --config src/lineEffect/webpackage.config.js",
     "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",

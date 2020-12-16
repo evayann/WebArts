@@ -138,7 +138,6 @@ function draw(): void {
     t += 1 / fps;
 }
 
-
 function reset(): void {
     p5.randomSeed(seed);
     p5.noiseSeed(seed);
