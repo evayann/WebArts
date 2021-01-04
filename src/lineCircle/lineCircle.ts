@@ -26,9 +26,7 @@ let circleSize: number = 20;
 
 let pause: boolean = false;
 
-function drawElement(lines: boolean) {
-
-    let oldPos: number[] = [], initPos = [];
+function drawPoints(): void {
     for (let i = 1; i <= nbSegment; i++) {
         let theta = angle * i;
         let sizeX = p5.cos(theta) * (xRadius - circleSize * 2);
@@ -43,30 +41,13 @@ function drawElement(lines: boolean) {
 
         useColor ? p5.fill(p5.lerpColor(fromColor, toColor, percent)) : p5.fill("white");
         p5.circle(x, y, circleSize);
-
-        if (lines) {
-            if (oldPos.length == 0) {
-                oldPos = [x, y];
-                initPos = [x, y];
-            }
-            else {
-                let [ox, oy] = oldPos;
-                p5.line(ox, oy, x, y);
-                oldPos = [x, y];
-            }
-        }
-    }
-
-    if (lines) {
-        let [ix, iy] = initPos, [ox, oy] = oldPos;
-        p5.line(ix, iy, ox, oy);
     }
 }
 
 function draw(): void {
     p5.fill(0, alpha);
     p5.rect(0, 0, width, height);
-    drawElement(false);
+    drawPoints();
     counter++;
 }
 
