@@ -1,0 +1,26 @@
+body {
+    margin: 0;
+}
+
+canvas {
+    display: block;
+}
+
+div.logoImage {
+    width: 200px;
+    position: fixed;
+    bottom: 5px;
+    right: 5px;
+    display: flex;
+    flex-direction: row;
+}
+div.logoImage a img {
+    width: 96px;
+    height: 96px;
+    opacity: 0.5;
+    background: transparent;
+}
+div.logoImage a:hover, div.logoImage a img:hover {
+    opacity: 1;
+    border-radius: 50%;
+}
