@@ -2569,10 +2569,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/circleAutomata/circleAutomata.ts":
-/*!**********************************************!*\
-  !*** ./src/circleAutomata/circleAutomata.ts ***!
-  \**********************************************/
+/***/ "./src/corridorLines/corridorLines.ts":
+/*!********************************************!*\
+  !*** ./src/corridorLines/corridorLines.ts ***!
+  \********************************************/
 /*! namespace exports */
 /*! exports [not provided] [no usage info] */
 /*! runtime requirements: __webpack_require__, __webpack_require__.n, __webpack_require__.r, __webpack_exports__, __webpack_require__.* */
@@ -2583,146 +2583,102 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
-// Recreate from gif : https://twitter.com/verytiredrobot/status/1345448387949309954?s=12
 
 
 let width = window.innerWidth;
 let height = window.innerHeight;
-let centerX = width / 2;
-let centerY = height / 2;
+let halfWidth = width / 2;
+let halfHeight = height / 2;
 let p5;
-let eColor = "#9e9eca";
-let fColor = "#ca5a5a";
-let emptyColor;
-let fillColor;
-let alpha = 120;
-let spaceOffset = 20;
-let False = 0;
-let True = 1;
-let gridHeight = 10;
-let gridWidth = 2 * gridHeight - 1;
-let currentGrid;
-let nextGrid;
-let counter = 0;
-let updateTime = 0.75;
-let fps = 60;
-let initSegment = 3;
-let rounded = true;
-let drawer;
-let rotateOffset = 0;
 let pause = false;
-function computePosition(theta, gen) {
-    return [centerX + p5.cos(theta) * gen * 25, centerY + p5.sin(theta) * gen * 25];
-}
-function setDrawer(round) {
-    if (round)
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            p5.noFill();
-            p5.arc(centerX, centerY, generation * 50, generation * 50, oldTheta + spaceBetween, currTheta - spaceBetween);
-        };
-    else
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            let [ox, oy] = computePosition(oldTheta + spaceBetween, generation);
-            let [x, y] = computePosition(currTheta - spaceBetween, generation);
-            p5.line(ox, oy, x, y);
-        };
-    p5.fill("black");
-    p5.background("black");
-}
-function rule(p, q, r) {
-    return p ^ (p && q || r);
-}
-function parents(x, y) {
-    let top = (y - 1) < 0 ? gridHeight + y - 1 : (y - 1) % gridHeight;
-    let xm1 = (x - 1) < 0 ? gridWidth + x - 1 : (x - 1) % gridWidth;
-    let p = currentGrid[top][xm1];
-    let q = currentGrid[top][x];
-    let r = currentGrid[top][(x + 1) % gridWidth];
-    return rule(p, q, r);
-}
-function computeGeneration() {
-    currentGrid[0][0] = p5.random() > 0.5 ? True : False;
-    for (let i = 0; i < gridHeight; i++)
-        for (let j = 0; j < gridWidth; j++)
-            nextGrid[i][j] = parents(j, i);
-    // Update generation, Buffer Swap
-    [currentGrid, nextGrid] = [nextGrid, currentGrid];
-}
-function drawAutomata() {
-    let nbPartAtGen = initSegment - 2;
-    p5.stroke((currentGrid[0][0] == True) ? fillColor : emptyColor);
-    p5.circle(centerX, centerY, 10);
-    let oldTheta = -1, initTheta = 0;
-    for (let r = 1; r < currentGrid.length - 1; r++) {
-        nbPartAtGen += 2;
-        let spaceBetween = spaceOffset / r;
-        let angle = 360 / nbPartAtGen;
-        for (let j = 1; j <= nbPartAtGen; j++) {
-            p5.stroke((currentGrid[r][j - 1] == True) ? fillColor : emptyColor);
-            let theta = angle * j + rotateOffset;
-            if (oldTheta == -1) {
-                oldTheta = theta;
-                initTheta = theta;
-            }
-            else {
-                drawer(oldTheta, theta, spaceBetween, r);
-                oldTheta = theta;
-            }
-        }
-        p5.stroke((currentGrid[r][nbPartAtGen - 1] == True) ? fillColor : emptyColor);
-        drawer(oldTheta, initTheta, spaceBetween, r);
-        oldTheta = -1;
-        rotateOffset += 25;
+let time = 0;
+let speed = 1;
+class Point {
+    constructor(x, y) {
+        this.setPosition(x, y);
     }
-    rotateOffset = 0;
+    setPosition(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    set(values) {
+        if (values.length < 2)
+            return false;
+        this.setPosition(values[0], values[1]);
+        return true;
+    }
+}
+class Equation {
+    constructor(pt1, pt2) {
+        p5.line(pt1.x, pt1.y, pt2.x, pt2.y);
+        // Compute point to equation
+        this.eqA = (pt2.y - pt1.y) / (pt2.x - pt1.x);
+        this.eqB = pt1.y - this.eqA * pt1.x;
+    }
+    computeX(y) {
+        return (y - this.eqB) / this.eqA;
+    }
+    computeY(x) {
+        return this.eqA * x + this.eqB;
+    }
+}
+let point = new Point(0, 0);
+let opacity = 1;
+let spaceOffset = 1.075;
+let xOffset = 0.5;
+let yOffset = 100;
+function lines(eq1, eq2, eq3, eq4) {
+    let iX = point.x, space = 1;
+    while (iX < halfWidth) {
+        let y1 = eq1.computeY(iX);
+        let y2 = eq2.computeY(iX);
+        let x3 = eq3.computeX(y2);
+        let y4 = eq4.computeY(x3);
+        p5.line(iX, y1, iX, y2);
+        p5.line(iX, y2, x3, y2);
+        p5.line(x3, y2, x3, y4);
+        p5.line(x3, y4, iX, y1);
+        space *= spaceOffset;
+        iX += space;
+    }
+}
+function getPointPosition(time) {
+    let pos = time % (2 * width);
+    if (pos < width)
+        return [xOffset * (pos - halfWidth), p5.cos(time / 2) * yOffset];
+    else
+        return [xOffset * (halfWidth - (pos - width)), p5.cos(time / 2 - p5.HALF_PI) * yOffset];
 }
 function draw() {
-    drawAutomata();
-    counter++;
-    if (counter / fps >= updateTime) {
-        computeGeneration();
-        counter = 0;
-    }
+    p5.fill(0, opacity * 255);
+    p5.rect(0, 0, width, height);
+    p5.translate(halfWidth, halfHeight);
+    p5.stroke("white");
+    point.set(getPointPosition(time));
+    lines(new Equation(point, new Point(halfWidth, halfHeight)), new Equation(point, new Point(halfWidth, -halfHeight)), new Equation(point, new Point(-halfWidth, -halfHeight)), new Equation(point, new Point(-halfWidth, halfHeight)));
+    time += speed * 10;
 }
 function reset() {
-    setDrawer(rounded);
-    currentGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    nextGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    for (let i = 0; i < p5.random(200, 500); i++)
-        computeGeneration();
-    counter = 0;
+    p5.clear();
+    time = 0;
+    p5.translate(-halfWidth, -halfHeight);
     draw();
-}
-function setColor() {
-    emptyColor = p5.color(eColor);
-    fillColor = p5.color(fColor);
-    emptyColor.setAlpha(alpha);
-    fillColor.setAlpha(alpha);
-    p5.fill("black");
-    p5.background("black");
 }
 function setupP5(p) {
     p5 = p;
+    p.createCanvas(width, height);
+    p5.frameRate(30);
     p5.angleMode(p5.DEGREES);
-    p5.createCanvas(width, height);
-    p5.frameRate(fps);
-    p5.strokeWeight(7);
-    p5.strokeCap(p5.ROUND);
-    setColor();
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        updateTime: updateTime,
-        nbGeneration: gridHeight,
+        speed: speed,
+        opacity: opacity,
+        xOffset: xOffset,
+        yOffset: yOffset,
         spaceOffset: spaceOffset,
-        rounded: rounded,
-        alpha: alpha,
-        strokeSize: 7,
-        fillColor: fColor,
-        emptyColor: eColor,
-        initSegment: initSegment,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
@@ -2733,50 +2689,21 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "updateTime", 0.1, 5, 0.1)
-        .onChange(value => updateTime = value)
-        .name("Update Time (s)");
+        .add(params, "speed", 0.1, 10, 0.1)
+        .onChange(value => speed = value);
     guiEffect
-        .add(params, "initSegment", 3, 7, 1)
-        .onChange(value => {
-        initSegment = value;
-        reset();
-    });
+        .add(params, "spaceOffset", 1.005, 2, 0.005)
+        .onChange(value => spaceOffset = value);
     guiEffect
-        .add(params, "nbGeneration", 5, 40, 1)
-        .onChange(value => {
-        gridHeight = value;
-        reset();
-    });
+        .add(params, "xOffset", 0, 2, 0.1)
+        .onChange(value => xOffset = value);
     guiEffect
-        .add(params, "spaceOffset", 15, 25, 1)
-        .onChange(value => {
-        spaceOffset = value;
-        setColor();
-    });
+        .add(params, "yOffset", 0, 500, 1)
+        .onChange(value => yOffset = value);
+    guiEffect
+        .add(params, "opacity", 0.3, 1, 0.05)
+        .onChange(value => opacity = value);
     guiEffect.open();
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual
-        .add(params, "rounded")
-        .onChange(value => {
-        rounded = value;
-        setDrawer(rounded);
-    });
-    guiVisual.addColor(params, "fillColor")
-        .onChange(value => fillColor = p5.color(value));
-    guiVisual.addColor(params, "emptyColor")
-        .onChange(value => emptyColor = p5.color(value));
-    guiVisual.add(params, "alpha", 0, 255, 1)
-        .onChange(value => {
-        alpha = value;
-        setColor();
-    });
-    guiVisual.add(params, "strokeSize", 1, 12, 0.1)
-        .onChange(value => {
-        p5.strokeWeight(value);
-        setColor();
-    });
-    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
@@ -2790,11 +2717,10 @@ function setupDatGUI() {
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
-    centerX = width / 2;
-    centerY = height / 2;
+    halfWidth = width / 2;
+    halfHeight = height / 2;
     p5.resizeCanvas(width, height);
-    setColor();
-    draw();
+    reset();
 }
 window.onresize = resize;
 window.onload = () => {
@@ -2809,7 +2735,6 @@ window.onload = () => {
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
     resize();
     setupDatGUI();
-    reset();
 };
 
 
@@ -2896,8 +2821,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/circleAutomata/circleAutomata.ts");
+/******/ 	__webpack_require__("./src/corridorLines/corridorLines.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=circleAutomataBundle.js.map
+//# sourceMappingURL=corridorLinesBundle.js.map

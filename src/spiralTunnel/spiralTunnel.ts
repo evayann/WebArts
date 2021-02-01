@@ -49,11 +49,10 @@ function computeColor(currDepth: number, el: number): P5.Color {
     return p5.lerpColor(toColor, fromColor, distanceColor / toDist(-startPos[0], startPos[0]));//toDist(globalDepth, elementPerDepth - 1));
 }
 
-function incrementCurrentPostion(): void {
+function incrementCurrentPosition(): void {
     coloredPositions.forEach(([d, el], i) =>  {
         // Increment position
-        (el == elementPerDepth - 1) ?
-            coloredPositions[i] = [d + 1, 0] : coloredPositions[i] = [d, el + 1];
+        coloredPositions[i] = (el == elementPerDepth - 1) ? [d + 1, 0] : [d, el + 1];
 
         // Remove overlaps elements
         if (d > globalDepth)
@@ -90,7 +89,7 @@ function draw(): void {
         square(i, depthIndex, move, 1);
         p5.rotate(-angleRotation);
     }
-    incrementCurrentPostion();
+    incrementCurrentPosition();
 }
 
 function resetPosition(): void {
