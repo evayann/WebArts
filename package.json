@@ -1,5 +1,7 @@
 {
   "name": "WebEffects",
+  "description": "Generative art effect with p5 and typescript",
+  "author": "Yann Zavattero",
   "version": "1.0.0",
   "scripts": {
     "spiral": "webpack --config src/spiral/webpackage.config.js",
@@ -16,13 +18,15 @@
   },
   "dependencies": {
     "dat.gui": "^0.7.5",
-    "p5": "^1.1.9",
+    "p5": "^1.2.0",
+    "p5.recorder": "^0.0.7",
     "stats-js": "^1.0.1",
     "webpack": "^5.4.0",
     "webpack-cli": "^4.2.0"
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.5",
+    "@types/node": "^14.14.25",
     "@types/p5": "^0.9.1",
     "@types/stats": "^0.16.30",
     "source-map-loader": "^1.1.2",
