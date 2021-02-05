@@ -32,7 +32,7 @@ function drawIteratif(): void {
     let computeTime: number = time / (10 * (1 / speed));
     for (let x = 0; x < width + size; x += size) {
         for (let y = 0; y < height + size; y += size) {
-            let d: number = p5.dist(x, y, halfWidth, halfHeight) / (zoom * 32);
+            let d: number = (p5.dist(x, y, halfWidth, halfHeight) / 32) * zoom;
             let theta: number = p5.atan2(y - halfHeight, x - halfWidth);
             let wave: number = p5.sin(p5.cos(d - computeTime) * amplitude + theta * nbWave);
             if (wave < 0.5)

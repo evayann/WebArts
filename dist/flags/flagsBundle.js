@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/spiral/spiral.ts":
-/*!******************************!*\
-  !*** ./src/spiral/spiral.ts ***!
-  \******************************/
+/***/ "./src/flags/flags.ts":
+/*!****************************!*\
+  !*** ./src/flags/flags.ts ***!
+  \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2575,48 +2575,65 @@ let height = window.innerHeight;
 let halfWidth = width / 2;
 let halfHeight = height / 2;
 let p5;
-let useShader = true;
 let shaderGraph;
 let shader;
-let size = 10;
 let pause = false;
 let time = 0;
-let zoom = 1;
 let speed = 1;
-let nbWave = 5;
-let amplitude = 1.5;
-let wColor = "#36caa4";
-let bgColor = "#ca365c";
-let waveColor;
-let backgroundColor;
-const parseColor = (color) => [p5.red(color) / 255, p5.green(color) / 255, p5.blue(color) / 255];
-function drawIteratif() {
-    p5.translate(-halfWidth, -halfHeight);
-    p5.background(backgroundColor);
-    let computeTime = time / (10 * (1 / speed));
-    for (let x = 0; x < width + size; x += size) {
-        for (let y = 0; y < height + size; y += size) {
-            let d = (p5.dist(x, y, halfWidth, halfHeight) / 32) * zoom;
-            let theta = p5.atan2(y - halfHeight, x - halfWidth);
-            let wave = p5.sin(p5.cos(d - computeTime) * amplitude + theta * nbWave);
-            if (wave < 0.5)
-                p5.square(x, y, size);
-        }
+let nbWave = 2;
+let offset = 20;
+let recursion = 2;
+let iColor = "#115dc8";
+let initColor;
+let squares;
+let flagsFunction = [drawFlagFrench, drawFlagSweden];
+let currentFlag = flagsFunction[0];
+function drawFlagFrench(x, y, w, h) {
+    squares.stroke("black");
+    squares.rect(x, y, w, h);
+    squares.noStroke();
+    squares.fill("#115dc8");
+    squares.rect(x - w / 3, y, w / 3, h);
+    squares.fill("#fdfdfd");
+    squares.rect(x, y, w / 3, h);
+    squares.fill("#e5131a");
+    squares.rect(x + w / 3, y, w / 3, h);
+}
+function drawFlagSweden(x, y, w, h) {
+    squares.stroke("black");
+    squares.fill(initColor);
+    squares.rect(x, y, w, h);
+    squares.noStroke();
+    squares.fill("#e5b813");
+    squares.rect(x - w / 4, y, w / 8, h);
+    squares.rect(x, y, w, h / 6);
+}
+function drawFlags(x, y, w, h, i) {
+    if (i > recursion) {
+        currentFlag(x, y, w, h);
+        return;
     }
+    let ox = w / 4, oy = h / 4;
+    let ow = w / 2 - offset, oh = h / 2 - offset;
+    drawFlags(x - ox, y - oy, ow, oh, ++i);
+    drawFlags(x + ox, y - oy, ow, oh, i);
+    drawFlags(x + ox, y + oy, ow, oh, i);
+    drawFlags(x - ox, y + oy, ow, oh, i);
 }
 function drawShader() {
     shaderGraph.shader(shader);
     shader.setUniform("time", time / (10 * (1 / speed)));
-    shader.setUniform("zoom", zoom);
-    shader.setUniform("wColor", parseColor(wColor));
-    shader.setUniform("bgColor", parseColor(bgColor));
-    shader.setUniform("amplitude", amplitude);
     shader.setUniform("nbWave", nbWave);
+    shader.setUniform("texSquares", squares);
     shaderGraph.plane(0, 0);
     p5.image(shaderGraph, 0, 0, width, height);
 }
 function draw() {
-    useShader ? drawShader() : drawIteratif();
+    squares.clear();
+    squares.background("black");
+    currentFlag(halfWidth, halfHeight, width - offset, height - offset);
+    drawFlags(halfWidth, halfHeight, width - offset, height - offset, 0);
+    drawShader();
     time++;
 }
 function preload(p) {
@@ -2628,103 +2645,76 @@ function preload(p) {
         precision highp int;
         #endif
         
-        varying vec2 vPos;
+        varying vec2 vTexPos;
         attribute vec3 aPosition;
+        attribute vec2 aTexCoord;
         
         void main() {
+            vTexPos = aTexCoord;
             vec4 pos = vec4(aPosition, 1.0);
-            pos.xy = pos.xy * 4.0 - 1.0;
-            vPos = (gl_Position = pos).xy;
+            pos.xy = pos.xy * 2.0;
+            gl_Position = pos;
         }`;
     let frag = `#ifdef GL_ES
         precision highp float;
         #endif
+        #define PI 3.14
+        #define MAX_AMP 0.05
         
-        varying vec2 vPos;
+        varying vec2 vTexPos;
         uniform float time;
-        uniform float zoom;
-        uniform vec3 wColor;
-        uniform vec3 bgColor;
-        uniform float amplitude;
         uniform float nbWave;
+        uniform sampler2D texSquares;
         
         void main() {
-            float d = distance(vPos.xy, vec2(0.0)) * (zoom * 16.0);
-            float theta = atan(vPos.y, vPos.x);
-            float wave = sin(cos(d - time) * amplitude + theta * nbWave);
-            if (wave < 0.5)
-                gl_FragColor = vec4(wColor, 1.0);
-            else
-                gl_FragColor = vec4(bgColor, 1.0);
+            vec2 uv = vTexPos;
+            uv.y = 1.0 - uv.y;
+            uv.x += sin(uv.y + time) * 0.025;
+            uv.y += cos(uv.x * PI * nbWave * 2.0 + time) * clamp(MAX_AMP, 0.0, 0.15);
+            gl_FragColor = texture2D(texSquares, uv);
         }`;
     shader = shaderGraph.createShader(vert, frag);
 }
 function setupP5() {
     p5.pixelDensity(1);
-    p5.createCanvas(width, height, p5.WEBGL);
-    setBackgroundColor(bgColor);
-    setWaveColor(wColor);
-    p5.rectMode(p5.CENTER);
-    p5.imageMode(p5.CENTER);
+    p5.createCanvas(width, height);
+    squares = p5.createGraphics(width, height);
+    initColor = p5.color(iColor);
+    squares.rectMode(p5.CENTER);
     draw();
-}
-function setBackgroundColor(color) {
-    bgColor = color;
-    backgroundColor = p5.color(bgColor);
-}
-function setWaveColor(color) {
-    wColor = color;
-    waveColor = p5.color(wColor);
-    p5.stroke(waveColor);
-    p5.fill(waveColor);
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        size: size,
-        zoom: zoom,
         speed: speed,
+        color: iColor,
         nbWave: nbWave,
-        wColor: wColor,
-        bgColor: bgColor,
-        amplitude: amplitude,
+        offset: offset,
+        nbSquareInside: recursion,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
-        },
-        useShader: useShader
+        }
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 10, 0.1)
+        .add(params, "speed", 0.1, 5, 0.1)
         .onChange(value => speed = value);
     guiEffect
-        .add(params, "zoom", 0.1, 3, 0.1)
-        .onChange(value => zoom = 1 / value);
+        .add(params, "offset", 0, 40, 0.1)
+        .onChange(value => offset = value);
     guiEffect
-        .add(params, "nbWave", 1, 7, 1)
+        .add(params, "nbSquareInside", 0, 4, 1)
+        .onChange(value => recursion = value);
+    guiEffect
+        .add(params, "nbWave", 0, 5, 1)
         .onChange(value => nbWave = value);
-    guiEffect
-        .add(params, "amplitude", 0.1, 2, 0.1)
-        .onChange(value => amplitude = value);
     guiEffect.open();
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.addColor(params, "wColor")
-        .onChange(value => setWaveColor(value));
-    guiVisual.addColor(params, "bgColor")
-        .onChange(value => setBackgroundColor(value));
-    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
         .name("Pause")
         .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
-    guiMisc
-        .add(params, "size", 1, 30, 1)
-        .onChange(value => size = value);
-    guiMisc
-        .add(params, "useShader")
-        .onChange(value => useShader = value);
     guiMisc.open();
 }
 function resize() {
@@ -2837,8 +2827,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/spiral/spiral.ts");
+/******/ 	__webpack_require__("./src/flags/flags.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=spiralBundle.js.map
+//# sourceMappingURL=flagsBundle.js.map

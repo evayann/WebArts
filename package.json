@@ -4,6 +4,7 @@
   "author": "Yann Zavattero",
   "version": "1.0.0",
   "scripts": {
+    "flags": "webpack --config src/flags/webpackage.config.js",
     "spiral": "webpack --config src/spiral/webpackage.config.js",
     "asciiCam": "webpack --config src/asciiCam/webpackage.config.js",
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
