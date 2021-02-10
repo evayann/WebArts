@@ -20,20 +20,20 @@ let fps: number = 60;
 let cycle: number = 1;
 let amplitude: number = 1;
 
-let nbSegment: number = 4;
-let elements: number = 20;
+let nbSegment: number = 3;
+let elements: number = 60;
 let xRadius: number = 450;
-let yRadius: number = 450;
-let size: number = 100;
+let yRadius: number = 385;
+let size: number = 160;
 
 let pause: boolean = false;
 
-function generatePoints(): Array<number[]> {
-    let points: Array<number[]> = [];
-    let offset: number = (nbSegment == 3) ? p5.HALF_PI : 0;
+function generatePoints(): {index: number, point: number[]}[] {
+    let points: {index: number, point: number[]}[] = [];
+    let offset: number = (nbSegment == 3) ? p5.HALF_PI / 3 : 0;
     for (let i = 0; i < nbSegment; i++) {
         let theta = angle * i + offset;
-        points[i] = [centerX + p5.cos(theta) * xRadius, centerY + p5.sin(theta) * yRadius];
+        points[i] = {index: i, point: [centerX + p5.cos(theta) * xRadius, centerY + p5.sin(theta) * yRadius]};
     }
     return points;
 }
@@ -46,34 +46,37 @@ function drawSquare(part: P5.Graphics, x: number, y: number, i: number): void {
     part.pop();
 }
 
-function drawSens(pts: number[][], previous: number[], part: P5.Graphics): void {
-    for (let [i, pt] of pts.entries()) {
+function drawSens(pts: {index: number, point: number[]}[], previous: number[], part: P5.Graphics): void {
+    for (let pt of pts) {
         let [x1, y1] = previous;
-        let [x2, y2] = pt;
+        let [x2, y2] = pt.point;
         for (let j = 0; j < elements; j++) {
             let x: number = p5.lerp(x1, x2, j / elements);
             let y: number = p5.lerp(y1, y2, j / elements);
             drawSquare(part, x, y,
-                (((j + i * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
+                (((j + pt.index * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
                     + (p5.millis() / 500) * (1 / cycle)));
         }
-        previous = pt;
+        previous = pt.point;
     }
 }
 
 function drawSquareLoop(): void {
-    let pts: number[][] = generatePoints();
-    let previous: number[] = pts[pts.length - 1];
+    let pts: {index: number, point: number[]}[] = generatePoints();
+    let previous: number[] = pts[pts.length - 1].point;
     drawSens(pts, previous, partA);
 
     let len: number = pts.length - 1;
     let half: number = ~~(pts.length / 2);
     pts = pts.slice(half, len + 1).concat(pts.slice(0, half));
-    previous = pts[pts.length - 1];
+    previous = pts[pts.length - 1].point;
     drawSens(pts, previous, partB);
 
-    p5.image(partA.get(0, height / 2, width, height / 2 - 1), 0, height / 2);
-    p5.image(partB.get(0, 0, width, height / 2 + 1), 0, 0);
+    // p5.image(partA.get(0, 0, width, height), 0, 0);
+    // p5.image(partB.get(0, 0, width, height), 0, 0);
+
+    p5.image(partA.get(0, height / 2 - 50, width, height / 2 + 50), 0, height / 2 - 50);
+    p5.image(partB.get(0, 0, width, height / 2), 0, 0);
 }
 
 function draw(): void {
@@ -137,7 +140,7 @@ function setupDatGUI(): void {
         .add(params, "amplitude",0.1, 5, 0.1)
         .onChange(value => cycle = value);
     guiEffect
-        .add(params, "nbSegment",[4, 6, 8])
+        .add(params, "nbSegment",3, 20, 1)
         .onChange(value => {
             nbSegment = value;
             reset();

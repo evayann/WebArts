@@ -2586,18 +2586,18 @@ let angle = 0;
 let fps = 60;
 let cycle = 1;
 let amplitude = 1;
-let nbSegment = 4;
-let elements = 20;
+let nbSegment = 3;
+let elements = 60;
 let xRadius = 450;
-let yRadius = 450;
-let size = 100;
+let yRadius = 385;
+let size = 160;
 let pause = false;
 function generatePoints() {
     let points = [];
-    let offset = (nbSegment == 3) ? p5.HALF_PI : 0;
+    let offset = (nbSegment == 3) ? p5.HALF_PI / 3 : 0;
     for (let i = 0; i < nbSegment; i++) {
         let theta = angle * i + offset;
-        points[i] = [centerX + p5.cos(theta) * xRadius, centerY + p5.sin(theta) * yRadius];
+        points[i] = { index: i, point: [centerX + p5.cos(theta) * xRadius, centerY + p5.sin(theta) * yRadius] };
     }
     return points;
 }
@@ -2609,29 +2609,31 @@ function drawSquare(part, x, y, i) {
     part.pop();
 }
 function drawSens(pts, previous, part) {
-    for (let [i, pt] of pts.entries()) {
+    for (let pt of pts) {
         let [x1, y1] = previous;
-        let [x2, y2] = pt;
+        let [x2, y2] = pt.point;
         for (let j = 0; j < elements; j++) {
             let x = p5.lerp(x1, x2, j / elements);
             let y = p5.lerp(y1, y2, j / elements);
-            drawSquare(part, x, y, (((j + i * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
+            drawSquare(part, x, y, (((j + pt.index * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
                 + (p5.millis() / 500) * (1 / cycle)));
         }
-        previous = pt;
+        previous = pt.point;
     }
 }
 function drawSquareLoop() {
     let pts = generatePoints();
-    let previous = pts[pts.length - 1];
+    let previous = pts[pts.length - 1].point;
     drawSens(pts, previous, partA);
     let len = pts.length - 1;
     let half = ~~(pts.length / 2);
     pts = pts.slice(half, len + 1).concat(pts.slice(0, half));
-    previous = pts[pts.length - 1];
+    previous = pts[pts.length - 1].point;
     drawSens(pts, previous, partB);
-    p5.image(partA.get(0, height / 2, width, height / 2 - 1), 0, height / 2);
-    p5.image(partB.get(0, 0, width, height / 2 + 1), 0, 0);
+    // p5.image(partA.get(0, 0, width, height), 0, 0);
+    // p5.image(partB.get(0, 0, width, height), 0, 0);
+    p5.image(partA.get(0, height / 2 - 50, width, height / 2 + 50), 0, height / 2 - 50);
+    p5.image(partB.get(0, 0, width, height / 2), 0, 0);
 }
 function draw() {
     partA.clear();
@@ -2691,7 +2693,7 @@ function setupDatGUI() {
         .add(params, "amplitude", 0.1, 5, 0.1)
         .onChange(value => cycle = value);
     guiEffect
-        .add(params, "nbSegment", [4, 6, 8])
+        .add(params, "nbSegment", 3, 20, 1)
         .onChange(value => {
         nbSegment = value;
         reset();
