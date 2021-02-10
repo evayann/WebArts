@@ -12,38 +12,90 @@ let shaderGraph: P5.Graphics;
 let shader: P5.Shader;
 
 let pause: boolean = false;
+let seed: number = 0;
 let time: number = 0;
 let speed: number = 1;
 let nbWave: number = 2;
 let offset: number = 20;
 let recursion: number = 2;
-let iColor: string = "#115dc8";
-let initColor: P5.Color;
 let squares: P5.Graphics;
 
-let flagsFunction: Array<Function> = [drawFlagFrench, drawFlagSweden];
-let currentFlag: Function = flagsFunction[0];
+let flagsFunction: {[id: string]: Function} = {drawFlagFrench: drawFlagFrench,
+    drawFlagItalian: drawFlagItalian, drawFlagIreland: drawFlagIreland, drawFlagBelgium: drawFlagBelgium,
+    drawFlagDeutsch: drawFlagDeutsch, drawFlagLuxembourg: drawFlagLuxembourg,
+    drawFlagNetherlands: drawFlagNetherlands, drawFlagRussia: drawFlagRussia,
+    drawFlagSweden: drawFlagSweden, randomFlag: randomFlag};
+let currentFlag: Function = drawFlagFrench;
 
 function drawFlagFrench(x: number, y: number, w: number, h: number): void {
+    drawTricolorVerticalFlag(x, y, w, h, "#115dc8", "#fdfdfd", "#e5131a");
+}
+
+function drawFlagItalian(x: number, y: number, w: number, h: number): void {
+    drawTricolorVerticalFlag(x, y, w, h, "#33c811", "#fdfdfd", "#e5131a");
+}
+
+function drawFlagIreland(x: number, y: number, w: number, h: number): void {
+    drawTricolorVerticalFlag(x, y, w, h, "#33c811", "#fdfdfd", "#e59113");
+}
+
+function drawFlagBelgium(x: number, y: number, w: number, h: number): void {
+    drawTricolorVerticalFlag(x, y, w, h, "#000000", "#f3d510", "#e5131a");
+}
+
+function drawTricolorVerticalFlag(x: number, y: number, w: number, h: number, c1: string, c2: string, c3: string): void {
     squares.stroke("black");
     squares.rect(x, y, w, h);
     squares.noStroke();
-    squares.fill("#115dc8");
+    squares.fill(c1);
     squares.rect(x - w / 3, y, w / 3, h);
-    squares.fill("#fdfdfd");
+    squares.fill(c2);
     squares.rect(x, y, w / 3, h);
-    squares.fill("#e5131a");
+    squares.fill(c3);
     squares.rect(x + w / 3, y, w / 3, h);
+}
+
+function drawFlagDeutsch(x: number, y: number, w: number, h: number): void {
+    drawTricolorHorizontalFlag(x, y, w, h, "#000000", "#e5131a", "#f3d510");
+}
+
+function drawFlagLuxembourg(x: number, y: number, w: number, h: number): void {
+    drawTricolorHorizontalFlag(x, y, w, h, "#e5131a", "#ffffff", "#0e96bf");
+}
+
+function drawFlagNetherlands(x: number, y: number, w: number, h: number): void {
+    drawTricolorHorizontalFlag(x, y, w, h, "#e5131a", "#ffffff", "#115dc8");
+}
+
+function drawFlagRussia(x: number, y: number, w: number, h: number): void {
+    drawTricolorHorizontalFlag(x, y, w, h, "#ffffff", "#115dc8", "#e5131a");
+}
+
+function drawTricolorHorizontalFlag(x: number, y: number, w: number, h: number, c1: string, c2: string, c3: string): void {
+    squares.stroke("black");
+    squares.rect(x, y, w, h);
+    squares.noStroke();
+    squares.fill(c1);
+    squares.rect(x, y - h / 3, w, h / 3);
+    squares.fill(c2);
+    squares.rect(x, y, w, h / 3);
+    squares.fill(c3);
+    squares.rect(x, y + h / 3, w, h / 3);
 }
 
 function drawFlagSweden(x: number, y: number, w: number, h: number): void {
     squares.stroke("black");
-    squares.fill(initColor);
+    squares.fill("#115dc8");
     squares.rect(x, y, w, h);
     squares.noStroke();
     squares.fill("#e5b813");
     squares.rect(x - w / 4, y, w / 8, h);
     squares.rect(x, y, w, h / 6);
+}
+
+function randomFlag(x: number, y: number, w: number, h: number): void {
+    let keys: string[] = Object.keys(flagsFunction);
+    flagsFunction[keys[p5.floor(p5.random(0, keys.length - 1))]](x, y, w, h);
 }
 
 function drawFlags(x: number, y: number, w: number, h: number, i: number): void {
@@ -53,11 +105,17 @@ function drawFlags(x: number, y: number, w: number, h: number, i: number): void 
     }
 
     let ox: number = w / 4, oy: number = h / 4;
-    let ow: number = w / 2 - offset, oh: number = h / 2 - offset;
+    let ow: number = w / 2 - offset / i, oh: number = h / 2 - offset / i;
     drawFlags(x - ox, y - oy, ow, oh, ++i);
     drawFlags(x + ox, y - oy, ow, oh, i);
     drawFlags(x + ox, y + oy, ow, oh, i);
     drawFlags(x - ox, y + oy, ow, oh, i);
+}
+
+function drawBackground(): void {
+    squares.stroke("gray");
+    squares.fill("gray");
+    squares.rect(halfWidth, halfHeight, width - offset, height - offset);
 }
 
 function drawShader(): void {
@@ -72,8 +130,9 @@ function drawShader(): void {
 function draw(): void {
     squares.clear();
     squares.background("black");
-    currentFlag(halfWidth, halfHeight, width - offset, height - offset);
-    drawFlags(halfWidth, halfHeight, width - offset, height - offset, 0);
+    p5.randomSeed(seed);
+    drawBackground();
+    drawFlags(halfWidth, halfHeight, width - offset, height - offset, 1);
     drawShader();
     time++;
 }
@@ -124,7 +183,6 @@ function setupP5(): void {
     p5.pixelDensity(1);
     p5.createCanvas(width, height);
     squares = p5.createGraphics(width, height);
-    initColor = p5.color(iColor);
     squares.rectMode(p5.CENTER);
     draw();
 }
@@ -132,8 +190,8 @@ function setupP5(): void {
 function setupDatGUI(): void {
     const gui = new dat.GUI();
     const params = {
+        flags: "drawFlagFrench",
         speed: speed,
-        color: iColor,
         nbWave: nbWave,
         offset: offset,
         nbSquareInside: recursion,
@@ -147,6 +205,12 @@ function setupDatGUI(): void {
     guiEffect
         .add(params, "speed",0.1, 5, 0.1)
         .onChange(value => speed = value);
+    guiEffect
+        .add(params, "flags", Object.keys(flagsFunction))
+        .onChange(value => {
+            currentFlag = flagsFunction[value];
+            seed = p5.floor(p5.random() * 1500);
+        });
     guiEffect
         .add(params, "offset",0, 40, 0.1)
         .onChange(value => offset = value);

@@ -181,7 +181,8 @@ function setupDatGUI(): void {
         distToDraw: distToDraw,
         strokeSize: strokeSize,
         useColor: useColor,
-        fromColor: fColor, toColor: tColor,
+        fromColor: fColor,
+        toColor: tColor,
         backgroundColor: bColor,
         pause: () => {
             pause = ! pause;

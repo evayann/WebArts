@@ -12,6 +12,7 @@
     "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
     "noiseColor": "webpack --config src/noiseColor/webpackage.config.js",
+    "shapeOfShape": "webpack --config src/shapeOfShape/webpackage.config.js",
     "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js",
     "corridorLines": "webpack --config src/corridorLines/webpackage.config.js",
     "planetsCircle": "webpack --config src/planetsCircle/webpackage.config.js",

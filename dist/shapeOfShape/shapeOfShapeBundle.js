@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/flags/flags.ts":
-/*!****************************!*\
-  !*** ./src/flags/flags.ts ***!
-  \****************************/
+/***/ "./src/shapeOfShape/shapeOfShape.ts":
+/*!******************************************!*\
+  !*** ./src/shapeOfShape/shapeOfShape.ts ***!
+  \******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2572,228 +2572,183 @@ __webpack_require__.r(__webpack_exports__);
 
 let width = window.innerWidth;
 let height = window.innerHeight;
-let halfWidth = width / 2;
-let halfHeight = height / 2;
+let centerX = width / 2;
+let centerY = height / 2;
 let p5;
-let shaderGraph;
-let shader;
+let partA;
+let partB;
+let fColor = "#ffffff";
+let sColor = "#3166d4";
+let fillColor;
+let strokeColor;
+let counter = 0;
+let angle = 0;
+let fps = 60;
+let cycle = 1;
+let amplitude = 1;
+let nbSegment = 4;
+let elements = 20;
+let xRadius = 450;
+let yRadius = 450;
+let size = 100;
 let pause = false;
-let seed = 0;
-let time = 0;
-let speed = 1;
-let nbWave = 2;
-let offset = 20;
-let recursion = 2;
-let squares;
-let flagsFunction = { drawFlagFrench: drawFlagFrench,
-    drawFlagItalian: drawFlagItalian, drawFlagIreland: drawFlagIreland, drawFlagBelgium: drawFlagBelgium,
-    drawFlagDeutsch: drawFlagDeutsch, drawFlagLuxembourg: drawFlagLuxembourg,
-    drawFlagNetherlands: drawFlagNetherlands, drawFlagRussia: drawFlagRussia,
-    drawFlagSweden: drawFlagSweden, randomFlag: randomFlag };
-let currentFlag = drawFlagFrench;
-function drawFlagFrench(x, y, w, h) {
-    drawTricolorVerticalFlag(x, y, w, h, "#115dc8", "#fdfdfd", "#e5131a");
-}
-function drawFlagItalian(x, y, w, h) {
-    drawTricolorVerticalFlag(x, y, w, h, "#33c811", "#fdfdfd", "#e5131a");
-}
-function drawFlagIreland(x, y, w, h) {
-    drawTricolorVerticalFlag(x, y, w, h, "#33c811", "#fdfdfd", "#e59113");
-}
-function drawFlagBelgium(x, y, w, h) {
-    drawTricolorVerticalFlag(x, y, w, h, "#000000", "#f3d510", "#e5131a");
-}
-function drawTricolorVerticalFlag(x, y, w, h, c1, c2, c3) {
-    squares.stroke("black");
-    squares.rect(x, y, w, h);
-    squares.noStroke();
-    squares.fill(c1);
-    squares.rect(x - w / 3, y, w / 3, h);
-    squares.fill(c2);
-    squares.rect(x, y, w / 3, h);
-    squares.fill(c3);
-    squares.rect(x + w / 3, y, w / 3, h);
-}
-function drawFlagDeutsch(x, y, w, h) {
-    drawTricolorHorizontalFlag(x, y, w, h, "#000000", "#e5131a", "#f3d510");
-}
-function drawFlagLuxembourg(x, y, w, h) {
-    drawTricolorHorizontalFlag(x, y, w, h, "#e5131a", "#ffffff", "#0e96bf");
-}
-function drawFlagNetherlands(x, y, w, h) {
-    drawTricolorHorizontalFlag(x, y, w, h, "#e5131a", "#ffffff", "#115dc8");
-}
-function drawFlagRussia(x, y, w, h) {
-    drawTricolorHorizontalFlag(x, y, w, h, "#ffffff", "#115dc8", "#e5131a");
-}
-function drawTricolorHorizontalFlag(x, y, w, h, c1, c2, c3) {
-    squares.stroke("black");
-    squares.rect(x, y, w, h);
-    squares.noStroke();
-    squares.fill(c1);
-    squares.rect(x, y - h / 3, w, h / 3);
-    squares.fill(c2);
-    squares.rect(x, y, w, h / 3);
-    squares.fill(c3);
-    squares.rect(x, y + h / 3, w, h / 3);
-}
-function drawFlagSweden(x, y, w, h) {
-    squares.stroke("black");
-    squares.fill("#115dc8");
-    squares.rect(x, y, w, h);
-    squares.noStroke();
-    squares.fill("#e5b813");
-    squares.rect(x - w / 4, y, w / 8, h);
-    squares.rect(x, y, w, h / 6);
-}
-function randomFlag(x, y, w, h) {
-    let keys = Object.keys(flagsFunction);
-    flagsFunction[keys[p5.floor(p5.random(0, keys.length - 1))]](x, y, w, h);
-}
-function drawFlags(x, y, w, h, i) {
-    if (i > recursion) {
-        currentFlag(x, y, w, h);
-        return;
+function generatePoints() {
+    let points = [];
+    let offset = (nbSegment == 3) ? p5.HALF_PI : 0;
+    for (let i = 0; i < nbSegment; i++) {
+        let theta = angle * i + offset;
+        points[i] = [centerX + p5.cos(theta) * xRadius, centerY + p5.sin(theta) * yRadius];
     }
-    let ox = w / 4, oy = h / 4;
-    let ow = w / 2 - offset / i, oh = h / 2 - offset / i;
-    drawFlags(x - ox, y - oy, ow, oh, ++i);
-    drawFlags(x + ox, y - oy, ow, oh, i);
-    drawFlags(x + ox, y + oy, ow, oh, i);
-    drawFlags(x - ox, y + oy, ow, oh, i);
+    return points;
 }
-function drawBackground() {
-    squares.stroke("gray");
-    squares.fill("gray");
-    squares.rect(halfWidth, halfHeight, width - offset, height - offset);
+function drawSquare(part, x, y, i) {
+    part.push();
+    part.translate(x, y);
+    part.rotate(i);
+    part.rect(0, 0, size, size);
+    part.pop();
 }
-function drawShader() {
-    shaderGraph.shader(shader);
-    shader.setUniform("time", time / (10 * (1 / speed)));
-    shader.setUniform("nbWave", nbWave);
-    shader.setUniform("texSquares", squares);
-    shaderGraph.plane(0, 0);
-    p5.image(shaderGraph, 0, 0, width, height);
+function drawSens(pts, previous, part) {
+    for (let [i, pt] of pts.entries()) {
+        let [x1, y1] = previous;
+        let [x2, y2] = pt;
+        for (let j = 0; j < elements; j++) {
+            let x = p5.lerp(x1, x2, j / elements);
+            let y = p5.lerp(y1, y2, j / elements);
+            drawSquare(part, x, y, (((j + i * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
+                + (p5.millis() / 500) * (1 / cycle)));
+        }
+        previous = pt;
+    }
+}
+function drawSquareLoop() {
+    let pts = generatePoints();
+    let previous = pts[pts.length - 1];
+    drawSens(pts, previous, partA);
+    let len = pts.length - 1;
+    let half = ~~(pts.length / 2);
+    pts = pts.slice(half, len + 1).concat(pts.slice(0, half));
+    previous = pts[pts.length - 1];
+    drawSens(pts, previous, partB);
+    p5.image(partA.get(0, height / 2, width, height / 2 - 1), 0, height / 2);
+    p5.image(partB.get(0, 0, width, height / 2 + 1), 0, 0);
 }
 function draw() {
-    squares.clear();
-    squares.background("black");
-    p5.randomSeed(seed);
-    drawBackground();
-    drawFlags(halfWidth, halfHeight, width - offset, height - offset, 1);
-    drawShader();
-    time++;
+    partA.clear();
+    partB.clear();
+    p5.background("black");
+    partA.stroke(strokeColor);
+    partB.stroke(strokeColor);
+    partA.fill(fillColor);
+    partB.fill(fillColor);
+    drawSquareLoop();
+    counter++;
 }
-function preload(p) {
-    p5 = p;
-    shaderGraph = p5.createGraphics(width, height, p5.WEBGL);
-    shaderGraph.noStroke();
-    let vert = `#ifdef GL_ES
-        precision highp float;
-        precision highp int;
-        #endif
-        
-        varying vec2 vTexPos;
-        attribute vec3 aPosition;
-        attribute vec2 aTexCoord;
-        
-        void main() {
-            vTexPos = aTexCoord;
-            vec4 pos = vec4(aPosition, 1.0);
-            pos.xy = pos.xy * 2.0;
-            gl_Position = pos;
-        }`;
-    let frag = `#ifdef GL_ES
-        precision highp float;
-        #endif
-        #define PI 3.14
-        #define MAX_AMP 0.05
-        
-        varying vec2 vTexPos;
-        uniform float time;
-        uniform float nbWave;
-        uniform sampler2D texSquares;
-        
-        void main() {
-            vec2 uv = vTexPos;
-            uv.y = 1.0 - uv.y;
-            uv.x += sin(uv.y + time) * 0.025;
-            uv.y += cos(uv.x * PI * nbWave * 2.0 + time) * clamp(MAX_AMP, 0.0, 0.15);
-            gl_FragColor = texture2D(texSquares, uv);
-        }`;
-    shader = shaderGraph.createShader(vert, frag);
-}
-function setupP5() {
-    p5.pixelDensity(1);
-    p5.createCanvas(width, height);
-    squares = p5.createGraphics(width, height);
-    squares.rectMode(p5.CENTER);
+function reset() {
+    angle = p5.TAU / nbSegment;
+    counter = 0;
     draw();
+}
+function setupP5(p) {
+    p5 = p;
+    fillColor = p5.color(fColor);
+    strokeColor = p5.color(sColor);
+    p5.createCanvas(width, height);
+    partA = p5.createGraphics(width, height);
+    partB = p5.createGraphics(width, height);
+    p5.frameRate(fps);
+    p5.rectMode(p5.CENTER);
+    partA.rectMode(p5.CENTER);
+    partB.rectMode(p5.CENTER);
+    reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        flags: "drawFlagFrench",
-        speed: speed,
-        nbWave: nbWave,
-        offset: offset,
-        nbSquareInside: recursion,
+        size: size,
+        cycle: cycle,
+        xRadius: xRadius,
+        yRadius: yRadius,
+        amplitude: amplitude,
+        fillColor: fColor,
+        elements: elements,
+        strokeColor: sColor,
+        nbSegment: nbSegment,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
+        },
+        reset: () => {
+            reset();
         }
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 5, 0.1)
-        .onChange(value => speed = value);
+        .add(params, "cycle", 0.1, 5, 0.1)
+        .onChange(value => cycle = value)
+        .name("Cycle Time (s)");
     guiEffect
-        .add(params, "flags", Object.keys(flagsFunction))
+        .add(params, "amplitude", 0.1, 5, 0.1)
+        .onChange(value => cycle = value);
+    guiEffect
+        .add(params, "nbSegment", [4, 6, 8])
         .onChange(value => {
-        currentFlag = flagsFunction[value];
-        seed = p5.floor(p5.random() * 1500);
+        nbSegment = value;
+        reset();
     });
     guiEffect
-        .add(params, "offset", 0, 40, 0.1)
-        .onChange(value => offset = value);
+        .add(params, "elements", 3, 60, 1)
+        .onChange(value => {
+        elements = value;
+        reset();
+    });
     guiEffect
-        .add(params, "nbSquareInside", 0, 4, 1)
-        .onChange(value => recursion = value);
+        .add(params, "xRadius", width / 8, centerX, 1)
+        .onChange(value => xRadius = value);
     guiEffect
-        .add(params, "nbWave", 0, 5, 1)
-        .onChange(value => nbWave = value);
+        .add(params, "yRadius", height / 8, centerY, 1)
+        .onChange(value => yRadius = value);
+    guiEffect
+        .add(params, "size", size / 4, size * 2, 1)
+        .onChange(value => size = value);
     guiEffect.open();
+    const guiVisual = gui.addFolder("Visual & Color");
+    guiVisual.addColor(params, "strokeColor")
+        .onChange(value => strokeColor = p5.color(value));
+    guiVisual.addColor(params, "fillColor")
+        .onChange(value => fillColor = p5.color(value));
+    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
         .name("Pause")
         .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
+    guiMisc
+        .add(params, "reset")
+        .name("Reset");
     guiMisc.open();
 }
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
-    halfWidth = width / 2;
-    halfHeight = height / 2;
+    centerX = width / 2;
+    centerY = height / 2;
     p5.resizeCanvas(width, height);
     draw();
 }
 window.onresize = resize;
 window.onload = () => {
     let sketch = (p) => {
-        p.preload = () => {
-            preload(p);
-        };
         p.setup = () => {
-            setupP5();
+            setupP5(p);
         };
         p.draw = () => {
             draw();
         };
     };
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
-    setupDatGUI();
     resize();
+    setupDatGUI();
 };
 
 
@@ -2880,8 +2835,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/flags/flags.ts");
+/******/ 	__webpack_require__("./src/shapeOfShape/shapeOfShape.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=flagsBundle.js.map
+//# sourceMappingURL=shapeOfShapeBundle.js.map
