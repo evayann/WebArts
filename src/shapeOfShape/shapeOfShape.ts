@@ -1,6 +1,8 @@
 import * as dat from 'dat.gui';
 import * as P5 from 'p5';
 
+// Inspired by https://mobile.twitter.com/beesandbombs/status/1334541858366775298
+
 let width: number = window.innerWidth;
 let height: number = window.innerHeight;
 let centerX: number = width / 2;
