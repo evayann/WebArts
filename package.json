@@ -17,7 +17,8 @@
     "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js",
     "corridorLines": "webpack --config src/corridorLines/webpackage.config.js",
     "planetsCircle": "webpack --config src/planetsCircle/webpackage.config.js",
-    "circleAutomata": "webpack --config src/circleAutomata/webpackage.config.js"
+    "circleAutomata": "webpack --config src/circleAutomata/webpackage.config.js",
+    "squareFromLittle": "webpack --config src/squareFromLittle/webpackage.config.js"
   },
   "dependencies": {
     "dat.gui": "^0.7.5",
