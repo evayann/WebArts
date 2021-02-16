@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/vortex/vortex.ts":
-/*!******************************!*\
-  !*** ./src/vortex/vortex.ts ***!
-  \******************************/
+/***/ "./src/circleSplit/circleSplit.ts":
+/*!****************************************!*\
+  !*** ./src/circleSplit/circleSplit.ts ***!
+  \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2570,52 +2570,107 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
 
 
+// Inspired by https://twitter.com/concinnus/status/1360831157852635136?s=12
 let width = window.innerWidth;
 let height = window.innerHeight;
 let halfWidth = width / 2;
 let halfHeight = height / 2;
 let p5;
-let pColor = "#b98a5d";
+let pColor = "#8738e1";
 let ptColor;
 let pause = false;
 let speed = 1;
 let time = 0;
-let conicShape = 0.26;
-let inclination = 2;
-let radius = 0;
+let nbElements = 5;
+let blockSize = Math.min(width, height) / nbElements;
+let size = blockSize / 2;
+let xEl = Math.floor((width / blockSize) / 2) + 2;
+let yEl = Math.floor((height / blockSize) / 2) + 2;
+function easeInOutExpo(x) {
+    return x === 0
+        ? 0
+        : x === 1
+            ? 1
+            : x < 0.5 ? p5.pow(2, 20 * x - 10) / 2
+                : (2 - p5.pow(2, -20 * x + 10)) / 2;
+}
+function easeInOutElastic(x) {
+    const c5 = (2 * Math.PI) / 4.5;
+    return x === 0
+        ? 0
+        : x === 1
+            ? 1
+            : x < 0.5
+                ? -(p5.pow(2, 20 * x - 10) * p5.sin((20 * x - 11.125) * c5)) / 2
+                : (p5.pow(2, -20 * x + 10) * p5.sin((20 * x - 11.125) * c5)) / 2 + 1;
+}
+function drawQuarter(x, y, rotate) {
+    p5.push();
+    p5.translate(x, y);
+    p5.arc(0, 0, size + 1, size + 1, p5.radians(rotate), p5.radians(rotate) + p5.HALF_PI, p5.PIE);
+    p5.pop();
+}
+function drawHalf(x, y, rotate) {
+    drawQuarter(x, y, rotate);
+    drawQuarter(x, y, rotate + 90);
+}
+function drawHorizontal(x, y, value) {
+    drawHalf(x - blockSize * value, y, 0);
+    drawHalf(x + blockSize * value, y, 180);
+}
+function drawVertical(x, y, value) {
+    drawHalf(x, y - blockSize * value, 90);
+    drawHalf(x, y + blockSize * value, 270);
+}
+function drawRotate(x, y, value) {
+    let rot = value * 180;
+    let mvt = value * blockSize;
+    drawQuarter(x + mvt, y + mvt, rot); // Bottom Right
+    drawQuarter(x - mvt, y + mvt, 90 + rot); // Bottom Left
+    drawQuarter(x - mvt, y - mvt, 180 + rot); // Top Left
+    drawQuarter(x + mvt, y - mvt, 270 + rot); // Top Right
+}
+function drawCircle(x, y, value) {
+    if (value < 3)
+        drawRotate(x, y, easeInOutExpo(p5.map(value, 0, 3, 0, 1)));
+    else if (value < 4)
+        drawVertical(x, y, easeInOutElastic(p5.map(value, 3, 4, 0, 1)));
+    else
+        drawHorizontal(x, y, easeInOutElastic(p5.map(value, 4, 5, 0, 1)));
+}
 function draw() {
     p5.background("black");
     time += 0.01 * speed;
-    for (let i = 0; i < 1500; i++) {
-        let j = p5.map(p5.cos(time), -1, 1, 0, 1) * i;
-        p5.strokeWeight((0.5 + (i / 1500)) * 3);
-        let rIncl = radius / inclination;
-        let a = j * conicShape + time;
-        let x = halfWidth + p5.sin(a) * radius;
-        let y = height + p5.cos(a) * rIncl - j;
-        radius = p5.pow(j, 3) / 1e5;
-        p5.point(x, y);
-    }
+    p5.stroke(ptColor);
+    p5.fill(ptColor);
+    let anim = time % 5;
+    p5.translate(halfWidth, halfHeight);
+    for (let y = -yEl * blockSize; y <= yEl * blockSize; y += blockSize)
+        for (let x = -xEl * blockSize; x <= xEl * blockSize; x += blockSize)
+            drawCircle(x, y, anim);
 }
 function reset() {
     p5.clear();
     time = 0;
+    blockSize = Math.min(width, height) / nbElements;
+    size = blockSize / 2;
+    xEl = p5.int((width / blockSize) / 2) + 2;
+    yEl = p5.int((height / blockSize) / 2) + 2;
     draw();
 }
 function setupP5(p) {
     p5 = p;
     ptColor = p5.color(pColor);
     p5.createCanvas(width, height);
-    p5.stroke(ptColor);
     p5.frameRate(60);
+    p5.strokeWeight(2);
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
         speed: speed,
-        conicShape: conicShape,
-        inclination: inclination,
+        nbElements: nbElements,
         ptColor: pColor,
         pause: () => {
             pause = !pause;
@@ -2627,14 +2682,14 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 2, 0.1)
+        .add(params, "speed", 0.1, 5, 0.1)
         .onChange(value => speed = value);
     guiEffect
-        .add(params, "conicShape", 0, 1, 0.01)
-        .onChange(value => conicShape = value);
-    guiEffect
-        .add(params, "inclination", 0.8, 5, 0.1)
-        .onChange(value => inclination = value);
+        .add(params, "nbElements", 5, 20, 1)
+        .onChange(value => {
+        nbElements = value;
+        reset();
+    });
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
     guiVisual.addColor(params, "ptColor")
@@ -2659,7 +2714,7 @@ function resize() {
     halfWidth = width / 2;
     halfHeight = height / 2;
     p5.resizeCanvas(width, height);
-    draw();
+    reset();
 }
 window.onresize = resize;
 window.onload = () => {
@@ -2760,8 +2815,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/vortex/vortex.ts");
+/******/ 	__webpack_require__("./src/circleSplit/circleSplit.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=vortexBundle.js.map
+//# sourceMappingURL=circleSplitBundle.js.map

@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/vortex/vortex.ts":
-/*!******************************!*\
-  !*** ./src/vortex/vortex.ts ***!
-  \******************************/
+/***/ "./src/squareCircleGradient/squareCircleGradient.ts":
+/*!**********************************************************!*\
+  !*** ./src/squareCircleGradient/squareCircleGradient.ts ***!
+  \**********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2570,43 +2570,77 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
 
 
+// Inspired by https://twitter.com/concinnus/status/1360423475631058950?s=12
 let width = window.innerWidth;
 let height = window.innerHeight;
 let halfWidth = width / 2;
 let halfHeight = height / 2;
 let p5;
-let pColor = "#b98a5d";
-let ptColor;
+let sColor = "#f26060";
+let tColor = "#60f273";
+let stColor;
+let toColor;
 let pause = false;
 let speed = 1;
 let time = 0;
-let conicShape = 0.26;
-let inclination = 2;
-let radius = 0;
+let nbElements = 1;
+let inc = true;
+let toDraw = [];
+class Circle {
+    constructor(x, y, size) {
+        this.s = size;
+        this.hs = this.s / 2;
+        this.x = x + this.hs;
+        this.y = y + this.hs;
+        this.start = time;
+        this.life = 0;
+        toDraw.unshift(this);
+    }
+    display() {
+        this.life = time - this.start;
+        p5.fill(p5.lerpColor(stColor, toColor, this.life));
+        p5.square(this.x, this.y, p5.abs(this.s - this.life * this.s), this.life * this.s / 2);
+        if (this.life > 1)
+            toDraw.splice(toDraw.indexOf(this), 1);
+    }
+}
+let generate = (x) => p5.sq(x) % 1 < .95;
 function draw() {
     p5.background("black");
     time += 0.01 * speed;
-    for (let i = 0; i < 1500; i++) {
-        let j = p5.map(p5.cos(time), -1, 1, 0, 1) * i;
-        p5.strokeWeight((0.5 + (i / 1500)) * 3);
-        let rIncl = radius / inclination;
-        let a = j * conicShape + time;
-        let x = halfWidth + p5.sin(a) * radius;
-        let y = height + p5.cos(a) * rIncl - j;
-        radius = p5.pow(j, 3) / 1e5;
-        p5.point(x, y);
+    p5.stroke("white");
+    let xOffset = 0, yOffset = 0;
+    (width > height) ? xOffset = (width - height) / 2 : yOffset = (height - width) / 2;
+    let gSize = p5.min(width, height);
+    let size = gSize / nbElements;
+    if (generate(time)) {
+        inc = true;
+        for (let yi = 0; yi < nbElements; yi++)
+            for (let xi = 0; xi < nbElements; xi++)
+                new Circle(xOffset + xi * size, yOffset + yi * size, size);
     }
+    else {
+        if (inc) {
+            nbElements = (nbElements + 1) % 5;
+            inc = false;
+        }
+    }
+    for (let c of toDraw)
+        c.display();
 }
 function reset() {
     p5.clear();
     time = 0;
+    nbElements = 1;
+    toDraw = [];
     draw();
 }
 function setupP5(p) {
     p5 = p;
-    ptColor = p5.color(pColor);
+    stColor = p5.color(sColor);
+    toColor = p5.color(tColor);
     p5.createCanvas(width, height);
-    p5.stroke(ptColor);
+    p5.rectMode(p5.CENTER);
     p5.frameRate(60);
     reset();
 }
@@ -2614,9 +2648,9 @@ function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
         speed: speed,
-        conicShape: conicShape,
-        inclination: inclination,
-        ptColor: pColor,
+        nbElements: nbElements,
+        stColor: sColor,
+        toColor: tColor,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
@@ -2627,21 +2661,14 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 2, 0.1)
+        .add(params, "speed", 0.1, 5, 0.1)
         .onChange(value => speed = value);
-    guiEffect
-        .add(params, "conicShape", 0, 1, 0.01)
-        .onChange(value => conicShape = value);
-    guiEffect
-        .add(params, "inclination", 0.8, 5, 0.1)
-        .onChange(value => inclination = value);
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.addColor(params, "ptColor")
-        .onChange(value => {
-        ptColor = p5.color(value);
-        p5.stroke(ptColor);
-    });
+    guiVisual.addColor(params, "stColor")
+        .onChange(value => stColor = p5.color(value));
+    guiVisual.addColor(params, "toColor")
+        .onChange(value => toColor = p5.color(value));
     guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
@@ -2659,7 +2686,7 @@ function resize() {
     halfWidth = width / 2;
     halfHeight = height / 2;
     p5.resizeCanvas(width, height);
-    draw();
+    reset();
 }
 window.onresize = resize;
 window.onload = () => {
@@ -2760,8 +2787,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/vortex/vortex.ts");
+/******/ 	__webpack_require__("./src/squareCircleGradient/squareCircleGradient.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=vortexBundle.js.map
+//# sourceMappingURL=squareCircleGradientBundle.js.map

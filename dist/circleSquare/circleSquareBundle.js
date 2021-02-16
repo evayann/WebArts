@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/vortex/vortex.ts":
-/*!******************************!*\
-  !*** ./src/vortex/vortex.ts ***!
-  \******************************/
+/***/ "./src/circleSquare/circleSquare.ts":
+/*!******************************************!*\
+  !*** ./src/circleSquare/circleSquare.ts ***!
+  \******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2570,31 +2570,46 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
 
 
+// Inspired by https://discord.com/channels/@me/422185882804682755/811014438861275157
 let width = window.innerWidth;
 let height = window.innerHeight;
 let halfWidth = width / 2;
 let halfHeight = height / 2;
 let p5;
-let pColor = "#b98a5d";
+let pColor = "#f26060";
 let ptColor;
 let pause = false;
 let speed = 1;
 let time = 0;
-let conicShape = 0.26;
-let inclination = 2;
-let radius = 0;
+let nbElements = 25;
+function drawCircle(x, y, size, value) {
+    let dist = p5.dist(x, y, halfWidth, halfHeight);
+    let normDist = dist / p5.dist(0, 0, halfWidth, halfHeight);
+    p5.push();
+    p5.translate(x, y);
+    p5.rotate(normDist * value);
+    p5.fill(p5.color(p5.red(ptColor) * normDist, p5.green(ptColor) * normDist, p5.blue(ptColor) * normDist));
+    p5.square(0, 0, p5.abs(.5 - value) * size * 2, value > .5 ? size : 0);
+    p5.pop();
+}
 function draw() {
     p5.background("black");
     time += 0.01 * speed;
-    for (let i = 0; i < 1500; i++) {
-        let j = p5.map(p5.cos(time), -1, 1, 0, 1) * i;
-        p5.strokeWeight((0.5 + (i / 1500)) * 3);
-        let rIncl = radius / inclination;
-        let a = j * conicShape + time;
-        let x = halfWidth + p5.sin(a) * radius;
-        let y = height + p5.cos(a) * rIncl - j;
-        radius = p5.pow(j, 3) / 1e5;
-        p5.point(x, y);
+    p5.stroke("white");
+    let anim = p5.map(p5.cos(time), -1, 1, 0, 1);
+    let size = (p5.max(width, height) / nbElements) * 1.5;
+    let yOffset = height / (nbElements * 2);
+    let xOffset = width / (nbElements * 2);
+    p5.translate(halfWidth, halfHeight);
+    p5.rotate(time * 0.1 * speed);
+    let maxSize = p5.max(halfWidth, halfHeight) * 1.5;
+    for (let yi = 0; yi < nbElements; yi++) {
+        let y = yOffset + height / (nbElements * 2) + p5.map(yi, 0, nbElements, -maxSize, maxSize);
+        let xOff = ((yi % 2 == 0) ? xOffset : 0) + xOffset / 2;
+        for (let xi = 0; xi <= nbElements; xi++) {
+            let x = xOff + p5.map(xi, 0, nbElements, -maxSize, maxSize);
+            drawCircle(x, y, size, anim);
+        }
     }
 }
 function reset() {
@@ -2605,17 +2620,17 @@ function reset() {
 function setupP5(p) {
     p5 = p;
     ptColor = p5.color(pColor);
-    p5.createCanvas(width, height);
     p5.stroke(ptColor);
+    p5.createCanvas(width, height);
     p5.frameRate(60);
+    p5.rectMode(p5.CENTER);
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
         speed: speed,
-        conicShape: conicShape,
-        inclination: inclination,
+        nbElements: nbElements,
         ptColor: pColor,
         pause: () => {
             pause = !pause;
@@ -2627,14 +2642,11 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 2, 0.1)
+        .add(params, "speed", 0.1, 5, 0.1)
         .onChange(value => speed = value);
     guiEffect
-        .add(params, "conicShape", 0, 1, 0.01)
-        .onChange(value => conicShape = value);
-    guiEffect
-        .add(params, "inclination", 0.8, 5, 0.1)
-        .onChange(value => inclination = value);
+        .add(params, "nbElements", 10, 100, 1)
+        .onChange(value => nbElements = value);
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
     guiVisual.addColor(params, "ptColor")
@@ -2760,8 +2772,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/vortex/vortex.ts");
+/******/ 	__webpack_require__("./src/circleSquare/circleSquare.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=vortexBundle.js.map
+//# sourceMappingURL=circleSquareBundle.js.map
