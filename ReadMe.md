@@ -46,6 +46,14 @@ Interactive version of all effect available here : [https://evayann.github.io/We
 
 [![Circle Split](./dist/circleSplit/circleSplit.png)](https://github.com/evayann/WebArts/blob/main/src/circleSplit/circleSplit.ts)
 
+## Line Sphere
+
+[![Line Sphere](./dist/lineSphere/lineSphere.png)](https://github.com/evayann/WebArts/blob/main/src/lineSphere/lineSphere.ts)
+
+## Grid Lines
+
+[![Grid Lines](./dist/gridLines/gridLines.png)](https://github.com/evayann/WebArts/blob/main/src/gridLines/gridLines.ts)
+
 ## Ascii Cam
 
 [![Ascii Cam](./dist/asciiCam/asciiCam.png)](https://github.com/evayann/WebArts/blob/main/src/asciiCam/asciiCam.ts)

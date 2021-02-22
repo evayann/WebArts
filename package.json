@@ -8,6 +8,8 @@
     "vortex": "webpack --config src/vortex/webpackage.config.js",
     "spiral": "webpack --config src/spiral/webpackage.config.js",
     "asciiCam": "webpack --config src/asciiCam/webpackage.config.js",
+    "gridLines": "webpack --config src/gridLines/webpackage.config.js",
+    "lineSphere": "webpack --config src/lineSphere/webpackage.config.js",
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
     "lineEffect": "webpack --config src/lineEffect/webpackage.config.js",
     "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",
