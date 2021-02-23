@@ -46,6 +46,10 @@ Interactive version of all effect available here : [https://evayann.github.io/We
 
 [![Circle Split](./dist/circleSplit/circleSplit.png)](https://github.com/evayann/WebArts/blob/main/src/circleSplit/circleSplit.ts)
 
+## Squares Loop
+
+[![Squares Loop](./dist/squaresLoop/squaresLoop.png)](https://github.com/evayann/WebArts/blob/main/src/squaresLoop/squaresLoop.ts)
+
 ## Line Sphere
 
 [![Line Sphere](./dist/lineSphere/lineSphere.png)](https://github.com/evayann/WebArts/blob/main/src/lineSphere/lineSphere.ts)
