@@ -40,7 +40,7 @@ function iterOn(xStart: number, yStart: number,): number[] {
             counter++;
         }
     }
-    return [r / counter, r / counter, b / counter];
+    return [r / counter, g / counter, b / counter];
 }
 
 function setDrawer() {

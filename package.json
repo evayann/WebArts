@@ -15,6 +15,7 @@
     "lineCircle": "webpack --config src/lineCircle/webpackage.config.js",
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
     "noiseColor": "webpack --config src/noiseColor/webpackage.config.js",
+    "circleImage": "webpack --config src/circleImage/webpackage.config.js",
     "squaresLoop": "webpack --config src/squaresLoop/webpackage.config.js",
     "circleSplit": "webpack --config src/circleSplit/webpackage.config.js",
     "circleSquare": "webpack --config src/circleSquare/webpackage.config.js",

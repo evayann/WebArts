@@ -58,6 +58,10 @@ Interactive version of all effect available here : [https://evayann.github.io/We
 
 [![Grid Lines](./dist/gridLines/gridLines.png)](https://github.com/evayann/WebArts/blob/main/src/gridLines/gridLines.ts)
 
+## Circle Image
+
+[![Circle Image](./dist/circleImage/circleImage.png)](https://github.com/evayann/WebArts/blob/main/src/circleImage/circleImage.ts)
+
 ## Ascii Cam
 
 [![Ascii Cam](./dist/asciiCam/asciiCam.png)](https://github.com/evayann/WebArts/blob/main/src/asciiCam/asciiCam.ts)

@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/asciiCam/asciiCam.ts":
-/*!**********************************!*\
-  !*** ./src/asciiCam/asciiCam.ts ***!
-  \**********************************/
+/***/ "./src/circleImage/circleImage.ts":
+/*!****************************************!*\
+  !*** ./src/circleImage/circleImage.ts ***!
+  \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2573,205 +2573,120 @@ __webpack_require__.r(__webpack_exports__);
 let width = window.innerWidth;
 let height = window.innerHeight;
 let p5;
-let fps = 30;
-let nbColumn = 120;
-let nbRow = 85;
-let xOffset = 0.1;
-let yOffset = 0.1;
-let contrast = 1.15;
-let bColor = "#000000";
-let backgroundColor;
-let invertColor;
-let useColor = true;
-let useText = true;
-let characters = " |$@#!%"; // :*=+-.
-let caracs = characters.split("");
-let drawer = null;
-let pause = false;
-let camLoad = false;
-let cam = null;
-let xSize, ySize;
-const parsePos = (x, y) => (y * cam.width + x) * 4;
-function iterOn(xStart, yStart) {
+let contrast = 1;
+let lColor = "#1e2830";
+let lineColor;
+let img = null;
+let nbCircle = 120;
+let nbIterByCircle = 100;
+let strokeWeight = 3;
+let imgFactor = 4;
+function iterOn(i) {
     let r = 0, g = 0, b = 0;
     let counter = 0;
-    for (let x = xStart; x < xStart + xSize; x++) {
-        for (let y = yStart; y < yStart + ySize && y < cam.height; y++) {
-            let p = parsePos(x, y);
-            r += cam.pixels[p] * contrast;
-            g += cam.pixels[p + 1] * contrast;
-            b += cam.pixels[p + 2] * contrast;
+    i.loadPixels();
+    for (let x = 0; x < i.width; x++) {
+        for (let y = 0; y < i.height; y++) {
+            let p = (y * i.width + x) * 4;
+            r += i.pixels[p] * contrast;
+            g += i.pixels[p + 1] * contrast;
+            b += i.pixels[p + 2] * contrast;
             counter++;
         }
     }
     return [r / counter, g / counter, b / counter];
 }
-function setDrawer() {
-    if (useText)
-        if (!useColor)
-            drawer = (colors) => {
-                p5.fill(invertColor);
-                let val = colors.reduce((sum, curr) => sum + curr, 0);
-                p5.text(caracs[Math.floor(p5.map(val / 3, 0, 255, 0, caracs.length - 1))], 0, 0);
-            };
-        else
-            drawer = (colors) => {
-                p5.fill(p5.color(colors));
-                let val = colors.reduce((sum, curr) => sum + curr, 0);
-                p5.text(caracs[Math.floor(p5.map(val / 3, 0, 255, 0, caracs.length - 1))], 0, 0);
-            };
-    else
-        drawer = (colors) => {
-            p5.fill(p5.color(colors));
-            p5.ellipse(0, 0, xSize - xOffset * xSize, ySize - yOffset * ySize);
-        };
+function getSize(x, y) {
+    let colors = iterOn(img.get(Math.floor(x / imgFactor), Math.floor(y / imgFactor), 10, 10));
+    return (.3 * colors[0] + .59 * colors[1] + .11 * colors[2]) / 255;
 }
-function draw() {
-    if (!camLoad)
+function draw(image) {
+    if (image == null)
         return;
+    img = image;
     p5.clear();
-    p5.background(backgroundColor);
-    cam.loadPixels();
-    p5.scale(width / cam.width, height / cam.height);
-    p5.translate(xSize / 2, ySize / 2);
-    for (let x = 0; x < cam.width; x += xSize) {
-        let y;
-        for (y = 0; y < cam.height; y += ySize) {
-            drawer(iterOn(x, y));
-            p5.translate(0, ySize);
-        }
-        p5.translate(xSize, -y);
+    p5.background("black");
+    p5.image(img, 0, height * .85, width * .15, height * .15);
+    p5.filter(p5.GRAY);
+    p5.stroke(lineColor);
+    p5.fill(lineColor);
+    img.loadPixels();
+    let prev = [width / 2, height / 2];
+    let nbIter = nbCircle * nbIterByCircle;
+    for (let i = 0; i < nbIter; i++) {
+        let curr = [
+            width / 2 + p5.cos(p5.TAU * (i / nbIterByCircle)) * (i / nbIter) * (width / 2),
+            height / 2 + p5.sin(p5.TAU * (i / nbIterByCircle)) * (i / nbIter) * (height / 2)
+        ];
+        p5.strokeWeight(getSize(curr[0], curr[1]) * strokeWeight);
+        p5.line(prev[0], prev[1], curr[0], curr[1]);
+        prev = curr;
     }
-}
-function resetParams() {
-    xSize = Math.floor(cam.width / nbColumn);
-    ySize = Math.floor(cam.height / nbRow);
-    caracs = characters.split("");
-    setDrawer();
+    p5.noLoop();
 }
 function reset() {
-    cam = p5.createCapture(p5.VIDEO, () => {
-        camLoad = true;
-        console.log("Cam loaded !");
-    });
-    cam.size(1920, 1080);
-    cam.hide();
-    resetParams();
+    p5.clear();
+    p5.background("black");
+    p5.fill("white");
+    p5.stroke("white");
+    p5.text("Load image", width / 2 - 20, height / 2);
+    p5.loadImage(`https://picsum.photos/${Math.floor(width / imgFactor)}/${Math.floor(height / imgFactor)}`, image => { draw(image); });
 }
 function setupP5(p) {
     p5 = p;
-    backgroundColor = p5.color(bColor);
-    invertColor = p5.color(255 - p5.red(backgroundColor), 255 - p5.green(backgroundColor), 255 - p5.blue(backgroundColor));
     p5.createCanvas(width, height);
-    p5.frameRate(fps);
+    lineColor = p5.color(lColor);
     p5.noStroke();
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        nbRow: nbRow,
-        nbColumn: nbColumn,
-        xOffset: xOffset,
-        yOffset: yOffset,
-        useText: useText,
-        useColor: useColor,
-        backgroundColor: bColor,
-        characters: characters,
-        cam: () => {
-            if (camLoad) {
-                cam.stop();
-                camLoad = false;
-            }
-            else {
-                reset();
-            }
-        },
-        pause: () => {
-            pause = !pause;
-            if (pause) {
-                p5.noLoop();
-                if (camLoad)
-                    cam.pause();
-            }
-            else {
-                p5.loop();
-                if (camLoad)
-                    cam.play();
-            }
+        contrast: contrast,
+        nbCircle: nbCircle,
+        nbIterByCircle: nbIterByCircle,
+        lineColor: lColor,
+        strokeWeight: strokeWeight,
+        update: () => {
+            draw(img);
         }
     };
     const guiEffect = gui.addFolder("Effect");
     guiEffect
-        .add(params, "nbRow", 10, height / 8, 1)
-        .onChange(value => {
-        nbRow = value;
-        resetParams();
-    });
+        .add(params, "contrast", 0, 2, 0.01)
+        .onChange(value => contrast = value);
     guiEffect
-        .add(params, "nbColumn", 10, width / 8, 1)
-        .onChange(value => {
-        nbColumn = value;
-        resetParams();
-    });
+        .add(params, "nbCircle", 50, 250, 1)
+        .onChange(value => nbCircle = value);
     guiEffect
-        .add(params, "xOffset", 0, 1, 0.01)
-        .onChange(value => xOffset = value);
-    guiEffect
-        .add(params, "yOffset", 0, 1, 0.01)
-        .onChange(value => yOffset = value);
-    guiEffect
-        .add(params, "useText")
-        .onChange(value => {
-        useText = value;
-        resetParams();
-    });
-    guiEffect
-        .add(params, "characters")
-        .onChange(value => {
-        characters = value;
-        resetParams();
-    });
+        .add(params, "nbIterByCircle", 50, 500, 1)
+        .onChange(value => nbIterByCircle = value);
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
     guiVisual
-        .add(params, "useColor")
-        .onChange(value => {
-        useColor = value;
-        resetParams();
-    });
+        .addColor(params, "lineColor")
+        .onChange(value => lineColor = p5.color(value));
     guiVisual
-        .addColor(params, "backgroundColor")
-        .onChange(value => {
-        backgroundColor = p5.color(value);
-        invertColor = p5.color(255 - p5.red(backgroundColor), 255 - p5.green(backgroundColor), 255 - p5.blue(backgroundColor));
-    });
+        .add(params, "strokeWeight", 1, 5, 0.01)
+        .onChange(value => strokeWeight = value);
     guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
-    let ps = guiMisc
-        .add(params, "pause")
-        .name("Pause")
-        .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
-    let camGui = guiMisc
-        .add(params, "cam")
-        .name("Stop Cam")
-        .onChange(() => (!camLoad) ? camGui.name("Stop Cam") : camGui.name("Turn on Cam"));
+    guiMisc
+        .add(params, "update")
+        .name("Update");
     guiMisc.open();
 }
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
     p5.resizeCanvas(width, height);
-    reset();
+    draw(img);
 }
-window.onresize = resize;
+// window.onresize = resize;
 window.onload = () => {
     let sketch = (p) => {
         p.setup = () => {
             setupP5(p);
-        };
-        p.draw = () => {
-            draw();
         };
     };
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
@@ -2863,8 +2778,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/asciiCam/asciiCam.ts");
+/******/ 	__webpack_require__("./src/circleImage/circleImage.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=asciiCamBundle.js.map
+//# sourceMappingURL=circleImageBundle.js.map
