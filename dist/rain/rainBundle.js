@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/circleAutomata/circleAutomata.ts":
-/*!**********************************************!*\
-  !*** ./src/circleAutomata/circleAutomata.ts ***!
-  \**********************************************/
+/***/ "./src/rain/rain.ts":
+/*!**************************!*\
+  !*** ./src/rain/rain.ts ***!
+  \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2568,218 +2568,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
-// Recreate from gif : https://twitter.com/verytiredrobot/status/1345448387949309954?s=12
+// Implemented from https://medium.com/@r.l.bongers/visual-effect-analysis-animated-raindrops-682b83b87e09
 
 
 let width = window.innerWidth;
 let height = window.innerHeight;
-let centerX = width / 2;
-let centerY = height / 2;
 let p5;
-let eColor = "#9e9eca";
-let fColor = "#ca5a5a";
-let emptyColor;
-let fillColor;
-let alpha = 120;
-let spaceOffset = 20;
-let False = 0;
-let True = 1;
-let gridHeight = 10;
-let gridWidth = 2 * gridHeight - 1;
-let currentGrid;
-let nextGrid;
-let counter = 0;
-let updateTime = 0.75;
-let fps = 60;
-let initSegment = 3;
-let rounded = true;
-let drawer;
-let rotateOffset = 0;
+let speedFactor = 1;
+let nbDropWater = 35;
+let nbWater = 100;
 let pause = false;
-function computePosition(theta, gen) {
-    return [centerX + p5.cos(theta) * gen * 25, centerY + p5.sin(theta) * gen * 25];
-}
-function setDrawer(round) {
-    if (round)
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            p5.noFill();
-            p5.arc(centerX, centerY, generation * 50, generation * 50, oldTheta + spaceBetween, currTheta - spaceBetween);
-        };
-    else
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            let [ox, oy] = computePosition(oldTheta + spaceBetween, generation);
-            let [x, y] = computePosition(currTheta - spaceBetween, generation);
-            p5.line(ox, oy, x, y);
-        };
-    p5.fill("black");
-    p5.background("black");
-}
-function rule(p, q, r) {
-    return p ^ (p && q || r);
-}
-function parents(x, y) {
-    let top = (y - 1) < 0 ? gridHeight + y - 1 : (y - 1) % gridHeight;
-    let xm1 = (x - 1) < 0 ? gridWidth + x - 1 : (x - 1) % gridWidth;
-    let p = currentGrid[top][xm1];
-    let q = currentGrid[top][x];
-    let r = currentGrid[top][(x + 1) % gridWidth];
-    return rule(p, q, r);
-}
-function computeGeneration() {
-    currentGrid[0][0] = p5.random() > 0.5 ? True : False;
-    for (let i = 0; i < gridHeight; i++)
-        for (let j = 0; j < gridWidth; j++)
-            nextGrid[i][j] = parents(j, i);
-    // Update generation, Buffer Swap
-    [currentGrid, nextGrid] = [nextGrid, currentGrid];
-}
-function drawAutomata() {
-    let nbPartAtGen = initSegment - 2;
-    p5.stroke((currentGrid[0][0] == True) ? fillColor : emptyColor);
-    p5.circle(centerX, centerY, 10);
-    let oldTheta = -1, initTheta = 0;
-    for (let r = 1; r < currentGrid.length - 1; r++) {
-        nbPartAtGen += 2;
-        let spaceBetween = spaceOffset / r;
-        let angle = 360 / nbPartAtGen;
-        for (let j = 1; j <= nbPartAtGen; j++) {
-            p5.stroke((currentGrid[r][j - 1] == True) ? fillColor : emptyColor);
-            let theta = angle * j + rotateOffset;
-            if (oldTheta == -1) {
-                oldTheta = theta;
-                initTheta = theta;
-            }
-            else {
-                drawer(oldTheta, theta, spaceBetween, r);
-                oldTheta = theta;
-            }
-        }
-        p5.stroke((currentGrid[r][nbPartAtGen - 1] == True) ? fillColor : emptyColor);
-        drawer(oldTheta, initTheta, spaceBetween, r);
-        oldTheta = -1;
-        rotateOffset += 25;
-    }
-    rotateOffset = 0;
-}
 function draw() {
-    drawAutomata();
-    counter++;
-    if (counter / fps >= updateTime) {
-        computeGeneration();
-        counter = 0;
-    }
-}
-function reset() {
-    setDrawer(rounded);
-    currentGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    nextGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    for (let i = 0; i < p5.random(200, 500); i++)
-        computeGeneration();
-    counter = 0;
-    draw();
-}
-function setColor() {
-    emptyColor = p5.color(eColor);
-    fillColor = p5.color(fColor);
-    emptyColor.setAlpha(alpha);
-    fillColor.setAlpha(alpha);
-    p5.fill("black");
     p5.background("black");
+    let effect_size = height / 3;
+    let time = p5.millis() / (1000 * (1 / speedFactor));
+    p5.fill(((time / 10) % 1) * 255, 255, 255);
+    for (let i = 0; i < nbDropWater; i++) {
+        let timing_variation = (time + Math.cos(i)) % 2;
+        for (let j = timing_variation; j < nbWater; j++) {
+            let burst_trigger = ~~timing_variation;
+            let drop_size = timing_variation * effect_size - effect_size;
+            let y_pos = (burst_trigger ? effect_size : timing_variation * effect_size) * (Math.cos(i) + 2);
+            let x_coord = width * p5.map(Math.cos(i * i * i), -1, 1, 0, 1)
+                + burst_trigger * drop_size * Math.cos(j);
+            let y_coord = y_pos + drop_size * (Math.sin(j) / 5);
+            p5.rect(x_coord, y_coord, 3, 3);
+        }
+    }
 }
 function setupP5(p) {
     p5 = p;
     p5.angleMode(p5.DEGREES);
     p5.createCanvas(width, height);
-    p5.frameRate(fps);
-    p5.strokeWeight(7);
-    p5.strokeCap(p5.ROUND);
-    setColor();
-    reset();
+    p5.frameRate(60);
+    p5.noStroke();
+    p5.colorMode(p5.HSB);
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        updateTime: updateTime,
-        nbGeneration: gridHeight,
-        spaceOffset: spaceOffset,
-        rounded: rounded,
-        alpha: alpha,
-        strokeSize: 7,
-        fillColor: fColor,
-        emptyColor: eColor,
-        initSegment: initSegment,
+        speedFactor: speedFactor,
+        nbWater: nbWater,
+        nbDropWater: nbDropWater,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
-        },
-        reset: () => {
-            reset();
         }
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "updateTime", 0.1, 5, 0.1)
-        .onChange(value => updateTime = value)
-        .name("Update Time (s)");
+        .add(params, "speedFactor", 0.1, 5, .1)
+        .onChange(value => speedFactor = value);
     guiEffect
-        .add(params, "initSegment", 3, 7, 1)
-        .onChange(value => {
-        initSegment = value;
-        reset();
-    });
+        .add(params, "nbDropWater", 20, 400, 1)
+        .onChange(value => nbDropWater = value);
     guiEffect
-        .add(params, "nbGeneration", 5, 40, 1)
-        .onChange(value => {
-        gridHeight = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "spaceOffset", 15, 25, 1)
-        .onChange(value => {
-        spaceOffset = value;
-        setColor();
-    });
+        .add(params, "nbWater", 10, 200, 1)
+        .onChange(value => nbWater = value);
     guiEffect.open();
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual
-        .add(params, "rounded")
-        .onChange(value => {
-        rounded = value;
-        setDrawer(rounded);
-    });
-    guiVisual.addColor(params, "fillColor")
-        .onChange(value => fillColor = p5.color(value));
-    guiVisual.addColor(params, "emptyColor")
-        .onChange(value => emptyColor = p5.color(value));
-    guiVisual.add(params, "alpha", 0, 255, 1)
-        .onChange(value => {
-        alpha = value;
-        setColor();
-    });
-    guiVisual.add(params, "strokeSize", 1, 12, 0.1)
-        .onChange(value => {
-        p5.strokeWeight(value);
-        setColor();
-    });
-    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
         .name("Pause")
         .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
-    guiMisc
-        .add(params, "reset")
-        .name("Reset");
     guiMisc.open();
 }
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
-    centerX = width / 2;
-    centerY = height / 2;
     p5.resizeCanvas(width, height);
-    setColor();
-    draw();
 }
 window.onresize = resize;
 window.onload = () => {
@@ -2794,7 +2651,6 @@ window.onload = () => {
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
     resize();
     setupDatGUI();
-    reset();
 };
 
 
@@ -2881,8 +2737,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/circleAutomata/circleAutomata.ts");
+/******/ 	__webpack_require__("./src/rain/rain.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=circleAutomataBundle.js.map
+//# sourceMappingURL=rainBundle.js.map

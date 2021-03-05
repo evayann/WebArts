@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/circleAutomata/circleAutomata.ts":
-/*!**********************************************!*\
-  !*** ./src/circleAutomata/circleAutomata.ts ***!
-  \**********************************************/
+/***/ "./src/squareShake/squareShake.ts":
+/*!****************************************!*\
+  !*** ./src/squareShake/squareShake.ts ***!
+  \****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2568,7 +2568,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
-// Recreate from gif : https://twitter.com/verytiredrobot/status/1345448387949309954?s=12
 
 
 let width = window.innerWidth;
@@ -2576,138 +2575,92 @@ let height = window.innerHeight;
 let centerX = width / 2;
 let centerY = height / 2;
 let p5;
-let eColor = "#9e9eca";
-let fColor = "#ca5a5a";
-let emptyColor;
-let fillColor;
-let alpha = 120;
-let spaceOffset = 20;
-let False = 0;
-let True = 1;
-let gridHeight = 10;
-let gridWidth = 2 * gridHeight - 1;
-let currentGrid;
-let nextGrid;
-let counter = 0;
-let updateTime = 0.75;
-let fps = 60;
-let initSegment = 3;
-let rounded = true;
-let drawer;
-let rotateOffset = 0;
+let sColor = "#35d492";
+let squareColor;
 let pause = false;
-function computePosition(theta, gen) {
-    return [centerX + p5.cos(theta) * gen * 25, centerY + p5.sin(theta) * gen * 25];
+let cycle = 1;
+let time = 0;
+let offset = 1.7;
+let max = 3;
+let rotate = true;
+function easeInOutElastic(x) {
+    const c5 = (2 * Math.PI) / 4.5;
+    return x === 0 ? 0
+        : x === 1
+            ? 1
+            : x < 0.5
+                ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
+                : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
 }
-function setDrawer(round) {
-    if (round)
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            p5.noFill();
-            p5.arc(centerX, centerY, generation * 50, generation * 50, oldTheta + spaceBetween, currTheta - spaceBetween);
-        };
-    else
-        drawer = (oldTheta, currTheta, spaceBetween, generation) => {
-            let [ox, oy] = computePosition(oldTheta + spaceBetween, generation);
-            let [x, y] = computePosition(currTheta - spaceBetween, generation);
-            p5.line(ox, oy, x, y);
-        };
-    p5.fill("black");
-    p5.background("black");
+function easeInOutCirc(x) {
+    return x < 0.5
+        ? (1 - Math.sqrt(1 - Math.pow(2 * x, 2))) / 2
+        : (Math.sqrt(1 - Math.pow(-2 * x + 2, 2)) + 1) / 2;
 }
-function rule(p, q, r) {
-    return p ^ (p && q || r);
+function cmpPos(from, to, t, rot) {
+    let val = easeInOutElastic(p5.map(t, -1, 1, 0, 1));
+    if (rot)
+        p5.rotate(val * p5.PI);
+    return p5.lerp(from, to, val);
 }
-function parents(x, y) {
-    let top = (y - 1) < 0 ? gridHeight + y - 1 : (y - 1) % gridHeight;
-    let xm1 = (x - 1) < 0 ? gridWidth + x - 1 : (x - 1) % gridWidth;
-    let p = currentGrid[top][xm1];
-    let q = currentGrid[top][x];
-    let r = currentGrid[top][(x + 1) % gridWidth];
-    return rule(p, q, r);
+function drawSquare(ix, iy, w, h) {
+    p5.push();
+    let x = cmpPos(ix * 2, ix, p5.cos(time * cycle), rotate);
+    let y = cmpPos(iy * 2, iy, p5.sin(offset + time * cycle), rotate);
+    p5.translate(x, y);
+    p5.rect(0, 0, w + 2, h + 2, easeInOutCirc(p5.map(p5.cos(time * cycle), -1, 1, 1, 0)) * w / 2);
+    p5.pop();
 }
-function computeGeneration() {
-    currentGrid[0][0] = p5.random() > 0.5 ? True : False;
-    for (let i = 0; i < gridHeight; i++)
-        for (let j = 0; j < gridWidth; j++)
-            nextGrid[i][j] = parents(j, i);
-    // Update generation, Buffer Swap
-    [currentGrid, nextGrid] = [nextGrid, currentGrid];
-}
-function drawAutomata() {
-    let nbPartAtGen = initSegment - 2;
-    p5.stroke((currentGrid[0][0] == True) ? fillColor : emptyColor);
-    p5.circle(centerX, centerY, 10);
-    let oldTheta = -1, initTheta = 0;
-    for (let r = 1; r < currentGrid.length - 1; r++) {
-        nbPartAtGen += 2;
-        let spaceBetween = spaceOffset / r;
-        let angle = 360 / nbPartAtGen;
-        for (let j = 1; j <= nbPartAtGen; j++) {
-            p5.stroke((currentGrid[r][j - 1] == True) ? fillColor : emptyColor);
-            let theta = angle * j + rotateOffset;
-            if (oldTheta == -1) {
-                oldTheta = theta;
-                initTheta = theta;
-            }
-            else {
-                drawer(oldTheta, theta, spaceBetween, r);
-                oldTheta = theta;
-            }
-        }
-        p5.stroke((currentGrid[r][nbPartAtGen - 1] == True) ? fillColor : emptyColor);
-        drawer(oldTheta, initTheta, spaceBetween, r);
-        oldTheta = -1;
-        rotateOffset += 25;
+function splitSquare(x, y, w, h, xOff, yOff, xInc, yInc, it) {
+    if (it >= max)
+        drawSquare(x, y, w, h);
+    else {
+        let nXOff = xOff + xInc, nYOff = yOff + yInc;
+        splitSquare(x, y, w * xOff, h * yOff, nXOff, nYOff, xInc, yInc, it + 1);
+        splitSquare(x + w * xOff, y, w * (1 - xOff), h * yOff, nXOff, nYOff, xInc, yInc, it + 1);
+        splitSquare(x + w * xOff, y + h * yOff, w * (1 - xOff), h * (1 - yOff), nXOff, nYOff, xInc, yInc, it + 1);
+        splitSquare(x, y + h * yOff, w * xOff, h * (1 - yOff), nXOff, nYOff, xInc, yInc, it + 1);
     }
-    rotateOffset = 0;
+}
+function center(size) {
+    let xOff = cmpPos(size, 0, p5.cos(time * cycle), false);
+    let yOff = cmpPos(size, 0, p5.sin(offset + time * cycle), false);
+    p5.translate(width / 2 + xOff, height / 2 + yOff);
 }
 function draw() {
-    drawAutomata();
-    counter++;
-    if (counter / fps >= updateTime) {
-        computeGeneration();
-        counter = 0;
-    }
+    p5.background("black");
+    p5.fill(squareColor);
+    p5.noStroke();
+    let size = Math.min(width, height);
+    center(size / 32);
+    p5.scale(.5);
+    let qSize = size / 2;
+    let off = 1 / (max * 2);
+    splitSquare(-qSize, -qSize, qSize, qSize, 0.1, 0.1, off, off, 0);
+    splitSquare(0, -qSize, qSize, qSize, 0.9, 0.1, -off, off, 0);
+    splitSquare(0, 0, qSize, qSize, 0.9, 0.9, -off, -off, 0);
+    splitSquare(-qSize, 0, qSize, qSize, 0.1, 0.9, off, -off, 0);
+    time += .02;
 }
 function reset() {
-    setDrawer(rounded);
-    currentGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    nextGrid = new Array(gridHeight).fill(False).map(() => new Array(gridWidth).fill(False));
-    for (let i = 0; i < p5.random(200, 500); i++)
-        computeGeneration();
-    counter = 0;
+    p5.clear();
+    time = 0;
     draw();
-}
-function setColor() {
-    emptyColor = p5.color(eColor);
-    fillColor = p5.color(fColor);
-    emptyColor.setAlpha(alpha);
-    fillColor.setAlpha(alpha);
-    p5.fill("black");
-    p5.background("black");
 }
 function setupP5(p) {
     p5 = p;
-    p5.angleMode(p5.DEGREES);
+    squareColor = p5.color(sColor);
     p5.createCanvas(width, height);
-    p5.frameRate(fps);
-    p5.strokeWeight(7);
-    p5.strokeCap(p5.ROUND);
-    setColor();
+    p5.frameRate(60);
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        updateTime: updateTime,
-        nbGeneration: gridHeight,
-        spaceOffset: spaceOffset,
-        rounded: rounded,
-        alpha: alpha,
-        strokeSize: 7,
-        fillColor: fColor,
-        emptyColor: eColor,
-        initSegment: initSegment,
+        cycle: cycle,
+        offset: offset,
+        squareColor: sColor,
+        rotate: rotate,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
@@ -2718,49 +2671,22 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "updateTime", 0.1, 5, 0.1)
-        .onChange(value => updateTime = value)
-        .name("Update Time (s)");
+        .add(params, "cycle", 0.1, 2, 0.1)
+        .onChange(value => cycle = value)
+        .name("Speed");
     guiEffect
-        .add(params, "initSegment", 3, 7, 1)
+        .add(params, "offset", 0, Math.PI * 2, .1)
+        .onChange(value => offset = value);
+    guiEffect
+        .add(params, "rotate", true)
         .onChange(value => {
-        initSegment = value;
+        rotate = value;
         reset();
-    });
-    guiEffect
-        .add(params, "nbGeneration", 5, 40, 1)
-        .onChange(value => {
-        gridHeight = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "spaceOffset", 15, 25, 1)
-        .onChange(value => {
-        spaceOffset = value;
-        setColor();
     });
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual
-        .add(params, "rounded")
-        .onChange(value => {
-        rounded = value;
-        setDrawer(rounded);
-    });
-    guiVisual.addColor(params, "fillColor")
-        .onChange(value => fillColor = p5.color(value));
-    guiVisual.addColor(params, "emptyColor")
-        .onChange(value => emptyColor = p5.color(value));
-    guiVisual.add(params, "alpha", 0, 255, 1)
-        .onChange(value => {
-        alpha = value;
-        setColor();
-    });
-    guiVisual.add(params, "strokeSize", 1, 12, 0.1)
-        .onChange(value => {
-        p5.strokeWeight(value);
-        setColor();
-    });
+    guiVisual.addColor(params, "squareColor")
+        .onChange(value => squareColor = p5.color(value));
     guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
@@ -2778,7 +2704,6 @@ function resize() {
     centerX = width / 2;
     centerY = height / 2;
     p5.resizeCanvas(width, height);
-    setColor();
     draw();
 }
 window.onresize = resize;
@@ -2794,7 +2719,6 @@ window.onload = () => {
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
     resize();
     setupDatGUI();
-    reset();
 };
 
 
@@ -2881,8 +2805,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/circleAutomata/circleAutomata.ts");
+/******/ 	__webpack_require__("./src/squareShake/squareShake.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=circleAutomataBundle.js.map
+//# sourceMappingURL=squareShakeBundle.js.map

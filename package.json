@@ -4,6 +4,9 @@
   "author": "Yann Zavattero",
   "version": "1.0.0",
   "scripts": {
+    "flow": "webpack --config src/flow/webpackage.config.js",
+    "flow1": "webpack --config src/flow1/webpackage.config.js",
+    "rain": "webpack --config src/rain/webpackage.config.js",
     "flags": "webpack --config src/flags/webpackage.config.js",
     "vortex": "webpack --config src/vortex/webpackage.config.js",
     "spiral": "webpack --config src/spiral/webpackage.config.js",
@@ -16,6 +19,8 @@
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
     "noiseColor": "webpack --config src/noiseColor/webpackage.config.js",
     "circleImage": "webpack --config src/circleImage/webpackage.config.js",
+    "boxWaves": "webpack --config src/boxWaves/webpackage.config.js",
+    "squareShake": "webpack --config src/squareShake/webpackage.config.js",
     "squaresLoop": "webpack --config src/squaresLoop/webpackage.config.js",
     "circleSplit": "webpack --config src/circleSplit/webpackage.config.js",
     "circleSquare": "webpack --config src/circleSquare/webpackage.config.js",
