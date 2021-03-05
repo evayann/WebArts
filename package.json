@@ -29,6 +29,7 @@
     "dropGradient": "webpack --config src/dropGradient/webpackage.config.js",
     "shapeOfShape": "webpack --config src/shapeOfShape/webpackage.config.js",
     "spiralTunnel": "webpack --config src/spiralTunnel/webpackage.config.js",
+    "particlesMove": "webpack --config src/particlesMove/webpackage.config.js",
     "corridorLines": "webpack --config src/corridorLines/webpackage.config.js",
     "planetsCircle": "webpack --config src/planetsCircle/webpackage.config.js",
     "circleAutomata": "webpack --config src/circleAutomata/webpackage.config.js",
