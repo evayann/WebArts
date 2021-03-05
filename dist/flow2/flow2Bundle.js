@@ -2557,9 +2557,9 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/flow1/flow1.ts":
+/***/ "./src/flow2/flow2.ts":
 /*!****************************!*\
-  !*** ./src/flow1/flow1.ts ***!
+  !*** ./src/flow2/flow2.ts ***!
   \****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
@@ -2574,7 +2574,6 @@ let w = window.innerWidth;
 let h = window.innerHeight;
 let p5;
 let speedFactor = 1;
-let spaceOffset = 5;
 let sizeFactor = 1;
 let density = 5000;
 let pause = false;
@@ -2589,9 +2588,9 @@ function draw() {
     p5.translate(w, h * .75);
     let t = p5.millis() / (1000 + 1000 * (1 / speedFactor));
     for (let i = density; i--; p5.rect((w / 2) * x / z, h * 1.25 - h * y / z, s = (500 * sizeFactor) / (z * z * z), s)) {
-        x = spaceOffset * C(u = t + 1000 / i) + C(v = t + i);
-        y = S(density / i) + T(v) * C(v) - 5;
-        z = S(u) - 5;
+        x = S(u = t + density - i) + .5 * T(v = t + i / density);
+        y = 4 * S(v) - 5;
+        z = C(u) * S(u) - 5;
     }
 }
 function setupP5(p) {
@@ -2604,7 +2603,6 @@ function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
         speedFactor: speedFactor,
-        spaceOffset: spaceOffset,
         sizeFactor: sizeFactor,
         density: density,
         pause: () => {
@@ -2619,9 +2617,6 @@ function setupDatGUI() {
     guiEffect
         .add(params, "sizeFactor", 0.1, 3, .1)
         .onChange(value => sizeFactor = value);
-    guiEffect
-        .add(params, "spaceOffset", 0, 7, .1)
-        .onChange(value => spaceOffset = value);
     guiEffect
         .add(params, "density", 100, 7000, 10)
         .onChange(value => density = value);
@@ -2737,8 +2732,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/flow1/flow1.ts");
+/******/ 	__webpack_require__("./src/flow2/flow2.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=flow1Bundle.js.map
+//# sourceMappingURL=flow2Bundle.js.map

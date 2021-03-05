@@ -6,6 +6,7 @@
   "scripts": {
     "flow": "webpack --config src/flow/webpackage.config.js",
     "flow1": "webpack --config src/flow1/webpackage.config.js",
+    "flow2": "webpack --config src/flow2/webpackage.config.js",
     "rain": "webpack --config src/rain/webpackage.config.js",
     "flags": "webpack --config src/flags/webpackage.config.js",
     "vortex": "webpack --config src/vortex/webpackage.config.js",
