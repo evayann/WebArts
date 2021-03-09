@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/particlesMove/particlesMove.ts":
-/*!********************************************!*\
-  !*** ./src/particlesMove/particlesMove.ts ***!
-  \********************************************/
+/***/ "./src/metaballs/metaballs.ts":
+/*!************************************!*\
+  !*** ./src/metaballs/metaballs.ts ***!
+  \************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2572,119 +2572,207 @@ __webpack_require__.r(__webpack_exports__);
 
 let width = window.innerWidth;
 let height = window.innerHeight;
+let halfWidth = width / 2;
+let halfHeight = height / 2;
 let p5;
-let hue = 0;
-let alpha = 25;
-let time = 0;
-let nbCircle = 20;
-let pManager;
+let shaderGraph;
+let shader;
 let pause = false;
-class Particle {
-    constructor(x, y) {
+let speed = 1;
+let bColor = "#ca365c";
+let clamping = 1.5;
+let ballColor;
+let displayCircle = false;
+let balls;
+const parseColor = (color) => [p5.red(color) / 255, p5.green(color) / 255, p5.blue(color) / 255];
+class Ball {
+    constructor(x, y, radius) {
         this.pos = p5.createVector(x, y);
+        this.vel = p5.createVector(p5.random(-5, 5), p5.random(-5, 5));
+        this.radius = radius;
+    }
+    update() {
+        this.pos.add(p5__WEBPACK_IMPORTED_MODULE_1__.Vector.mult(this.vel, speed));
+        if (this.pos.x > halfWidth || this.pos.x < -halfWidth)
+            this.vel.x *= -1;
+        if (this.pos.y > halfHeight || this.pos.y < -halfHeight)
+            this.vel.y *= -1;
     }
     draw() {
-        p5.circle(this.pos.x + xCompute(time) * this.pos.x / 2, this.pos.y + yCompute(time) * this.pos.x / 2, 10);
+        p5.noFill();
+        p5.stroke("white");
+        p5.circle(this.pos.x, this.pos.y, this.radius);
+    }
+    static getX(b) {
+        return b.pos.x;
+    }
+    static getY(b) {
+        return b.pos.y;
+    }
+    static getR(b) {
+        return b.radius;
     }
 }
-function xCompute(t) {
-    return Math.sin(t);
-}
-function yCompute(t) {
-    return ((Math.cos(t) * Math.sin(t)) / Math.tan(.5 * t));
-}
-class ParticlesManager {
-    constructor(nbPart) {
-        this.particles = [];
-        for (let i = nbPart; i--;)
-            this.particles.push(new Particle(Math.min(width, height) / 4, 0));
+class Balls {
+    constructor(nbBalls) {
+        this.balls = [];
+        let size = Math.min(width, height);
+        for (let i = nbBalls; i--;)
+            this.balls.push(new Ball(p5.random(-halfWidth, halfWidth), p5.random(-halfHeight, halfHeight), p5.random(size / 8, size / 2)));
     }
-    draw() {
-        for (let [i, p] of this.particles.entries()) {
-            p5.push();
-            p5.rotate(-(i / this.particles.length) * p5.TAU);
-            p.draw();
-            p5.pop();
-        }
+    update() {
+        this.balls.forEach(b => {
+            b.update();
+            if (displayCircle)
+                b.draw();
+        });
     }
+    len() {
+        return this.balls.length;
+    }
+    get(f) {
+        let elements = [];
+        this.balls.forEach(b => elements.push(f(b)));
+        return elements;
+    }
+    getXs() {
+        return this.get(Ball.getX);
+    }
+    getYs() {
+        return this.get(Ball.getY);
+    }
+    getRs() {
+        return this.get(Ball.getR);
+    }
+}
+function drawBalls() {
+    shaderGraph.shader(shader);
+    shader.setUniform("color", parseColor(ballColor));
+    shader.setUniform("clamping", clamping);
+    shader.setUniform("width", width);
+    shader.setUniform("height", height);
+    shader.setUniform("ballsX", balls.getXs());
+    shader.setUniform("ballsY", balls.getYs());
+    shader.setUniform("ballsR", balls.getRs());
+    shaderGraph.plane(width, height);
+    p5.image(shaderGraph, 0, 0, width, height);
 }
 function draw() {
-    p5.colorMode(p5.RGB);
-    p5.fill(0, alpha);
-    p5.rect(0, 0, width, height);
-    p5.translate(width / 2, height / 2);
-    p5.colorMode(p5.HSB);
-    p5.fill(hue, 255, 255);
-    pManager.draw();
-    time += .02;
-    hue = (hue + .1) % 360;
+    drawBalls();
+    balls.update();
 }
-function reset() {
-    time = 0;
-    pManager = new ParticlesManager(nbCircle);
-    draw();
-}
-function setupP5(p) {
+function preload(p) {
     p5 = p;
-    p5.noStroke();
+    shaderGraph = p5.createGraphics(width, height, p5.WEBGL);
+    shaderGraph.noStroke();
+    let vert = `#ifdef GL_ES
+        precision highp float;
+        precision highp int;
+        #endif
+        
+        varying vec2 vPos;
+        attribute vec3 aPosition;
+        
+        void main() {
+            vec4 pos = vec4(aPosition, 1.0);
+            pos.xy *= 2.0;
+            vPos = (gl_Position = pos).xy;
+        }`;
+    let frag = `#ifdef GL_ES
+        precision highp float;
+        #endif
+        
+        #define MAX_BALLS 20
+        
+        varying vec2 vPos;
+        uniform vec3 color;
+        uniform float width;
+        uniform float height;
+        uniform float clamping;
+        uniform float ballsX[MAX_BALLS];
+        uniform float ballsY[MAX_BALLS];
+        uniform float ballsR[MAX_BALLS];
+        
+        void main() {
+            float sum = 0.0;
+            for (int i = 0; i < MAX_BALLS; i++) {
+                float xDiff = vPos.x * width - ballsX[i] * 2.0;
+                float yDiff = -vPos.y * height - ballsY[i] * 2.0;
+                sum += (0.25 * ballsR[i]) / sqrt(xDiff * xDiff + yDiff * yDiff);
+            }
+            gl_FragColor = vec4(color * clamp(sum, 0.0, clamping), 1.0);
+        }`;
+    shader = shaderGraph.createShader(vert, frag);
+}
+function setupP5() {
+    p5.pixelDensity(1);
+    p5.createCanvas(width, height, p5.WEBGL);
     p5.createCanvas(width, height);
-    p5.frameRate(60);
-    reset();
+    p5.rectMode(p5.CENTER);
+    p5.imageMode(p5.CENTER);
+    balls = new Balls(~~p5.random(10, 20));
+    ballColor = p5.color(bColor);
+    draw();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        nbCircle: nbCircle,
-        alpha: alpha,
+        displayCircle: displayCircle,
+        clamping: clamping,
+        bColor: bColor,
+        speed: speed,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
-        },
-        reset: () => {
-            reset();
         }
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "nbCircle", 5, 50, 1)
-        .onChange(value => {
-        nbCircle = value;
-        reset();
-    });
+        .add(params, "speed", 0.1, 10, 0.1)
+        .onChange(value => speed = value);
+    guiEffect
+        .add(params, "clamping", 1, 3, .01)
+        .onChange(value => clamping = value)
+        .name("Shiny");
+    guiEffect
+        .add(params, "displayCircle")
+        .onChange(value => displayCircle = value);
     guiEffect.open();
     const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.add(params, "alpha", 0, 255, 1)
-        .onChange(value => alpha = value);
+    guiVisual.addColor(params, "bColor")
+        .onChange(value => ballColor = p5.color(value));
     guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
         .name("Pause")
         .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
-    guiMisc
-        .add(params, "reset")
-        .name("Reset");
     guiMisc.open();
 }
 function resize() {
     width = window.innerWidth;
     height = window.innerHeight;
+    halfWidth = width / 2;
+    halfHeight = height / 2;
     p5.resizeCanvas(width, height);
     draw();
 }
 window.onresize = resize;
 window.onload = () => {
     let sketch = (p) => {
+        p.preload = () => {
+            preload(p);
+        };
         p.setup = () => {
-            setupP5(p);
+            setupP5();
         };
         p.draw = () => {
             draw();
         };
     };
     p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
-    resize();
     setupDatGUI();
+    resize();
 };
 
 
@@ -2771,8 +2859,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/particlesMove/particlesMove.ts");
+/******/ 	__webpack_require__("./src/metaballs/metaballs.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=particlesMoveBundle.js.map
+//# sourceMappingURL=metaballsBundle.js.map

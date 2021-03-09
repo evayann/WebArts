@@ -5,8 +5,6 @@ let width: number = window.innerWidth;
 let height: number = window.innerHeight;
 
 let p5: P5;
-let fColor: string = "#a21c1c";
-let color: P5.Color;
 let hue: number = 0;
 let alpha: number = 25;
 
@@ -64,7 +62,7 @@ function draw(): void {
     p5.fill(hue, 255, 255);
     pManager.draw();
     time += .02;
-    hue = (hue + 0.1) % 255;
+    hue = (hue + .1) % 360;
 }
 
 function reset(): void {
@@ -75,7 +73,6 @@ function reset(): void {
 
 function setupP5(p: P5): void {
     p5 = p;
-    color = p5.color(fColor);
     p5.noStroke();
     p5.createCanvas(width, height);
     p5.frameRate(60);
@@ -86,7 +83,6 @@ function setupDatGUI(): void {
     const gui = new dat.GUI();
     const params = {
         nbCircle: nbCircle,
-        fromColor: fColor,
         alpha: alpha,
         pause: () => {
             pause = ! pause;
@@ -106,8 +102,6 @@ function setupDatGUI(): void {
     guiEffect.open();
 
     const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.addColor(params, "fromColor")
-        .onChange(value => color = p5.color(value));
     guiVisual.add(params, "alpha", 0, 255, 1)
         .onChange(value => alpha = value);
     guiVisual.open();

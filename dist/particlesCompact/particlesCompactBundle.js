@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/particlesMove/particlesMove.ts":
-/*!********************************************!*\
-  !*** ./src/particlesMove/particlesMove.ts ***!
-  \********************************************/
+/***/ "./src/particlesCompact/particlesCompact.ts":
+/*!**************************************************!*\
+  !*** ./src/particlesCompact/particlesCompact.ts ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2574,50 +2574,79 @@ let width = window.innerWidth;
 let height = window.innerHeight;
 let p5;
 let hue = 0;
-let alpha = 25;
 let time = 0;
-let nbCircle = 20;
+let nbCircle = 80;
+let maxRadius = 400;
 let pManager;
 let pause = false;
 class Particle {
-    constructor(x, y) {
+    constructor(x, y, size) {
         this.pos = p5.createVector(x, y);
+        this.vel = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.random2D();
+        this.acc = p5.createVector();
+        this.size = size;
     }
-    draw() {
-        p5.circle(this.pos.x + xCompute(time) * this.pos.x / 2, this.pos.y + yCompute(time) * this.pos.x / 2, 10);
+    update() {
+        this.vel.add(this.acc);
+        this.vel.limit(20);
+        this.vel.mult(0.9);
+        this.pos.add(this.vel);
+        this.acc.mult(0);
     }
-}
-function xCompute(t) {
-    return Math.sin(t);
-}
-function yCompute(t) {
-    return ((Math.cos(t) * Math.sin(t)) / Math.tan(.5 * t));
+    draw(particles) {
+        this.movement(particles);
+        this.update();
+        p5.circle(this.pos.x, this.pos.y, this.size);
+    }
+    movement(targets) {
+        let sumForce = p5.createVector();
+        targets.forEach(p => sumForce.add(p5__WEBPACK_IMPORTED_MODULE_1__.Vector.mult((p5__WEBPACK_IMPORTED_MODULE_1__.Vector.sub(this.pos, p.pos)), p.size)));
+        sumForce.div(targets.length);
+        let d = p5.constrain(sumForce.mag(), 1, 10);
+        sumForce.setMag(50 / p5.sq(d));
+        if (p5__WEBPACK_IMPORTED_MODULE_1__.Vector.sub(this.pos, p5.createVector()).mag() > maxRadius / 2)
+            sumForce = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.mult(p5__WEBPACK_IMPORTED_MODULE_1__.Vector.sub(p5.createVector(), this.pos), .001);
+        this.acc.add(sumForce);
+    }
 }
 class ParticlesManager {
     constructor(nbPart) {
         this.particles = [];
         for (let i = nbPart; i--;)
-            this.particles.push(new Particle(Math.min(width, height) / 4, 0));
+            this.new();
     }
     draw() {
-        for (let [i, p] of this.particles.entries()) {
-            p5.push();
-            p5.rotate(-(i / this.particles.length) * p5.TAU);
-            p.draw();
-            p5.pop();
+        this.particles.forEach(p => p.draw(this.nearest(p)));
+    }
+    new() {
+        let pos = p5.random(0, p5.TAU);
+        this.particles.push(new Particle(p5.cos(pos) * p5.random(0, maxRadius / 2 - 50), p5.sin(pos) * p5.random(0, maxRadius / 2 - 50), (p5.random(10, 50) + p5.random(10, 50) + p5.random(10, 50)) / 3));
+        if (this.particles.length > nbCircle)
+            this.particles.splice(0, this.particles.length + 1 - nbCircle);
+    }
+    nearest(p) {
+        let pts = [];
+        for (let part of this.particles) {
+            let dist = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.sub(part.pos, p.pos).mag();
+            if (dist < (p.size + part.size) && dist != 0)
+                pts.push(part);
         }
+        return pts;
     }
 }
-function draw() {
-    p5.colorMode(p5.RGB);
-    p5.fill(0, alpha);
-    p5.rect(0, 0, width, height);
-    p5.translate(width / 2, height / 2);
+function drawCircle() {
     p5.colorMode(p5.HSB);
     p5.fill(hue, 255, 255);
     pManager.draw();
+    hue = (hue + .5) % 360;
+}
+function draw() {
+    p5.background("black");
+    p5.translate(width / 2, height / 2);
+    drawCircle();
+    if (p5.random() < .25)
+        pManager.new();
     time += .02;
-    hue = (hue + .1) % 360;
 }
 function reset() {
     time = 0;
@@ -2635,7 +2664,7 @@ function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
         nbCircle: nbCircle,
-        alpha: alpha,
+        maxRadius: maxRadius,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
@@ -2646,16 +2675,12 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "nbCircle", 5, 50, 1)
-        .onChange(value => {
-        nbCircle = value;
-        reset();
-    });
+        .add(params, "nbCircle", 20, 200, 1)
+        .onChange(value => nbCircle = value);
+    guiEffect
+        .add(params, "maxRadius", 200, 1000, 1)
+        .onChange(value => maxRadius = value);
     guiEffect.open();
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.add(params, "alpha", 0, 255, 1)
-        .onChange(value => alpha = value);
-    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
@@ -2771,8 +2796,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/particlesMove/particlesMove.ts");
+/******/ 	__webpack_require__("./src/particlesCompact/particlesCompact.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=particlesMoveBundle.js.map
+//# sourceMappingURL=particlesCompactBundle.js.map
