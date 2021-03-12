@@ -13,6 +13,7 @@
     "spiral": "webpack --config src/spiral/webpackage.config.js",
     "asciiCam": "webpack --config src/asciiCam/webpackage.config.js",
     "gridLines": "webpack --config src/gridLines/webpackage.config.js",
+    "cubeStack": "webpack --config src/cubeStack/webpackage.config.js",
     "metaballs": "webpack --config src/metaballs/webpackage.config.js",
     "lineSphere": "webpack --config src/lineSphere/webpackage.config.js",
     "simpleGrid": "webpack --config src/simpleGrid/webpackage.config.js",
@@ -36,6 +37,7 @@
     "circleAutomata": "webpack --config src/circleAutomata/webpackage.config.js",
     "particlesCompact": "webpack --config src/particlesCompact/webpackage.config.js",
     "squareFromLittle": "webpack --config src/squareFromLittle/webpackage.config.js",
+    "particlesNoise": "webpack --config src/particlesNoise/webpackage.config.js",
     "squareCircleGradient": "webpack --config src/squareCircleGradient/webpackage.config.js"
   },
   "dependencies": {
