@@ -12,6 +12,7 @@
     "vortex": "webpack --config src/vortex/webpackage.config.js",
     "spiral": "webpack --config src/spiral/webpackage.config.js",
     "asciiCam": "webpack --config src/asciiCam/webpackage.config.js",
+    "boxWaves": "webpack --config src/boxWaves/webpackage.config.js",
     "gridLines": "webpack --config src/gridLines/webpackage.config.js",
     "cubeStack": "webpack --config src/cubeStack/webpackage.config.js",
     "metaballs": "webpack --config src/metaballs/webpackage.config.js",
@@ -22,7 +23,7 @@
     "spiralCube": "webpack --config src/spiralCube/webpackage.config.js",
     "noiseColor": "webpack --config src/noiseColor/webpackage.config.js",
     "circleImage": "webpack --config src/circleImage/webpackage.config.js",
-    "boxWaves": "webpack --config src/boxWaves/webpackage.config.js",
+    "shaderNoise": "webpack --config src/shaderNoise/webpackage.config.js",
     "squareShake": "webpack --config src/squareShake/webpackage.config.js",
     "squaresLoop": "webpack --config src/squaresLoop/webpackage.config.js",
     "circleSplit": "webpack --config src/circleSplit/webpackage.config.js",
@@ -35,9 +36,9 @@
     "corridorLines": "webpack --config src/corridorLines/webpackage.config.js",
     "planetsCircle": "webpack --config src/planetsCircle/webpackage.config.js",
     "circleAutomata": "webpack --config src/circleAutomata/webpackage.config.js",
+    "particlesNoise": "webpack --config src/particlesNoise/webpackage.config.js",
     "particlesCompact": "webpack --config src/particlesCompact/webpackage.config.js",
     "squareFromLittle": "webpack --config src/squareFromLittle/webpackage.config.js",
-    "particlesNoise": "webpack --config src/particlesNoise/webpackage.config.js",
     "squareCircleGradient": "webpack --config src/squareCircleGradient/webpackage.config.js"
   },
   "dependencies": {
