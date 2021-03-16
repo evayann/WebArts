@@ -27,6 +27,7 @@
     "squareShake": "webpack --config src/squareShake/webpackage.config.js",
     "squaresLoop": "webpack --config src/squaresLoop/webpackage.config.js",
     "circleSplit": "webpack --config src/circleSplit/webpackage.config.js",
+    "overlapWaves": "webpack --config src/overlapWaves/webpackage.config.js",
     "circleSquare": "webpack --config src/circleSquare/webpackage.config.js",
     "pendulumDraw": "webpack --config src/pendulumDraw/webpackage.config.js",
     "dropGradient": "webpack --config src/dropGradient/webpackage.config.js",
