@@ -4,6 +4,7 @@
   "author": "Yann Zavattero",
   "version": "1.0.0",
   "scripts": {
+    "city": "webpack --config src/city/webpackage.config.js",
     "flow": "webpack --config src/flow/webpackage.config.js",
     "flow1": "webpack --config src/flow1/webpackage.config.js",
     "flow2": "webpack --config src/flow2/webpackage.config.js",

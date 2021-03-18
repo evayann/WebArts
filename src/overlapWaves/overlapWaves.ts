@@ -9,8 +9,6 @@ let halfWidth: number = width / 2;
 let halfHeight: number = height / 2;
 
 let p5: P5;
-let pColor: string = "#b98a5d";
-let ptColor: P5.Color;
 
 let pause: boolean = false;
 let speed: number = 1;
@@ -78,7 +76,6 @@ function setWaver(value: boolean): void {
 
 function setupP5(p: P5): void {
     p5 = p;
-    ptColor = p5.color(pColor);
     p5.createCanvas(width, height);
     p5.frameRate(60);
     p5.blendMode(p5.ADD);
@@ -94,7 +91,6 @@ function setupDatGUI(): void {
         speed: speed,
         nbLoop: nbLoop,
         nbPoint: nbPoint,
-        ptColor: pColor,
         circleWave: true,
         pause: () => {
             pause = ! pause;
@@ -118,14 +114,6 @@ function setupDatGUI(): void {
         .add(params, "circleWave")
         .onChange(value => setWaver(value));
     guiEffect.open();
-
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual.addColor(params, "ptColor")
-        .onChange(value => {
-            ptColor = p5.color(value);
-            p5.stroke(ptColor);
-        });
-    guiVisual.open();
 
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc

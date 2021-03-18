@@ -66,6 +66,16 @@ a img, a div {
 a:hover img, a:hover div {
     box-shadow: 0 0 5px 2px #bf2e2e;
 }
+.effectName {
+    background:
+            linear-gradient(45deg, #bf2e2e 50%, transparent 0) right /250% 100% no-repeat,
+            linear-gradient(45deg, transparent 50%, #bf2e2e 0) left /250% 100% no-repeat;
+    transition: 0.5s;
+}
+.effectName:hover {
+    background-position: center;
+    color: #fff;
+}
 
 div.logoImage {
     width: 300px;

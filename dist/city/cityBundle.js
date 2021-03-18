@@ -2557,10 +2557,10 @@ var index = {
 
 /***/ }),
 
-/***/ "./src/overlapWaves/overlapWaves.ts":
-/*!******************************************!*\
-  !*** ./src/overlapWaves/overlapWaves.ts ***!
-  \******************************************/
+/***/ "./src/city/city.ts":
+/*!**************************!*\
+  !*** ./src/city/city.ts ***!
+  \**************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -2568,87 +2568,535 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
-// Inspired from https://www.reddit.com/r/loadingicon/comments/m4yept/overlapping_waves_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
+// Inspired from https://openprocessing.org/sketch/121526
 
 
+// region Attributes
 let width = window.innerWidth;
 let height = window.innerHeight;
 let halfWidth = width / 2;
 let halfHeight = height / 2;
 let p5;
+let colors;
+let drawer;
 let pause = false;
-let speed = 1;
-let time = 0;
-let nbLoop = 5;
-let nbPoint = 1000;
-let makeWave;
-function flatWave(value, from, to) {
-    p5.beginShape();
-    for (let i = nbPoint; i--;) {
-        let prct = i / nbPoint;
-        let y = (prct > from && prct < to) ? 0 : p5.cos(value + prct * 3 * p5.TAU) * (halfHeight * 0.5);
-        p5.curveVertex(p5.map(i, 0, nbPoint, -halfWidth, halfWidth), y);
-    }
-    p5.endShape();
+/**
+ * Parameter attributes
+ */
+let nbLinesToDraw = 5;
+let useColor = true;
+let offset = 5;
+let skyLimit = .9;
+let intersectPos = .63;
+let groundOff = 0.05;
+/**
+ * Compute only
+ */
+let distance = 90;
+let alpha = 30 * (Math.PI / 180);
+let cAlpha = Math.cos(alpha);
+let sAlpha = Math.sin(alpha);
+/**
+ * Useful little function
+ */
+const rdm = (min, max) => p5.random(min, max);
+const off = () => rdm(-offset, offset);
+const int = (x) => p5.floor(x);
+/**
+ * Direction principally for rect filling
+ */
+var Direction;
+(function (Direction) {
+    Direction[Direction["VERTICAL"] = 0] = "VERTICAL";
+    Direction[Direction["HORIZONTAL"] = 1] = "HORIZONTAL";
+    Direction[Direction["DIAG_UP"] = 2] = "DIAG_UP";
+    Direction[Direction["DIAG_DOWN"] = 3] = "DIAG_DOWN";
+})(Direction || (Direction = {}));
+// region Utility
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param x axis (width)
+ * @param y axis (depth)
+ * @param z axis (height)
+ * @param debug print value of projection in console
+ */
+function projection(x, z, y = 0, debug = false) {
+    let v = projectionVector(vec(x, z, y), debug);
+    return [v.x, v.y];
 }
-function circleWave(value, from, to) {
-    let size = Math.min(halfWidth / 2, halfHeight / 2);
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param x axis (width)
+ * @param y axis (depth)
+ * @param z axis (height)
+ * @param debug print value of projection in console
+ */
+function projectionGetV(x, z, y = 0, debug = false) {
+    return projectionVector(vec(x, z, y), debug);
+}
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param pt the 3D Vector to project on the screen
+ * @param debug print value of projection in console
+ */
+function projectionVector(pt, debug) {
+    let pj = projectionFactor(pt);
+    let scale = height / 90;
+    let v = vec(intersectPos * width + scale * pj.x, 0, (skyLimit + groundOff) * height + scale * pj.y);
+    if (debug)
+        console.log(pt, " :: ", v);
+    return v;
+}
+/**
+ * Compute the factor of projection on screen (2D plan)
+ * @param pt the 3D Vector to project on the screen
+ */
+function projectionFactor(pt) {
+    let camHeight = 1.5;
+    let a = pt.x * sAlpha - pt.z * cAlpha;
+    let b = pt.x * cAlpha + pt.z * sAlpha;
+    return vec(distance * a / (b + distance), 0, -distance * (pt.y - camHeight) / (b + distance));
+}
+/**
+ * Create a P5 Vector from 3 coordinates
+ * @param x the X axis
+ * @param z the Y axis
+ * @param y the Z axis
+ */
+function vec(x, z, y = 0) {
+    return p5.createVector(x, y, z);
+}
+/**
+ * Unwrap xy values of a P5 Vector
+ * @param v the P5 Vector to unwrap
+ */
+function xy(v) {
+    return [v.x, v.y];
+}
+/**
+ * Give a position near of pt in a radius of maxOffset / 2
+ * @param pt the P5 Vector to find a near position
+ * @param maxOffset the radius of near position
+ */
+function near(pt, maxOffset) {
+    let d = maxOffset / 2;
+    return p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(rdm(-d, d), rdm(-d, d)));
+}
+// endregion Utility
+// region Instruction
+/**
+ * Make a line from (x0, y0) to (x1, y1)
+ * @param x0 the top left corner X
+ * @param y0 the top left corner Y
+ * @param x1 the bottom right corner X
+ * @param y1 the bottom right corner Y
+ */
+function line(x0, y0, x1, y1) {
+    stroke(colors.get(Element.STROKE));
+    x0 += off();
+    y0 += off();
+    p5.line(x0, y0, x1, y1);
+    resetColor();
+}
+/**
+ * Make an ellipse of center (cx, cy) and radius (rx, ry)
+ * @param cx the center X of ellipse
+ * @param cy the center Y of ellipse
+ * @param rx the radius X of ellipse
+ * @param ry the radius X of ellipse
+ * @param fillColor the filing color of circle
+ * @param nbLoop the number of loop of ellipse stroke
+ * @param border if we have ellipse stroke
+ * @param fct a noise function for make non circular ellipse
+ */
+function ellipse(cx, cy, rx, ry, fillColor, nbLoop, border = true, fct) {
+    if (border)
+        stroke(colors.get(Element.STROKE));
+    if (fillColor)
+        fill(fillColor);
     p5.beginShape();
-    for (let i = nbPoint; i--;) {
-        let prct = i / nbPoint;
-        let v = value + prct * nbLoop * p5.TAU;
-        let x = p5.cos(prct * p5.TAU) * size;
-        let y = p5.sin(prct * p5.TAU) * size;
-        if (prct >= from && prct <= to) {
-            let s = p5.map(Math.min(to - prct, prct - from), 0, 0.5, 0, 1) * size / 2;
-            p5.vertex(x + p5.cos(v) * s, y + p5.sin(v) * s);
+    let r = rdm(2.1, 2.5);
+    let f = (fct === undefined) ? (x) => 2.5 * offset * p5.sin(r * x) : fct;
+    let min = p5.min(rx, ry);
+    let v = f(0);
+    let to = isNaN(nbLoop) ? p5.TAU * rdm([2, 3, 4]) : p5.TAU * nbLoop;
+    for (let i = 0; i <= to; i += p5.TAU / (min * .5))
+        p5.curveVertex(cx + p5.cos(i) * rx - (v = f(i)), cy + p5.sin(i) * ry - v);
+    p5.endShape();
+    resetColor();
+}
+/**
+ * Make an ellipse of center (cx, cy) and radius (rx, ry)
+ * @param cx the center X of ellipse
+ * @param cy the center Y of ellipse
+ * @param r the radius X of ellipse
+ * @param fillColor the filing color of circle
+ * @param nbLoop the number of loop of ellipse stroke
+ * @param border if we have ellipse stroke
+ */
+function circle(cx, cy, r, fillColor, nbLoop, border = true) {
+    ellipse(cx, cy, r, r, fillColor, nbLoop, border);
+}
+/**
+ * Make a polygon with all vertices
+ * @param vertices the array of vertices
+ * @param fillColor the color to fill polygon
+ * @param border the border color
+ */
+function polygon(vertices, fillColor, border = true) {
+    if (fillColor)
+        fill(fillColor);
+    let borders = [];
+    p5.beginShape();
+    for (let v of vertices) {
+        v = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(v, vec(off(), off())); // TODO Necessary to add noise here ???
+        p5.vertex(v.x, v.y);
+        borders.push(xy(v));
+    }
+    p5.endShape(p5.CLOSE);
+    if (border) {
+        stroke(colors.get(Element.STROKE));
+        let [x1, y1] = xy(vertices[vertices.length - 1]);
+        for (let [x2, y2] of borders) {
+            line(x1, y1, x2, y2);
+            [x1, y1] = [x2, y2];
         }
-        else
-            p5.vertex(x, y);
     }
-    p5.endShape();
+    resetColor();
 }
-function waves() {
-    let p = p5.abs(p5.cos(time / 10)) / 2;
-    p5.stroke("yellow");
-    makeWave(time, .5 - p, .5 + p);
-    p5.stroke("blue");
-    makeWave(time + p5.TAU * .33, .5 - p, .5 + p);
-    p5.stroke("red");
-    makeWave(time + p5.TAU * .66, .5 - p, .5 + p);
+/**
+ * Make a rectangle with the 4 points
+ * @param p1 the first point of rectangle
+ * @param p2 the second point of rectangle
+ * @param p3 the third point of rectangle
+ * @param p4 the last point of rectangle
+ * @param color a function for coloring points
+ */
+function rectangle(p1, p2, p3, p4, color) {
+    add(action(polygon, [projectionVector(p1), projectionVector(p2),
+        projectionVector(p3), projectionVector(p4)], color));
+}
+/**
+ * Make a box from bottom visible point (p1) to top hidden point (p2). Hidden is in diagonal of visible point.
+ * @param p1 bottom point
+ * @param p2 top point
+ * @param boxColor color of the box
+ * @param underBoxColor color of the part under the box
+ */
+function box(p1, p2, boxColor, underBoxColor) {
+    let c1 = projectionGetV(p1.x, p2.z, p1.y), c2 = projectionGetV(p1.x, p2.z, p2.y), c3 = projectionGetV(p1.x, p1.z, p1.y), c4 = projectionGetV(p1.x, p1.z, p2.y), c5 = projectionGetV(p2.x, p1.z, p1.y), c6 = projectionGetV(p2.x, p1.z, p2.y), c7 = projectionGetV(p2.x, p2.z, p1.y);
+    add(action(polygon, [c1, c2, c4, c6, c5, c7], boxColor));
+    add(action(line, ...xy(c4), ...xy(c3)));
+    if (c7.y > c1.y)
+        add(action(polygon, [c1, c3, c5, c7], underBoxColor));
+    // strip(c2.y - c1.y, c3, c4, c5, c6);
+}
+// endregion Instruction
+// region Fill
+/**
+ * Fill area with upper diagonal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_up(sx, sy, ex, ey) {
+    let dx = ex - sx;
+    let dy = ey - sy;
+    for (let i = 0; i < p5.min(dx, dy); i += 6)
+        add(action(line, sx, sy + i, sx + i, sy));
+    if (dx > dy)
+        for (let i = 0; i < dx - dy; i += 6)
+            add(action(line, sx + i, ey, sx + dy + i, sy));
+    else
+        for (let i = 0; i < dy - dx; i += 6)
+            add(action(line, sx, sy + dx + i, ex, sy + i));
+    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
+        add(action(line, ex - i, ey, ex, ey - i));
+}
+/**
+ * Fill area with lower diagonal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_down(sx, sy, ex, ey) {
+    let dx = ex - sx;
+    let dy = ey - sy;
+    for (let i = 0; i < p5.min(dx, dy); i += 6)
+        add(action(line, sx + i, ey, sx, ey - i));
+    if (dx > dy)
+        for (let i = 0; i < dx - dy; i += 6)
+            add(action(line, sx + i, sy, sx + dy + i, ey));
+    else
+        for (let i = 0; i < dy - dx; i += 6)
+            add(action(line, ex, ey - i, sx, ey - dx - i));
+    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
+        add(action(line, ex - i, sy, ex, sy + i));
+}
+/**
+ * Fill area with horizontal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_hori(sx, sy, ex, ey) {
+    for (let i = 0; i < p5.abs(ey - sy); i += 6)
+        add(action(line, sx, sy + i, ex, sy + i));
+}
+/**
+ * Fill area with vertical lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_vert(sx, sy, ex, ey) {
+    for (let i = 0; i < p5.abs(ex - sx); i += 6)
+        add(action(line, sx + i, sy, sx + i, ey));
+}
+/**
+ * Make a strip
+ * @param del
+ * @param p1
+ * @param p2
+ * @param p3
+ * @param p4
+ */
+function strip(del, p1, p2, p3, p4) {
+    let r1 = (p1.y - p2.y) / del;
+    let r2 = (p3.y - p4.y) / del;
+    let pp = 0;
+    while (pp < del) {
+        add(action(line, p1.x, p2.y + pp * r1, p3.x, p4.y + pp * r2));
+        pp += 0.5;
+    }
+}
+// endregion Fill
+/**
+ * Make a rectangle from (sx, sy) to (ex, ey) and fill it if necessary
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ * @param fillColor the color to fill rectangle
+ * @param fillDirection if we need to fill rectangle with lines and the direction
+ * @param border if we need to display border of rectangle
+ */
+function rect(sx, sy, ex, ey, fillColor, fillDirection, border = false) {
+    add(action(polygon, [vec(sx, 0, sy), vec(ex, 0, sy), vec(ex, 0, ey), vec(sx, 0, ey)], fillColor, border));
+    switch (fillDirection) {
+        case Direction.DIAG_UP:
+            fill_up(sx, sy, ex, ey);
+            break;
+        case Direction.DIAG_DOWN:
+            fill_down(sx, sy, ex, ey);
+            break;
+        case Direction.HORIZONTAL:
+            fill_hori(sx, sy, ex, ey);
+            break;
+        case Direction.VERTICAL:
+            fill_vert(sx, sy, ex, ey);
+            break;
+        default:
+            break; // Is None
+    }
+}
+/**
+ * Make the sky of city
+ */
+function sky() {
+    rect(0, 0, width, height * skyLimit, colors.get(Element.SKY), rdm(Object.values(Direction)), false);
+    add(action(circle, width * rdm(0.1, .9), rdm(height * .1, height * .5), height * .1, colors.get(Element.SUN)));
+}
+/**
+ * Make the ground of city
+ */
+function ground() {
+    // TODO Better ?
+    rect(-offset, height * skyLimit - offset, width + offset, height + offset, colors.get(Element.GROUND));
+    for (let i = 2; i--;) { // Ground lines
+        add(action(line, ...projection(-10, 240), ...projection(-10, -60)), action(line, ...projection(-20, 240), ...projection(-20, -60)), action(line, ...projection(-40, -5), ...projection(240, -5)), action(line, ...projection(-40, -15), ...projection(240, -15)));
+    }
+}
+/**
+ * Make little tree at given position
+ * @param pt
+ */
+function tree(pt) {
+    let b = projectionVector(pt);
+    let c = projectionVector(pt.copy().add(vec(0, 0, rdm(4, 8))));
+    let hTree = b.y - c.y;
+    let factor = p5.constrain(p5.abs(projectionFactor(pt).y), 0, .7);
+    let rx = factor * rdm(hTree * .7, hTree * 1.2);
+    let ry = factor * rdm(hTree * .7, hTree * 1.2);
+    add(action(line, ...xy(b), ...xy(c)), action(ellipse, c.x + rdm(-1, 1), c.y, rx, ry, colors.get(Element.TREE), 2, true, (x) => p5.sq(p5.sin(x * p5.PI)) * offset));
+}
+/**
+ * Make little forest at given position
+ * @param pt
+ */
+function forest(pt) {
+    let nbTree = int(rdm(10, 15));
+    for (let i = nbTree; i--;)
+        tree(near(pt, 30));
+}
+/**
+ * Make billboard on building, street...
+ * @param pt
+ */
+function billboard(pt, color) {
+    // Left
+    let ls = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(0, 5)), le = vec(pt.x + 15, pt.z + 20, 10);
+    rectangle(vec(ls.x, le.z, ls.y), vec(ls.x, le.z, le.y), vec(ls.x, ls.z, le.y), vec(ls.x, ls.z, ls.y), color);
+    // Right
+    let rs = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(10, 0)), re = vec(pt.x + 20, pt.z - 5, 10);
+    rectangle(vec(rs.x, re.z, rs.y), vec(rs.x, re.z, re.y), vec(rs.x, rs.z, re.y), vec(rs.x, rs.z, rs.y), color);
+}
+/**
+ * Make a building at given position
+ * @param pt
+ */
+function building(pt) {
+    let h = int(rdm(50, 100));
+    box(vec(pt.x + 20, pt.z + 10, h), vec(pt.x + 21, pt.z + 11, h + rdm(20, 30)), "white");
+    box(vec(pt.x + 10, pt.z + 10, h), vec(pt.x + 11, pt.z + 11, h + rdm(20, 30)), "white");
+    rectangle(vec(pt.x, pt.z, h), vec(pt.x + 30, pt.z, h), vec(pt.x + 30, pt.z + 30, h), vec(pt.x, pt.z + 30, h), "white");
+    box(vec(pt.x, pt.z, 20), vec(pt.x + 30, pt.z + 30, h - 4), colors.get(Element.WINDOW), "black");
+    for (let fi = 30 - 3; fi > 0; fi -= 3)
+        add(action(line, ...projection(pt.x, pt.z + fi, 20), ...projection(pt.x, pt.z + fi, h - 4)), action(line, ...projection(pt.x + fi, pt.z, 20), ...projection(pt.x + fi, pt.z, h - 4)));
+    box(pt, vec(pt.x + 30, pt.z + 30, 19), colors.get(Element.STRUCTURE));
+    if (rdm() < .5)
+        billboard(pt, p5.color(0, 150));
+}
+function populate() {
+    let elements = [forest, building];
+    for (let z = 9; z > 0; z--)
+        rdm(elements)(vec(0, z * 40));
+    for (let x = 6; x--;)
+        rdm(elements)(vec(x * 40, 0));
+    // forest(vec(0, 0))
+}
+function city() {
+    sky();
+    ground();
+    populate();
+    drawer.start();
+}
+// region Colors
+var Element;
+(function (Element) {
+    Element[Element["STROKE"] = 0] = "STROKE";
+    Element[Element["SUN"] = 1] = "SUN";
+    Element[Element["SKY"] = 2] = "SKY";
+    Element[Element["GROUND"] = 3] = "GROUND";
+    Element[Element["TREE"] = 4] = "TREE";
+    Element[Element["WINDOW"] = 5] = "WINDOW";
+    Element[Element["STRUCTURE"] = 6] = "STRUCTURE";
+})(Element || (Element = {}));
+class Colors {
+    constructor(useColor = true) {
+        this.uColor = useColor;
+        this.colors = new Map();
+        this.colors.set(Element.STROKE, [p5.color("#000000")]);
+        this.colors.set(Element.SUN, [p5.color("#ded40d")]);
+        this.colors.set(Element.SKY, [p5.color("#327be9")]);
+        this.colors.set(Element.GROUND, [p5.color("#282318")]);
+        this.colors.set(Element.TREE, [p5.color("#3d720f"), p5.color("#3d720f"), p5.color("#74ba34")]);
+        this.colors.set(Element.WINDOW, [p5.color("#84ace2"), p5.color("#57e6fa"), p5.color("#7fb7cb")]);
+        this.colors.set(Element.STRUCTURE, [p5.color("#541c14"), p5.color("#173e3e"), p5.color("#396611")]);
+    }
+    useColor(value) {
+        this.uColor = value;
+    }
+    get(element) {
+        if (this.uColor != true)
+            return (element == Element.STROKE) ? p5.color("black") : p5.color("white");
+        else
+            return rdm(this.colors.get(element));
+    }
+}
+function resetColor() {
+    p5.noStroke();
+    p5.noFill();
+}
+const fill = (v) => { p5.fill(v); };
+const stroke = (v) => { p5.stroke(v); };
+// endregion Colors
+// region Draw Elements
+class Action {
+    constructor(action, ...data) {
+        this.action = action;
+        this.data = data;
+    }
+    do() {
+        this.action(...this.data);
+    }
+}
+function action(fct, ...data) {
+    return new Action(fct, ...data);
+}
+class Drawer extends Array {
+    constructor(step) {
+        super();
+        this.curr = 0;
+        this.setStep(step);
+    }
+    setStep(step) {
+        this.step = step;
+    }
+    start() {
+        this.iterOn = this.values();
+    }
+    call() {
+        if (this.curr == this.length)
+            return;
+        let startAt = this.curr.valueOf();
+        while (this.curr < startAt + this.step && this.curr <= this.length) {
+            this.curr++;
+            let a = this.iterOn.next();
+            if (!a.done)
+                a.value.do();
+            else
+                p5.noLoop(); // End
+        }
+    }
+}
+function add(...action) {
+    drawer.push(...action);
 }
 function draw() {
-    p5.clear();
-    p5.background("black");
-    p5.translate(halfWidth, halfHeight);
-    waves();
-    time += 0.05 * speed;
+    drawer.call();
 }
+// endregion Draw Elements
 function reset() {
     p5.clear();
-    time = 0;
-    draw();
-}
-function setWaver(value) {
-    makeWave = value ? circleWave : flatWave;
+    p5.loop();
+    drawer = new Drawer(nbLinesToDraw);
+    resetColor();
+    city();
 }
 function setupP5(p) {
     p5 = p;
     p5.createCanvas(width, height);
-    p5.frameRate(60);
-    p5.blendMode(p5.ADD);
-    p5.noFill();
-    p5.strokeWeight(5);
-    setWaver(true);
+    p5.frameRate(30);
+    p5.strokeWeight(2);
+    colors = new Colors();
     reset();
 }
 function setupDatGUI() {
     const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
     const params = {
-        speed: speed,
-        nbLoop: nbLoop,
-        nbPoint: nbPoint,
-        circleWave: true,
+        nbLinesToDraw: nbLinesToDraw,
+        skyLimit: skyLimit,
+        groundOff: groundOff,
+        intersectPos: intersectPos,
+        useColor: useColor,
         pause: () => {
             pause = !pause;
             (pause) ? p5.noLoop() : p5.loop();
@@ -2659,18 +3107,40 @@ function setupDatGUI() {
     };
     const guiEffect = gui.addFolder("Effect & Speed");
     guiEffect
-        .add(params, "speed", 0.1, 2, 0.1)
-        .onChange(value => speed = value);
+        .add(params, "nbLinesToDraw", 1, 100, 1)
+        .onChange(value => drawer.setStep(value));
     guiEffect
-        .add(params, "nbLoop", 0, 10, 1)
-        .onChange(value => nbLoop = value);
+        .add(params, "intersectPos", .05, .95, 0.01)
+        .onChange(value => {
+        intersectPos = value;
+        reset();
+    });
     guiEffect
-        .add(params, "nbPoint", 10, 1000, 1)
-        .onChange(value => nbPoint = value);
+        .add(params, "skyLimit", .5, .9, 0.1)
+        .onChange(value => {
+        skyLimit = value;
+        reset();
+    });
     guiEffect
-        .add(params, "circleWave")
-        .onChange(value => setWaver(value));
+        .add(params, "groundOff", 0, .2, .01)
+        .onChange(value => {
+        groundOff = value;
+        reset();
+    });
     guiEffect.open();
+    const guiVisual = gui.addFolder("Visual & Color");
+    guiVisual
+        .add(params, "useColor")
+        .onChange(value => {
+        colors.useColor(value);
+        reset();
+    });
+    // guiVisual.addColor(params, "ptColor")
+    //     .onChange(value => {
+    //         ptColor = p5.color(value);
+    //         p5.stroke(ptColor);
+    //     });
+    guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
         .add(params, "pause")
@@ -2687,7 +3157,7 @@ function resize() {
     halfWidth = width / 2;
     halfHeight = height / 2;
     p5.resizeCanvas(width, height);
-    draw();
+    reset();
 }
 window.onresize = resize;
 window.onload = () => {
@@ -2788,8 +3258,8 @@ window.onload = () => {
 /************************************************************************/
 /******/ 	// startup
 /******/ 	// Load entry module
-/******/ 	__webpack_require__("./src/overlapWaves/overlapWaves.ts");
+/******/ 	__webpack_require__("./src/city/city.ts");
 /******/ 	// This entry module used 'exports' so it can't be inlined
 /******/ })()
 ;
-//# sourceMappingURL=overlapWavesBundle.js.map
+//# sourceMappingURL=cityBundle.js.map
