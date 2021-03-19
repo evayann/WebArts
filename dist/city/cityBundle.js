@@ -2568,360 +2568,48 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
 /* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _drawer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./drawer */ "./src/city/drawer.ts");
+/* harmony import */ var _geometry__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./geometry */ "./src/city/geometry.ts");
 // Inspired from https://openprocessing.org/sketch/121526
+
+
 
 
 // region Attributes
 let width = window.innerWidth;
 let height = window.innerHeight;
-let halfWidth = width / 2;
-let halfHeight = height / 2;
 let p5;
-let colors;
-let drawer;
 let pause = false;
 /**
  * Parameter attributes
  */
 let nbLinesToDraw = 5;
 let useColor = true;
-let offset = 5;
-let skyLimit = .9;
-let intersectPos = .63;
-let groundOff = 0.05;
-/**
- * Compute only
- */
-let distance = 90;
-let alpha = 30 * (Math.PI / 180);
-let cAlpha = Math.cos(alpha);
-let sAlpha = Math.sin(alpha);
+let cp;
+// endregion Attributes
 /**
  * Useful little function
  */
-const rdm = (min, max) => p5.random(min, max);
-const off = () => rdm(-offset, offset);
 const int = (x) => p5.floor(x);
-/**
- * Direction principally for rect filling
- */
-var Direction;
-(function (Direction) {
-    Direction[Direction["VERTICAL"] = 0] = "VERTICAL";
-    Direction[Direction["HORIZONTAL"] = 1] = "HORIZONTAL";
-    Direction[Direction["DIAG_UP"] = 2] = "DIAG_UP";
-    Direction[Direction["DIAG_DOWN"] = 3] = "DIAG_DOWN";
-})(Direction || (Direction = {}));
-// region Utility
-/**
- * Project the point in 2D space
- * x, z is the 2D plan, y is height
- * @param x axis (width)
- * @param y axis (depth)
- * @param z axis (height)
- * @param debug print value of projection in console
- */
-function projection(x, z, y = 0, debug = false) {
-    let v = projectionVector(vec(x, z, y), debug);
-    return [v.x, v.y];
-}
-/**
- * Project the point in 2D space
- * x, z is the 2D plan, y is height
- * @param x axis (width)
- * @param y axis (depth)
- * @param z axis (height)
- * @param debug print value of projection in console
- */
-function projectionGetV(x, z, y = 0, debug = false) {
-    return projectionVector(vec(x, z, y), debug);
-}
-/**
- * Project the point in 2D space
- * x, z is the 2D plan, y is height
- * @param pt the 3D Vector to project on the screen
- * @param debug print value of projection in console
- */
-function projectionVector(pt, debug) {
-    let pj = projectionFactor(pt);
-    let scale = height / 90;
-    let v = vec(intersectPos * width + scale * pj.x, 0, (skyLimit + groundOff) * height + scale * pj.y);
-    if (debug)
-        console.log(pt, " :: ", v);
-    return v;
-}
-/**
- * Compute the factor of projection on screen (2D plan)
- * @param pt the 3D Vector to project on the screen
- */
-function projectionFactor(pt) {
-    let camHeight = 1.5;
-    let a = pt.x * sAlpha - pt.z * cAlpha;
-    let b = pt.x * cAlpha + pt.z * sAlpha;
-    return vec(distance * a / (b + distance), 0, -distance * (pt.y - camHeight) / (b + distance));
-}
-/**
- * Create a P5 Vector from 3 coordinates
- * @param x the X axis
- * @param z the Y axis
- * @param y the Z axis
- */
-function vec(x, z, y = 0) {
-    return p5.createVector(x, y, z);
-}
-/**
- * Unwrap xy values of a P5 Vector
- * @param v the P5 Vector to unwrap
- */
-function xy(v) {
-    return [v.x, v.y];
-}
-/**
- * Give a position near of pt in a radius of maxOffset / 2
- * @param pt the P5 Vector to find a near position
- * @param maxOffset the radius of near position
- */
-function near(pt, maxOffset) {
-    let d = maxOffset / 2;
-    return p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(rdm(-d, d), rdm(-d, d)));
-}
-// endregion Utility
-// region Instruction
-/**
- * Make a line from (x0, y0) to (x1, y1)
- * @param x0 the top left corner X
- * @param y0 the top left corner Y
- * @param x1 the bottom right corner X
- * @param y1 the bottom right corner Y
- */
-function line(x0, y0, x1, y1) {
-    stroke(colors.get(Element.STROKE));
-    x0 += off();
-    y0 += off();
-    p5.line(x0, y0, x1, y1);
-    resetColor();
-}
-/**
- * Make an ellipse of center (cx, cy) and radius (rx, ry)
- * @param cx the center X of ellipse
- * @param cy the center Y of ellipse
- * @param rx the radius X of ellipse
- * @param ry the radius X of ellipse
- * @param fillColor the filing color of circle
- * @param nbLoop the number of loop of ellipse stroke
- * @param border if we have ellipse stroke
- * @param fct a noise function for make non circular ellipse
- */
-function ellipse(cx, cy, rx, ry, fillColor, nbLoop, border = true, fct) {
-    if (border)
-        stroke(colors.get(Element.STROKE));
-    if (fillColor)
-        fill(fillColor);
-    p5.beginShape();
-    let r = rdm(2.1, 2.5);
-    let f = (fct === undefined) ? (x) => 2.5 * offset * p5.sin(r * x) : fct;
-    let min = p5.min(rx, ry);
-    let v = f(0);
-    let to = isNaN(nbLoop) ? p5.TAU * rdm([2, 3, 4]) : p5.TAU * nbLoop;
-    for (let i = 0; i <= to; i += p5.TAU / (min * .5))
-        p5.curveVertex(cx + p5.cos(i) * rx - (v = f(i)), cy + p5.sin(i) * ry - v);
-    p5.endShape();
-    resetColor();
-}
-/**
- * Make an ellipse of center (cx, cy) and radius (rx, ry)
- * @param cx the center X of ellipse
- * @param cy the center Y of ellipse
- * @param r the radius X of ellipse
- * @param fillColor the filing color of circle
- * @param nbLoop the number of loop of ellipse stroke
- * @param border if we have ellipse stroke
- */
-function circle(cx, cy, r, fillColor, nbLoop, border = true) {
-    ellipse(cx, cy, r, r, fillColor, nbLoop, border);
-}
-/**
- * Make a polygon with all vertices
- * @param vertices the array of vertices
- * @param fillColor the color to fill polygon
- * @param border the border color
- */
-function polygon(vertices, fillColor, border = true) {
-    if (fillColor)
-        fill(fillColor);
-    let borders = [];
-    p5.beginShape();
-    for (let v of vertices) {
-        v = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(v, vec(off(), off())); // TODO Necessary to add noise here ???
-        p5.vertex(v.x, v.y);
-        borders.push(xy(v));
-    }
-    p5.endShape(p5.CLOSE);
-    if (border) {
-        stroke(colors.get(Element.STROKE));
-        let [x1, y1] = xy(vertices[vertices.length - 1]);
-        for (let [x2, y2] of borders) {
-            line(x1, y1, x2, y2);
-            [x1, y1] = [x2, y2];
-        }
-    }
-    resetColor();
-}
-/**
- * Make a rectangle with the 4 points
- * @param p1 the first point of rectangle
- * @param p2 the second point of rectangle
- * @param p3 the third point of rectangle
- * @param p4 the last point of rectangle
- * @param color a function for coloring points
- */
-function rectangle(p1, p2, p3, p4, color) {
-    add(action(polygon, [projectionVector(p1), projectionVector(p2),
-        projectionVector(p3), projectionVector(p4)], color));
-}
-/**
- * Make a box from bottom visible point (p1) to top hidden point (p2). Hidden is in diagonal of visible point.
- * @param p1 bottom point
- * @param p2 top point
- * @param boxColor color of the box
- * @param underBoxColor color of the part under the box
- */
-function box(p1, p2, boxColor, underBoxColor) {
-    let c1 = projectionGetV(p1.x, p2.z, p1.y), c2 = projectionGetV(p1.x, p2.z, p2.y), c3 = projectionGetV(p1.x, p1.z, p1.y), c4 = projectionGetV(p1.x, p1.z, p2.y), c5 = projectionGetV(p2.x, p1.z, p1.y), c6 = projectionGetV(p2.x, p1.z, p2.y), c7 = projectionGetV(p2.x, p2.z, p1.y);
-    add(action(polygon, [c1, c2, c4, c6, c5, c7], boxColor));
-    add(action(line, ...xy(c4), ...xy(c3)));
-    if (c7.y > c1.y)
-        add(action(polygon, [c1, c3, c5, c7], underBoxColor));
-    // strip(c2.y - c1.y, c3, c4, c5, c6);
-}
-// endregion Instruction
-// region Fill
-/**
- * Fill area with upper diagonal lines
- * @param sx the X top left of area to fill
- * @param sy the Y top left of area to fill
- * @param ex the X bottom right of area to fill
- * @param ey the Y bottom right of area to fill
- */
-function fill_up(sx, sy, ex, ey) {
-    let dx = ex - sx;
-    let dy = ey - sy;
-    for (let i = 0; i < p5.min(dx, dy); i += 6)
-        add(action(line, sx, sy + i, sx + i, sy));
-    if (dx > dy)
-        for (let i = 0; i < dx - dy; i += 6)
-            add(action(line, sx + i, ey, sx + dy + i, sy));
-    else
-        for (let i = 0; i < dy - dx; i += 6)
-            add(action(line, sx, sy + dx + i, ex, sy + i));
-    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
-        add(action(line, ex - i, ey, ex, ey - i));
-}
-/**
- * Fill area with lower diagonal lines
- * @param sx the X top left of area to fill
- * @param sy the Y top left of area to fill
- * @param ex the X bottom right of area to fill
- * @param ey the Y bottom right of area to fill
- */
-function fill_down(sx, sy, ex, ey) {
-    let dx = ex - sx;
-    let dy = ey - sy;
-    for (let i = 0; i < p5.min(dx, dy); i += 6)
-        add(action(line, sx + i, ey, sx, ey - i));
-    if (dx > dy)
-        for (let i = 0; i < dx - dy; i += 6)
-            add(action(line, sx + i, sy, sx + dy + i, ey));
-    else
-        for (let i = 0; i < dy - dx; i += 6)
-            add(action(line, ex, ey - i, sx, ey - dx - i));
-    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
-        add(action(line, ex - i, sy, ex, sy + i));
-}
-/**
- * Fill area with horizontal lines
- * @param sx the X top left of area to fill
- * @param sy the Y top left of area to fill
- * @param ex the X bottom right of area to fill
- * @param ey the Y bottom right of area to fill
- */
-function fill_hori(sx, sy, ex, ey) {
-    for (let i = 0; i < p5.abs(ey - sy); i += 6)
-        add(action(line, sx, sy + i, ex, sy + i));
-}
-/**
- * Fill area with vertical lines
- * @param sx the X top left of area to fill
- * @param sy the Y top left of area to fill
- * @param ex the X bottom right of area to fill
- * @param ey the Y bottom right of area to fill
- */
-function fill_vert(sx, sy, ex, ey) {
-    for (let i = 0; i < p5.abs(ex - sx); i += 6)
-        add(action(line, sx + i, sy, sx + i, ey));
-}
-/**
- * Make a strip
- * @param del
- * @param p1
- * @param p2
- * @param p3
- * @param p4
- */
-function strip(del, p1, p2, p3, p4) {
-    let r1 = (p1.y - p2.y) / del;
-    let r2 = (p3.y - p4.y) / del;
-    let pp = 0;
-    while (pp < del) {
-        add(action(line, p1.x, p2.y + pp * r1, p3.x, p4.y + pp * r2));
-        pp += 0.5;
-    }
-}
-// endregion Fill
-/**
- * Make a rectangle from (sx, sy) to (ex, ey) and fill it if necessary
- * @param sx the X top left of area to fill
- * @param sy the Y top left of area to fill
- * @param ex the X bottom right of area to fill
- * @param ey the Y bottom right of area to fill
- * @param fillColor the color to fill rectangle
- * @param fillDirection if we need to fill rectangle with lines and the direction
- * @param border if we need to display border of rectangle
- */
-function rect(sx, sy, ex, ey, fillColor, fillDirection, border = false) {
-    add(action(polygon, [vec(sx, 0, sy), vec(ex, 0, sy), vec(ex, 0, ey), vec(sx, 0, ey)], fillColor, border));
-    switch (fillDirection) {
-        case Direction.DIAG_UP:
-            fill_up(sx, sy, ex, ey);
-            break;
-        case Direction.DIAG_DOWN:
-            fill_down(sx, sy, ex, ey);
-            break;
-        case Direction.HORIZONTAL:
-            fill_hori(sx, sy, ex, ey);
-            break;
-        case Direction.VERTICAL:
-            fill_vert(sx, sy, ex, ey);
-            break;
-        default:
-            break; // Is None
-    }
-}
+const darker = (c) => {
+    p5.colorMode(p5.HSB);
+    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) - 10, 0, 255));
+};
 /**
  * Make the sky of city
  */
 function sky() {
-    rect(0, 0, width, height * skyLimit, colors.get(Element.SKY), rdm(Object.values(Direction)), false);
-    add(action(circle, width * rdm(0.1, .9), rdm(height * .1, height * .5), height * .1, colors.get(Element.SUN)));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rect)(0, 0, width, height * cp.skyLimit, cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.SKY), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(Object.values(_geometry__WEBPACK_IMPORTED_MODULE_3__.Direction)), false);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.add)((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.circle, width * (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(0.1, .9), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(height * .1, height * .5), height * .1, cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.SUN)));
 }
 /**
  * Make the ground of city
  */
 function ground() {
     // TODO Better ?
-    rect(-offset, height * skyLimit - offset, width + offset, height + offset, colors.get(Element.GROUND));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rect)(-cp.offset, height * cp.skyLimit - cp.offset, width + cp.offset, height + cp.offset, cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.GROUND));
     for (let i = 2; i--;) { // Ground lines
-        add(action(line, ...projection(-10, 240), ...projection(-10, -60)), action(line, ...projection(-20, 240), ...projection(-20, -60)), action(line, ...projection(-40, -5), ...projection(240, -5)), action(line, ...projection(-40, -15), ...projection(240, -15)));
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.add)((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-10, 240), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-10, -60)), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-20, 240), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-20, -60)), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-40, -5), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(240, -5)), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(-40, -15), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(240, -15)));
     }
 }
 /**
@@ -2929,65 +2617,292 @@ function ground() {
  * @param pt
  */
 function tree(pt) {
-    let b = projectionVector(pt);
-    let c = projectionVector(pt.copy().add(vec(0, 0, rdm(4, 8))));
+    let b = (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projectionVector)(pt);
+    let c = (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projectionVector)(pt.copy().add((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(0, 0, (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(4, 8))));
     let hTree = b.y - c.y;
-    let factor = p5.constrain(p5.abs(projectionFactor(pt).y), 0, .7);
-    let rx = factor * rdm(hTree * .7, hTree * 1.2);
-    let ry = factor * rdm(hTree * .7, hTree * 1.2);
-    add(action(line, ...xy(b), ...xy(c)), action(ellipse, c.x + rdm(-1, 1), c.y, rx, ry, colors.get(Element.TREE), 2, true, (x) => p5.sq(p5.sin(x * p5.PI)) * offset));
+    let factor = p5.constrain(p5.abs((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projectionFactor)(pt).y), 0, .7);
+    let rx = factor * (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(hTree * .7, hTree * 1.2);
+    let ry = factor * (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(hTree * .7, hTree * 1.2);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.add)((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.xy)(b), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.xy)(c)), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.ellipse, c.x + (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(-1, 1), c.y, rx, ry, cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.TREE), 2, true, (x) => p5.sq(p5.sin(x * p5.PI)) * cp.offset));
 }
 /**
  * Make little forest at given position
  * @param pt
  */
 function forest(pt) {
-    let nbTree = int(rdm(10, 15));
+    let nbTree = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(10, 15));
     for (let i = nbTree; i--;)
-        tree(near(pt, 30));
+        tree((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.near)(pt, 30));
 }
 /**
- * Make billboard on building, street...
+ * Make rectangle near position with a color
+ * Usefull to make door
  * @param pt
+ * @param color
  */
-function billboard(pt, color) {
+function doorLike(pt, color) {
     // Left
-    let ls = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(0, 5)), le = vec(pt.x + 15, pt.z + 20, 10);
-    rectangle(vec(ls.x, le.z, ls.y), vec(ls.x, le.z, le.y), vec(ls.x, ls.z, le.y), vec(ls.x, ls.z, ls.y), color);
+    let ls = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(0, 5)), le = (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 15, pt.z + 20, 10);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(ls.x, le.z, ls.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(ls.x, le.z, le.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(ls.x, ls.z, le.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(ls.x, ls.z, ls.y), color);
     // Right
-    let rs = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, vec(10, 0)), re = vec(pt.x + 20, pt.z - 5, 10);
-    rectangle(vec(rs.x, re.z, rs.y), vec(rs.x, re.z, re.y), vec(rs.x, rs.z, re.y), vec(rs.x, rs.z, rs.y), color);
+    let rs = p5__WEBPACK_IMPORTED_MODULE_1__.Vector.add(pt, (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(10, 0)), re = (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 20, pt.z - 5, 10);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(rs.x, re.z, rs.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(rs.x, re.z, re.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(rs.x, rs.z, re.y), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(rs.x, rs.z, rs.y), color);
 }
 /**
- * Make a building at given position
+ * Make stilts at position (pt) of height (h) woth distance between stilt of dx, dy and fill it with color
+ * @param pt initial position
+ * @param dx the delta x position between stilts on x axis
+ * @param dz the delta z position between stilts on x axis
+ * @param h the height of all stilts
+ * @param color the color to fill stilts
+ */
+function onStilts(pt, dx, dz, h, color) {
+    let nrx = int((dx - 1) / 6), nrz = int((dz - 1) / 6), delx = (dx - 1) / nrx, delz = (dz - 1) / nrz;
+    for (let i = nrz; i > 0; i--)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + i * delz, 0), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 1, pt.z + i * delz + 1, h), color);
+    for (let i = nrx; i >= 0; i--)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + i * delx, pt.z, 0), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + i * delx + 1, pt.z + 1, h), color);
+}
+/**
+ * Make a base at given position (pt) of height (h)
+ * @param pt the position
+ * @param h the height
+ * @param color the color of base
+ */
+function base(pt, h, color) {
+    let nr1 = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(1, 5)), nr2 = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(1, 5));
+    let inter1 = 27.0 / nr1, inter2 = 27.0 / nr2;
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)(pt, (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z + 30, h), color);
+    (((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)() < .5) ? _geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle_strip : _geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 2, 6), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 2, h - 2), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 28, h - 2), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 28, 6));
+    for (let i = 0; i < nr1; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 2 + i * inter1, 0), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 2 + i * inter1, 4), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 1 + (i + 1) * inter1, 4), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 1 + (i + 1) * inter1, 0), color);
+    (((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)() < .5) ? _geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle_strip : _geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z, 6), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z, h - 2), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 28, pt.z, h - 2), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 28, pt.z, 6), "black");
+    for (let i = 0; i < nr2; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2 + i * inter2, pt.z, 0), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2 + i * inter2, pt.z, 4), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 1 + (i + 1) * inter2, pt.z, 4), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 1 + (i + 1) * inter2, pt.z, 0), "black");
+}
+/**
+ * Make a window building at given position
  * @param pt
  */
-function building(pt) {
-    let h = int(rdm(50, 100));
-    box(vec(pt.x + 20, pt.z + 10, h), vec(pt.x + 21, pt.z + 11, h + rdm(20, 30)), "white");
-    box(vec(pt.x + 10, pt.z + 10, h), vec(pt.x + 11, pt.z + 11, h + rdm(20, 30)), "white");
-    rectangle(vec(pt.x, pt.z, h), vec(pt.x + 30, pt.z, h), vec(pt.x + 30, pt.z + 30, h), vec(pt.x, pt.z + 30, h), "white");
-    box(vec(pt.x, pt.z, 20), vec(pt.x + 30, pt.z + 30, h - 4), colors.get(Element.WINDOW), "black");
+function windowBuilding(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 20, pt.z + 10, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 21, pt.z + 11, h + (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(20, 30)), "white");
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 10, pt.z + 10, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 11, pt.z + 11, h + (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(20, 30)), "white");
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.rectangle)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z + 30, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z + 30, h), "white");
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 20), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z + 30, h - 4), cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.WINDOW), "black");
     for (let fi = 30 - 3; fi > 0; fi -= 3)
-        add(action(line, ...projection(pt.x, pt.z + fi, 20), ...projection(pt.x, pt.z + fi, h - 4)), action(line, ...projection(pt.x + fi, pt.z, 20), ...projection(pt.x + fi, pt.z, h - 4)));
-    box(pt, vec(pt.x + 30, pt.z + 30, 19), colors.get(Element.STRUCTURE));
-    if (rdm() < .5)
-        billboard(pt, p5.color(0, 150));
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.add)((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(pt.x, pt.z + fi, 20), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(pt.x, pt.z + fi, h - 4)), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.action)(_geometry__WEBPACK_IMPORTED_MODULE_3__.line, ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(pt.x + fi, pt.z, 20), ...(0,_geometry__WEBPACK_IMPORTED_MODULE_3__.projection)(pt.x + fi, pt.z, h - 4)));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)(pt, (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z + 30, 19), cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE_DARKER));
+    if ((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)() < .5)
+        doorLike(pt, p5.color(0, 150));
+}
+/**
+ * Make a box building at given position
+ * @param pt
+ */
+function squareBuilding(pt) {
+    let nr = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(5, 20));
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    onStilts(pt, 30, 30, 4, c);
+    for (let i = nr - 1; i--;)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, i * 4 + 4), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 30, pt.z + 30, i * 4 + 6), c);
+}
+function cubeBuilding(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    let c1 = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE), c2 = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    const core = () => {
+        if (h > 50)
+            (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z + 2, 50), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 28, pt.z + 28, h), c1);
+        if (h > 50)
+            (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 4, pt.z + 4, 42), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 26, pt.z + 26, 50), c2);
+        if (h > 42)
+            (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z + 2, 16), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 28, pt.z + 28, 42), c1);
+        if (h > 16)
+            (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 4, pt.z + 4, 12), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 26, pt.z + 26, 16), c2);
+    };
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 14.5, pt.z + 14.5, h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 15.5, pt.z + 15.5, h + 40), "white"); // Antenna
+    if ((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)() < .2) {
+        onStilts(pt, 8, 15, 12, cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STROKE));
+        core();
+    }
+    else {
+        core();
+        base(pt, 12, c1);
+    }
+}
+function rectangleBuilding(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    let c1 = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE), c2 = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 1, pt.z + 1, h - 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 29, pt.z + 29, h), c1);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 4, pt.z + 4, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 22, pt.z + 22, h - 10), (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)() < .35 ? c1 : cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE_DARKER));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z + 22, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 4, pt.z + 28, h - 10), c2);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 22, pt.z + 2, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 28, pt.z + 4, h - 10), c2);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z + 2, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 8, pt.z + 8, h - 10), c2);
+    base(pt, 10, c1);
+}
+function building(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 31), h - 16, 16, 13, c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 26), 4, 16, 13, c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 21), 4, 16, 13, c = (darker(c)));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 16), 4, 16, 13, c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 12), 4, 16, 11, c = (darker(c)));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 0), 12, 16, 15, darker(c), false);
 }
 function populate() {
-    let elements = [forest, building];
+    let elements = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding, building];
+    elements = [building];
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 80));
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 40));
     for (let z = 9; z > 0; z--)
-        rdm(elements)(vec(0, z * 40));
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(0, z * 40));
     for (let x = 6; x--;)
-        rdm(elements)(vec(x * 40, 0));
-    // forest(vec(0, 0))
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(x * 40, 0));
+    if (cp.intersectPos > .65)
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(0, -65));
 }
 function city() {
     sky();
     ground();
     populate();
-    drawer.start();
+    cp.drawer.start();
 }
+function draw() {
+    cp.drawer.call();
+}
+function reset() {
+    p5.clear();
+    p5.loop();
+    cp.drawer = new _drawer__WEBPACK_IMPORTED_MODULE_2__.Drawer(nbLinesToDraw);
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.resetColor)();
+    city();
+}
+function setupP5(p) {
+    p5 = p;
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.setP5)(p5);
+    p5.createCanvas(width, height);
+    p5.frameRate(30);
+    p5.strokeWeight(2);
+    cp = new _geometry__WEBPACK_IMPORTED_MODULE_3__.CityParameters(width, height, new _drawer__WEBPACK_IMPORTED_MODULE_2__.Colors(), 3, .9, .6, .05);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.setGeometryParameters)(p5, cp);
+    reset();
+}
+function setupDatGUI() {
+    const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
+    const params = {
+        nbLinesToDraw: nbLinesToDraw,
+        skyLimit: cp.skyLimit,
+        groundOff: cp.groundOff,
+        intersectPos: cp.intersectPos,
+        useColor: useColor,
+        pause: () => {
+            pause = !pause;
+            (pause) ? p5.noLoop() : p5.loop();
+        },
+        reset: () => {
+            reset();
+        }
+    };
+    const guiEffect = gui.addFolder("Effect & Speed");
+    guiEffect
+        .add(params, "nbLinesToDraw", 1, 100, 1)
+        .onChange(value => cp.drawer.setStep(value));
+    guiEffect
+        .add(params, "intersectPos", .05, .95, 0.01)
+        .onChange(value => {
+        cp.intersectPos = value;
+        reset();
+    });
+    guiEffect
+        .add(params, "skyLimit", .5, .9, 0.1)
+        .onChange(value => {
+        cp.skyLimit = value;
+        reset();
+    });
+    guiEffect
+        .add(params, "groundOff", 0, .2, .01)
+        .onChange(value => {
+        cp.groundOff = value;
+        reset();
+    });
+    guiEffect.open();
+    const guiVisual = gui.addFolder("Visual & Color");
+    guiVisual
+        .add(params, "useColor")
+        .onChange(value => {
+        cp.colors.useColor(value);
+        reset();
+    });
+    // guiVisual.addColor(params, "ptColor")
+    //     .onChange(value => {
+    //         ptColor = p5.color(value);
+    //         p5.stroke(ptColor);
+    //     });
+    guiVisual.open();
+    const guiMisc = gui.addFolder("Misc");
+    let ps = guiMisc
+        .add(params, "pause")
+        .name("Pause")
+        .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
+    guiMisc
+        .add(params, "reset")
+        .name("Reset");
+    guiMisc.open();
+}
+function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    p5.resizeCanvas(width, height);
+    cp.width = width;
+    cp.height = height;
+    reset();
+}
+window.onresize = resize;
+window.onload = () => {
+    let sketch = (p) => {
+        p.setup = () => {
+            setupP5(p);
+        };
+        p.draw = () => {
+            draw();
+        };
+    };
+    p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
+    resize();
+    setupDatGUI();
+};
+
+
+/***/ }),
+
+/***/ "./src/city/drawer.ts":
+/*!****************************!*\
+  !*** ./src/city/drawer.ts ***!
+  \****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "setP5": () => (/* binding */ setP5),
+/* harmony export */   "rdm": () => (/* binding */ rdm),
+/* harmony export */   "Element": () => (/* binding */ Element),
+/* harmony export */   "Colors": () => (/* binding */ Colors),
+/* harmony export */   "resetColor": () => (/* binding */ resetColor),
+/* harmony export */   "fill": () => (/* binding */ fill),
+/* harmony export */   "stroke": () => (/* binding */ stroke),
+/* harmony export */   "Action": () => (/* binding */ Action),
+/* harmony export */   "action": () => (/* binding */ action),
+/* harmony export */   "Drawer": () => (/* binding */ Drawer)
+/* harmony export */ });
+// region Attributes
+let p5;
+/**
+ * Useful little function
+ */
+const setP5 = (_p5) => p5 = _p5; // Need to call first
+const rdm = (min, max) => p5.random(min, max);
 // region Colors
 var Element;
 (function (Element) {
@@ -2998,6 +2913,7 @@ var Element;
     Element[Element["TREE"] = 4] = "TREE";
     Element[Element["WINDOW"] = 5] = "WINDOW";
     Element[Element["STRUCTURE"] = 6] = "STRUCTURE";
+    Element[Element["STRUCTURE_DARKER"] = 7] = "STRUCTURE_DARKER";
 })(Element || (Element = {}));
 class Colors {
     constructor(useColor = true) {
@@ -3009,7 +2925,8 @@ class Colors {
         this.colors.set(Element.GROUND, [p5.color("#282318")]);
         this.colors.set(Element.TREE, [p5.color("#3d720f"), p5.color("#3d720f"), p5.color("#74ba34")]);
         this.colors.set(Element.WINDOW, [p5.color("#84ace2"), p5.color("#57e6fa"), p5.color("#7fb7cb")]);
-        this.colors.set(Element.STRUCTURE, [p5.color("#541c14"), p5.color("#173e3e"), p5.color("#396611")]);
+        this.colors.set(Element.STRUCTURE, [p5.color("#67605e"), p5.color("#6b7c7c"), p5.color("#99b7b6")]);
+        this.colors.set(Element.STRUCTURE_DARKER, [p5.color("#473e3c"), p5.color("#1e2929"), p5.color("#2b2b21")]);
     }
     useColor(value) {
         this.uColor = value;
@@ -3067,112 +2984,425 @@ class Drawer extends Array {
         }
     }
 }
-function add(...action) {
-    drawer.push(...action);
-}
-function draw() {
-    drawer.call();
-}
 // endregion Draw Elements
-function reset() {
-    p5.clear();
-    p5.loop();
-    drawer = new Drawer(nbLinesToDraw);
-    resetColor();
-    city();
+
+
+/***/ }),
+
+/***/ "./src/city/geometry.ts":
+/*!******************************!*\
+  !*** ./src/city/geometry.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "CityParameters": () => (/* binding */ CityParameters),
+/* harmony export */   "setGeometryParameters": () => (/* binding */ setGeometryParameters),
+/* harmony export */   "Direction": () => (/* binding */ Direction),
+/* harmony export */   "projection": () => (/* binding */ projection),
+/* harmony export */   "projectionGetV": () => (/* binding */ projectionGetV),
+/* harmony export */   "projectionVector": () => (/* binding */ projectionVector),
+/* harmony export */   "projectionFactor": () => (/* binding */ projectionFactor),
+/* harmony export */   "vec": () => (/* binding */ vec),
+/* harmony export */   "xy": () => (/* binding */ xy),
+/* harmony export */   "near": () => (/* binding */ near),
+/* harmony export */   "line": () => (/* binding */ line),
+/* harmony export */   "ellipse": () => (/* binding */ ellipse),
+/* harmony export */   "computeArc": () => (/* binding */ computeArc),
+/* harmony export */   "circle": () => (/* binding */ circle),
+/* harmony export */   "rect": () => (/* binding */ rect),
+/* harmony export */   "polygon": () => (/* binding */ polygon),
+/* harmony export */   "rectangle": () => (/* binding */ rectangle),
+/* harmony export */   "rectangle_strip": () => (/* binding */ rectangle_strip),
+/* harmony export */   "box": () => (/* binding */ box),
+/* harmony export */   "cylinder": () => (/* binding */ cylinder),
+/* harmony export */   "strip": () => (/* binding */ strip),
+/* harmony export */   "add": () => (/* binding */ add)
+/* harmony export */ });
+/* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! p5 */ "./node_modules/p5/lib/p5.min.js");
+/* harmony import */ var p5__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(p5__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _drawer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./drawer */ "./src/city/drawer.ts");
+
+
+// region Attributes
+let p5;
+let cp;
+/**
+ * Compute only
+ */
+let distance = 90;
+let alpha = 30 * (Math.PI / 180);
+let cAlpha = Math.cos(alpha);
+let sAlpha = Math.sin(alpha);
+// endregion Attributes
+// region Update Utility Attributes
+class CityParameters {
+    constructor(w, h, c, o, sl, ip, go) {
+        this.width = w;
+        this.height = h;
+        this.colors = c;
+        this.offset = o;
+        this.skyLimit = sl;
+        this.groundOff = go;
+        this.intersectPos = ip;
+    }
 }
-function setupP5(p) {
+function setGeometryParameters(p, c) {
     p5 = p;
-    p5.createCanvas(width, height);
-    p5.frameRate(30);
-    p5.strokeWeight(2);
-    colors = new Colors();
-    reset();
+    cp = c;
 }
-function setupDatGUI() {
-    const gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__.GUI();
-    const params = {
-        nbLinesToDraw: nbLinesToDraw,
-        skyLimit: skyLimit,
-        groundOff: groundOff,
-        intersectPos: intersectPos,
-        useColor: useColor,
-        pause: () => {
-            pause = !pause;
-            (pause) ? p5.noLoop() : p5.loop();
-        },
-        reset: () => {
-            reset();
+// endregion Update Utility Attributes
+/**
+ * Useful little function
+ */
+const off = () => (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.rdm)(-cp.offset, cp.offset);
+const int = (x) => p5.floor(x);
+/**
+ * Direction principally for rect filling
+ */
+var Direction;
+(function (Direction) {
+    Direction[Direction["VERTICAL"] = 0] = "VERTICAL";
+    Direction[Direction["HORIZONTAL"] = 1] = "HORIZONTAL";
+    Direction[Direction["DIAG_UP"] = 2] = "DIAG_UP";
+    Direction[Direction["DIAG_DOWN"] = 3] = "DIAG_DOWN";
+})(Direction || (Direction = {}));
+// region Utility
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param x axis (width)
+ * @param y axis (depth)
+ * @param z axis (height)
+ * @param debug print value of projection in console
+ */
+function projection(x, z, y = 0, debug = false) {
+    let v = projectionVector(vec(x, z, y), debug);
+    return [v.x, v.y];
+}
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param x axis (width)
+ * @param y axis (depth)
+ * @param z axis (height)
+ * @param debug print value of projection in console
+ */
+function projectionGetV(x, z, y = 0, debug = false) {
+    return projectionVector(vec(x, z, y), debug);
+}
+/**
+ * Project the point in 2D space
+ * x, z is the 2D plan, y is height
+ * @param pt the 3D Vector to project on the screen
+ * @param debug print value of projection in console
+ */
+function projectionVector(pt, debug) {
+    let pj = projectionFactor(pt);
+    let scale = cp.height / 90;
+    let v = vec(cp.intersectPos * cp.width + scale * pj.x, 0, (cp.skyLimit + cp.groundOff) * cp.height + scale * pj.y);
+    if (debug)
+        console.log(pt, " :: ", v);
+    return v;
+}
+/**
+ * Compute the factor of projection on screen (2D plan)
+ * @param pt the 3D Vector to project on the screen
+ */
+function projectionFactor(pt) {
+    let camHeight = 1.5;
+    let a = pt.x * sAlpha - pt.z * cAlpha;
+    let b = pt.x * cAlpha + pt.z * sAlpha;
+    return vec(distance * a / (b + distance), 0, -distance * (pt.y - camHeight) / (b + distance));
+}
+/**
+ * Create a P5 Vector from 3 coordinates
+ * @param x the X axis
+ * @param z the Y axis
+ * @param y the Z axis
+ */
+function vec(x, z, y = 0) {
+    return p5.createVector(x, y, z);
+}
+/**
+ * Unwrap xy values of a P5 Vector
+ * @param v the P5 Vector to unwrap
+ */
+function xy(v) {
+    return [v.x, v.y];
+}
+/**
+ * Give a position near of pt in a radius of maxOffset / 2
+ * @param pt the P5 Vector to find a near position
+ * @param maxOffset the radius of near position
+ */
+function near(pt, maxOffset) {
+    let d = maxOffset / 2;
+    return p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.rdm)(-d, d), (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.rdm)(-d, d)));
+}
+// endregion Utility
+// region Instruction
+/**
+ * Make a line from (x0, y0) to (x1, y1)
+ * @param x0 the top left corner X
+ * @param y0 the top left corner Y
+ * @param x1 the bottom right corner X
+ * @param y1 the bottom right corner Y
+ */
+function line(x0, y0, x1, y1) {
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.stroke)(cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_1__.Element.STROKE));
+    x0 += off();
+    y0 += off();
+    p5.line(x0, y0, x1, y1);
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.resetColor)();
+}
+/**
+ * Make an ellipse of center (cx, cy) and radius (rx, ry)
+ * @param cx the center X of ellipse
+ * @param cy the center Y of ellipse
+ * @param rx the radius X of ellipse
+ * @param ry the radius X of ellipse
+ * @param fillColor the filing color of circle
+ * @param nbLoop the number of loop of ellipse stroke
+ * @param border if we have ellipse stroke
+ * @param fct a noise function for make non circular ellipse
+ */
+function ellipse(cx, cy, rx, ry, fillColor, nbLoop, border = true, fct) {
+    if (border)
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.stroke)(cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_1__.Element.STROKE));
+    if (fillColor)
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.fill)(fillColor);
+    p5.beginShape();
+    let r = (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.rdm)(2.1, 2.5), v;
+    let f = (fct === undefined) ? (x) => 2.5 * cp.offset * p5.sin(r * x) : fct;
+    let min = p5.min(rx, ry);
+    let to = isNaN(nbLoop) ? p5.TAU * (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.rdm)([2, 3, 4]) : p5.TAU * nbLoop;
+    for (let i = 0; i <= to; i += p5.TAU / (min * .5))
+        p5.curveVertex(cx + p5.cos(i) * rx - (v = f(i)), cy + p5.sin(i) * ry - v);
+    p5.endShape();
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.resetColor)();
+}
+function computeArc(pt, rx, ry, from, to, precision = 25) {
+    let vertices = [];
+    for (let i = from; i <= to; i += (to - from) / precision)
+        vertices.push(projectionGetV(pt.x + p5.cos(i) * rx, pt.z - p5.sin(i) * ry, pt.y));
+    vertices.push(projectionGetV(pt.x + p5.cos(to) * rx, pt.z - p5.sin(to) * ry, pt.y));
+    return vertices;
+}
+/**
+ * Make an ellipse of center (cx, cy) and radius (rx, ry)
+ * @param cx the center X of ellipse
+ * @param cy the center Y of ellipse
+ * @param r the radius X of ellipse
+ * @param fillColor the filing color of circle
+ * @param nbLoop the number of loop of ellipse stroke
+ * @param border if we have ellipse stroke
+ */
+function circle(cx, cy, r, fillColor, nbLoop, border = true) {
+    ellipse(cx, cy, r, r, fillColor, nbLoop, border);
+}
+/**
+ * Make a rectangle from (sx, sy) to (ex, ey) and fill it if necessary
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ * @param fillColor the color to fill rectangle
+ * @param fillDirection if we need to fill rectangle with lines and the direction
+ * @param border if we need to display border of rectangle
+ */
+function rect(sx, sy, ex, ey, fillColor, fillDirection, border = false) {
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [vec(sx, 0, sy), vec(ex, 0, sy), vec(ex, 0, ey), vec(sx, 0, ey)], fillColor, border));
+    switch (fillDirection) {
+        case Direction.DIAG_UP:
+            fill_up(sx, sy, ex, ey);
+            break;
+        case Direction.DIAG_DOWN:
+            fill_down(sx, sy, ex, ey);
+            break;
+        case Direction.HORIZONTAL:
+            fill_hori(sx, sy, ex, ey);
+            break;
+        case Direction.VERTICAL:
+            fill_vert(sx, sy, ex, ey);
+            break;
+        default:
+            break; // Is None
+    }
+}
+/**
+ * Make a polygon with all vertices
+ * @param vertices the array of vertices
+ * @param fillColor the color to fill polygon
+ * @param border the border color
+ */
+function polygon(vertices, fillColor, border = true) {
+    if (fillColor)
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.fill)(fillColor);
+    let borders = [];
+    p5.beginShape();
+    for (let v of vertices) {
+        p5.vertex(v.x, v.y);
+        borders.push(xy(v));
+    }
+    p5.endShape(p5.CLOSE);
+    if (border) {
+        (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.stroke)(cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_1__.Element.STROKE));
+        let [x1, y1] = xy(vertices[vertices.length - 1]);
+        for (let [x2, y2] of borders) {
+            line(x1, y1, x2, y2);
+            [x1, y1] = [x2, y2];
         }
-    };
-    const guiEffect = gui.addFolder("Effect & Speed");
-    guiEffect
-        .add(params, "nbLinesToDraw", 1, 100, 1)
-        .onChange(value => drawer.setStep(value));
-    guiEffect
-        .add(params, "intersectPos", .05, .95, 0.01)
-        .onChange(value => {
-        intersectPos = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "skyLimit", .5, .9, 0.1)
-        .onChange(value => {
-        skyLimit = value;
-        reset();
-    });
-    guiEffect
-        .add(params, "groundOff", 0, .2, .01)
-        .onChange(value => {
-        groundOff = value;
-        reset();
-    });
-    guiEffect.open();
-    const guiVisual = gui.addFolder("Visual & Color");
-    guiVisual
-        .add(params, "useColor")
-        .onChange(value => {
-        colors.useColor(value);
-        reset();
-    });
-    // guiVisual.addColor(params, "ptColor")
-    //     .onChange(value => {
-    //         ptColor = p5.color(value);
-    //         p5.stroke(ptColor);
-    //     });
-    guiVisual.open();
-    const guiMisc = gui.addFolder("Misc");
-    let ps = guiMisc
-        .add(params, "pause")
-        .name("Pause")
-        .onChange(() => (!pause) ? ps.name("Play") : ps.name("Pause"));
-    guiMisc
-        .add(params, "reset")
-        .name("Reset");
-    guiMisc.open();
+    }
+    (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.resetColor)();
 }
-function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    halfWidth = width / 2;
-    halfHeight = height / 2;
-    p5.resizeCanvas(width, height);
-    reset();
+/**
+ * Make a rectangle with the 4 points
+ * @param p1 the first point of rectangle
+ * @param p2 the second point of rectangle
+ * @param p3 the third point of rectangle
+ * @param p4 the last point of rectangle
+ * @param color to fill rectangle
+ */
+function rectangle(p1, p2, p3, p4, color) {
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [projectionVector(p1), projectionVector(p2),
+        projectionVector(p3), projectionVector(p4)], color));
 }
-window.onresize = resize;
-window.onload = () => {
-    let sketch = (p) => {
-        p.setup = () => {
-            setupP5(p);
-        };
-        p.draw = () => {
-            draw();
-        };
-    };
-    p5 = new p5__WEBPACK_IMPORTED_MODULE_1__(sketch);
-    resize();
-    setupDatGUI();
-};
+/**
+ * Make a rectangle with the 4 points and add strip on it
+ * @param p1 the first point of rectangle
+ * @param p2 the second point of rectangle
+ * @param p3 the third point of rectangle
+ * @param p4 the last point of rectangle
+ * @param color to fill rectangle
+ */
+function rectangle_strip(p1, p2, p3, p4, color) {
+    rectangle(p1, p2, p3, p4, color);
+    strip(p2.y - p1.y, projectionVector(p1), projectionVector(p2), projectionVector(p4), projectionVector(p3));
+}
+/**
+ * Make a box from bottom visible point (p1) to top hidden point (p2). Hidden is in diagonal of visible point.
+ * @param p1 bottom point
+ * @param p2 top point
+ * @param boxColor color of the box
+ * @param underBoxColor color of the part under the box
+ */
+function box(p1, p2, boxColor, underBoxColor) {
+    let c1 = projectionGetV(p1.x, p2.z, p1.y), c2 = projectionGetV(p1.x, p2.z, p2.y), c3 = projectionGetV(p1.x, p1.z, p1.y), c4 = projectionGetV(p1.x, p1.z, p2.y), c5 = projectionGetV(p2.x, p1.z, p1.y), c6 = projectionGetV(p2.x, p1.z, p2.y), c7 = projectionGetV(p2.x, p2.z, p1.y);
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [c1, c2, c4, c6, c5, c7], boxColor));
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, ...xy(c4), ...xy(c3)));
+    if (c7.y > c1.y)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [c1, c3, c5, c7], underBoxColor));
+    strip(c1.y - c2.y, c3, c4, c5, c6);
+}
+function cylinder(pt, h, r, precision, color, border = true) {
+    let bottom = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
+    let top = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
+    let zip = (x, y) => x.map((vx, i) => [vx, y[i]]);
+    let pts = zip(top, bottom);
+    let [prevTop, prevBottom] = pts[pts.length - 1];
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, top, color, border));
+    for (let [ti, bi] of pts) {
+        if (bi.x <= prevBottom.x)
+            add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [prevTop, ti, bi, prevBottom], color, border));
+        [prevTop, prevBottom] = [ti, bi];
+    }
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, bottom, "black", border));
+}
+// endregion Instruction
+// region Fill
+/**
+ * Fill area with upper diagonal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_up(sx, sy, ex, ey) {
+    let dx = ex - sx;
+    let dy = ey - sy;
+    for (let i = 0; i < p5.min(dx, dy); i += 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx, sy + i, sx + i, sy));
+    if (dx > dy)
+        for (let i = 0; i < dx - dy; i += 6)
+            add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx + i, ey, sx + dy + i, sy));
+    else
+        for (let i = 0; i < dy - dx; i += 6)
+            add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx, sy + dx + i, ex, sy + i));
+    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, ex - i, ey, ex, ey - i));
+}
+/**
+ * Fill area with lower diagonal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_down(sx, sy, ex, ey) {
+    let dx = ex - sx;
+    let dy = ey - sy;
+    for (let i = 0; i < p5.min(dx, dy); i += 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx + i, ey, sx, ey - i));
+    if (dx > dy)
+        for (let i = 0; i < dx - dy; i += 6)
+            add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx + i, sy, sx + dy + i, ey));
+    else
+        for (let i = 0; i < dy - dx; i += 6)
+            add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, ex, ey - i, sx, ey - dx - i));
+    for (let i = p5.min(dx, dy); i >= 0; i -= 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, ex - i, sy, ex, sy + i));
+}
+/**
+ * Fill area with horizontal lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_hori(sx, sy, ex, ey) {
+    for (let i = 0; i < p5.abs(ey - sy); i += 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx, sy + i, ex, sy + i));
+}
+/**
+ * Fill area with vertical lines
+ * @param sx the X top left of area to fill
+ * @param sy the Y top left of area to fill
+ * @param ex the X bottom right of area to fill
+ * @param ey the Y bottom right of area to fill
+ */
+function fill_vert(sx, sy, ex, ey) {
+    for (let i = 0; i < p5.abs(ex - sx); i += 6)
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, sx + i, sy, sx + i, ey));
+}
+/**
+ * Make a strip lines to simulate shadow
+ * @param distToDo the distance to do with strip
+ * @param p1 the first point of rectangle to fill of strip
+ * @param p2 the second point of rectangle to fill of strip
+ * @param p3 the third point of rectangle to fill of strip
+ * @param p4 the last point of rectangle to fill of strip
+ * @param stripOff the offset between two strip
+ */
+function strip(distToDo, p1, p2, p3, p4, stripOff = 6) {
+    let r1 = (p1.y - p2.y) / distToDo;
+    let r2 = (p3.y - p4.y) / distToDo;
+    let pp = 0;
+    while (pp < distToDo) {
+        add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(line, p1.x, p2.y + pp * r1, p3.x, p4.y + pp * r2));
+        pp += stripOff;
+    }
+}
+// endregion Fill
+/**
+ * Easy insertion of new actions on drawer
+ * @param action the different action to add
+ */
+function add(...action) {
+    cp.drawer.push(...action);
+}
 
 
 /***/ })
