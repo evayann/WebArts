@@ -2591,9 +2591,13 @@ let cp;
  * Useful little function
  */
 const int = (x) => p5.floor(x);
-const darker = (c) => {
+const darker = (c, off = 10) => {
     p5.colorMode(p5.HSB);
-    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) - 10, 0, 255));
+    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) - off, 0, 255));
+};
+const lighter = (c, off = 10) => {
+    p5.colorMode(p5.HSB);
+    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) + off, 0, 255));
 };
 /**
  * Make the sky of city
@@ -2740,19 +2744,81 @@ function rectangleBuilding(pt) {
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 2, pt.z + 2, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 8, pt.z + 8, h - 10), c2);
     base(pt, 10, c1);
 }
-function building(pt) {
+function cylinderBuilding(pt) {
     let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
     let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 31), h - 16, 16, 13, c);
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 26), 4, 16, 13, c);
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 21), 4, 16, 13, c = (darker(c)));
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 16), 4, 16, 13, c);
-    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 12), 4, 16, 11, c = (darker(c)));
-    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 0), 12, 16, 15, darker(c), false);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 12), 4, 16, 11, c = (darker(c)), true, 2);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 0), 12, 16, 15, darker(c));
+}
+function cylinderOnBaseBuilding(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, h - 4), 4, 12, 13, c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, h - 8), 12, 9, c = (lighter(c)));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 8), h - 14, 12, 13, lighter(c));
+    base(pt, 8, darker(cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE), 5));
+}
+function shapeStack(pt) {
+    let h = int((0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(50, 100));
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    let w = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.WINDOW);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 5, 32), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 25, pt.z + 25, h), w);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 10, pt.z + 10, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 20, pt.z + 20, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 24, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 25, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 18, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 19, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 11, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 12, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 24, pt.z + 5, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 25, pt.z + 6, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 18, pt.z + 5, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 19, pt.z + 6, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 11, pt.z + 5, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 12, pt.z + 6, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 5, 26), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 6, pt.z + 6, 32), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.cylinder)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x, pt.z, 6), 20, 25, 15, darker(w));
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 10, pt.z + 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 20, pt.z + 20, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 24), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 25, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 18), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 19, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 11), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 12, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 24, pt.z + 5), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 25, pt.z + 6, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 18, pt.z + 5), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 19, pt.z + 6, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 11, pt.z + 5), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 12, pt.z + 6, 6), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5, pt.z + 5), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 6, pt.z + 6, 6), c);
+}
+function podBase(pt, h, c) {
+    for (let i = 0; i < 10; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + h - 5 - i, pt.z + h - 5 - i, i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + h - i, pt.z + h - i, i + 1), c);
+    for (let i = 0; i < 10; i++) {
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + h - 5 - i, pt.z + i + 1, i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + h - i - 1, pt.z + 5 + i, i + 1), c);
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + i + 1, pt.z + h - 5 - i, i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5 + i, pt.z + h - i - 1, i + 1), c);
+    }
+    for (let i = 0; i < 10; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + i, pt.z + i, i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + 5 + i, pt.z + 5 + i, i + 1), c);
+}
+function parabolicAntenna(pt) {
+    let hgt = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(20, 35);
+    let halfHgt = hgt / 2;
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    podBase(pt, hgt, c);
+    let h = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(5, 15);
+    for (let i = 0; i < h; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt - i, pt.z + halfHgt - i, 10 + i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + 5 + i, pt.z + halfHgt + 5 + i, 10 + i + 1), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
+}
+function eiffel(pt) {
+    let hgt = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(20, 35);
+    let halfHgt = hgt / 2;
+    let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
+    podBase(pt, hgt, c);
+    let h = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(5, 15);
+    for (let i = 0; i < h; i++)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + i, pt.z + halfHgt + i, 10 + i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + 5 - i, pt.z + halfHgt + 5 - i, 10 + i + 1), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
 }
 function populate() {
-    let elements = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding, building];
-    elements = [building];
+    let elements = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding,
+        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna];
+    elements = [eiffel];
     (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 80));
     (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 40));
     for (let z = 9; z > 0; z--)
@@ -2784,7 +2850,7 @@ function setupP5(p) {
     p5.createCanvas(width, height);
     p5.frameRate(30);
     p5.strokeWeight(2);
-    cp = new _geometry__WEBPACK_IMPORTED_MODULE_3__.CityParameters(width, height, new _drawer__WEBPACK_IMPORTED_MODULE_2__.Colors(), 3, .9, .6, .05);
+    cp = new _geometry__WEBPACK_IMPORTED_MODULE_3__.CityParameters(width, height, new _drawer__WEBPACK_IMPORTED_MODULE_2__.Colors(), 3, .9, .67, .05);
     (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.setGeometryParameters)(p5, cp);
     reset();
 }
@@ -3297,19 +3363,33 @@ function box(p1, p2, boxColor, underBoxColor) {
         add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [c1, c3, c5, c7], underBoxColor));
     strip(c1.y - c2.y, c3, c4, c5, c6);
 }
-function cylinder(pt, h, r, precision, color, border = true) {
-    let bottom = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
-    let top = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
+/**
+ * Make a cylinder at point (pt) of height (h) and radius (r) with precision facet
+ * @param pt the point at the bottom of cylinder
+ * @param h the height of cylinder
+ * @param r the radius of cylinder
+ * @param precision the number of facet of cylinder
+ * @param color the color to fill cylinder
+ * @param border if we draw border of cylinder
+ * @param shadow the number of facet who have shadow strip
+ */
+function cylinder(pt, h, r, precision, color, border = true, shadow = 3) {
+    let bottoms = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
+    let tops = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
     let zip = (x, y) => x.map((vx, i) => [vx, y[i]]);
-    let pts = zip(top, bottom);
+    let pts = zip(tops, bottoms);
     let [prevTop, prevBottom] = pts[pts.length - 1];
-    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, top, color, border));
+    let shCounter = 0;
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, tops, color, border));
     for (let [ti, bi] of pts) {
-        if (bi.x <= prevBottom.x)
+        if (bi.x < prevBottom.x) {
             add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, [prevTop, ti, bi, prevBottom], color, border));
+            if (++shCounter <= shadow)
+                strip(bi.y - ti.y, ti, bi, prevTop, prevBottom);
+        }
         [prevTop, prevBottom] = [ti, bi];
     }
-    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, bottom, "black", border));
+    add((0,_drawer__WEBPACK_IMPORTED_MODULE_1__.action)(polygon, bottoms, "black", border));
 }
 // endregion Instruction
 // region Fill

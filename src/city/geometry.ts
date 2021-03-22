@@ -310,23 +310,35 @@ export function box(p1: P5.Vector, p2: P5.Vector, boxColor?: P5.Color | string, 
     strip(c1.y - c2.y, c3, c4, c5, c6);
 }
 
-
+/**
+ * Make a cylinder at point (pt) of height (h) and radius (r) with precision facet
+ * @param pt the point at the bottom of cylinder
+ * @param h the height of cylinder
+ * @param r the radius of cylinder
+ * @param precision the number of facet of cylinder
+ * @param color the color to fill cylinder
+ * @param border if we draw border of cylinder
+ * @param shadow the number of facet who have shadow strip
+ */
 export function cylinder(pt: P5.Vector, h: number, r: number, precision?: number,
-                         color?: P5.Color | string, border: boolean = true) {
-    let bottom: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
-    let top: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
+                         color?: P5.Color | string, border: boolean = true, shadow: number = 3) {
+    let bottoms: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
+    let tops: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
 
     let zip: Function = (x, y) => x.map((vx, i) => [vx, y[i]]);
-    let pts: Array<[P5.Vector, P5.Vector]> = zip(top, bottom);
+    let pts: Array<[P5.Vector, P5.Vector]> = zip(tops, bottoms);
     let [prevTop, prevBottom] = pts[pts.length - 1];
+    let shCounter: number = 0;
 
-    add(action(polygon, top, color, border));
+    add(action(polygon, tops, color, border));
     for (let [ti, bi] of pts) {
-        if (bi.x <= prevBottom.x)
+        if (bi.x < prevBottom.x) {
             add(action(polygon, [prevTop, ti, bi, prevBottom], color, border));
+            if (++shCounter <= shadow) strip(bi.y - ti.y, ti, bi, prevTop, prevBottom);
+        }
         [prevTop, prevBottom] = [ti, bi];
     }
-    add(action(polygon, bottom, "black", border));
+    add(action(polygon, bottoms, "black", border));
 }
 
 // endregion Instruction

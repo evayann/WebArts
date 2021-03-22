@@ -45,9 +45,13 @@ let cp: CityParameters;
  * Useful little function
  */
 const int: Function = (x: number): number => p5.floor(x);
-const darker: Function = (c: P5.Color): P5.Color => {
+const darker: Function = (c: P5.Color, off: number = 10): P5.Color => {
     p5.colorMode(p5.HSB);
-    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) - 10, 0, 255));
+    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) - off, 0, 255));
+};
+const lighter: Function = (c: P5.Color, off: number = 10): P5.Color => {
+    p5.colorMode(p5.HSB);
+    return p5.color(p5.hue(c), p5.saturation(c), p5.constrain(p5.brightness(c) + off, 0, 255));
 };
 
 /**
@@ -224,20 +228,99 @@ function rectangleBuilding(pt: P5.Vector): void {
     base(pt, 10, c1);
 }
 
-function building(pt: P5.Vector): void {
+function cylinderBuilding(pt: P5.Vector): void {
     let h: number = int(rdm(50, 100));
     let c: P5.Color = cp.colors.get(Element.STRUCTURE);
     cylinder(vec(pt.x, pt.z, 31), h - 16, 16, 13, c);
     cylinder(vec(pt.x, pt.z, 26), 4, 16, 13, c);
     cylinder(vec(pt.x, pt.z, 21), 4, 16, 13, c=(darker(c)));
     cylinder(vec(pt.x, pt.z, 16), 4, 16, 13, c);
-    cylinder(vec(pt.x, pt.z, 12), 4, 16, 11, c=(darker(c)));
-    cylinder(vec(pt.x, pt.z, 0), 12, 16, 15, darker(c), false);
+    cylinder(vec(pt.x, pt.z, 12), 4, 16, 11, c=(darker(c)), true,  2);
+    cylinder(vec(pt.x, pt.z, 0), 12, 16, 15, darker(c));
+}
+
+function cylinderOnBaseBuilding(pt: P5.Vector): void {
+    let h: number = int(rdm(50, 100));
+    let c: P5.Color = cp.colors.get(Element.STRUCTURE);
+    cylinder(vec(pt.x, pt.z, h - 4), 4, 12, 13, c);
+    cylinder(vec(pt.x, pt.z, h - 8), 12, 9, c=(lighter(c)));
+    cylinder(vec(pt.x, pt.z, 8), h - 14, 12, 13, lighter(c));
+    base(pt, 8, darker(cp.colors.get(Element.STRUCTURE), 5));
+}
+
+function shapeStack(pt: P5.Vector): void {
+    let h: number = int(rdm(50, 100));
+    let c: P5.Color = cp.colors.get(Element.STRUCTURE);
+    let w: P5.Color = cp.colors.get(Element.WINDOW);
+    box(vec(pt.x + 5, pt.z + 5, 32), vec(pt.x + 25, pt.z + 25, h), w);
+    box(vec(pt.x + 10, pt.z + 10, 26), vec(pt.x + 20,  pt.z + 20, 32), c);
+    box(vec(pt.x + 5, pt.z + 24, 26), vec(pt.x + 5,  pt.z + 25, 32), c);
+    box(vec(pt.x + 5, pt.z + 18, 26), vec(pt.x + 5,  pt.z + 19, 32), c);
+    box(vec(pt.x + 5, pt.z + 11, 26), vec(pt.x + 5,  pt.z + 12, 32), c);
+    box(vec(pt.x + 24, pt.z + 5, 26), vec(pt.x + 25,  pt.z + 6, 32), c);
+    box(vec(pt.x + 18, pt.z + 5, 26), vec(pt.x + 19,  pt.z + 6, 32), c);
+    box(vec(pt.x + 11, pt.z + 5, 26), vec(pt.x + 12,  pt.z + 6, 32), c);
+    box(vec(pt.x + 5, pt.z + 5, 26), vec(pt.x + 6,  pt.z + 6, 32), c);
+    cylinder(vec(pt.x, pt.z, 6), 20, 25, 15, darker(w));
+    box(vec(pt.x + 10, pt.z + 10), vec(pt.x + 20, pt.z + 20, 6), c);
+    box(vec(pt.x + 5, pt.z + 24), vec(pt.x + 5, pt.z +  25, 6), c);
+    box(vec(pt.x + 5, pt.z + 18), vec(pt.x + 5, pt.z + 19, 6), c);
+    box(vec(pt.x + 5, pt.z + 11), vec(pt.x + 5, pt.z + 12, 6), c);
+    box(vec(pt.x + 24, pt.z + 5), vec(pt.x + 25, pt.z + 6, 6), c);
+    box(vec(pt.x + 18, pt.z + 5), vec(pt.x + 19, pt.z + 6, 6), c);
+    box(vec(pt.x + 11, pt.z + 5), vec(pt.x + 12, pt.z + 6, 6), c);
+    box(vec(pt.x + 5, pt.z + 5), vec(pt.x + 6, pt.z + 6, 6), c);
+}
+
+function podBase(pt: P5.Vector, h: number, c: P5.Color): void {
+    for (let i = 0; i < 10; i++)
+        box(vec(pt.x + h - 5 - i, pt.z + h - 5 - i, i),
+            vec(pt.x + h - i, pt.z + h - i, i + 1), c);
+    for (let i = 0; i < 10; i++) {
+        box(vec(pt.x + h - 5 - i, pt.z + i + 1, i),
+            vec(pt.x + h - i - 1, pt.z + 5 + i, i + 1), c);
+        box(vec(pt.x + i + 1, pt.z + h - 5 - i, i),
+            vec(pt.x + 5 + i, pt.z + h - i - 1, i + 1), c);
+    }
+    for (let i = 0; i < 10; i++)
+        box(vec(pt.x + i, pt.z + i, i), vec(pt.x + 5 + i, pt.z + 5 + i, i + 1), c);
+}
+
+function parabolicAntenna(pt: P5.Vector): void {
+    let hgt: number = rdm(20, 35);
+    let halfHgt: number = hgt / 2;
+    let c: P5.Color = cp.colors.get(Element.STRUCTURE);
+    podBase(pt, hgt, c);
+
+    let h: number = rdm(5, 15);
+    for (let i = 0; i < h; i++)
+        box(vec(pt.x + halfHgt - i, pt.z + halfHgt - i, 10 + i),
+            vec(pt.x + halfHgt + 5 + i, pt.z + halfHgt + 5 + i, 10 + i + 1), c);
+
+    box(vec(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h),
+        vec(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
+}
+
+function eiffel(pt: P5.Vector): void {
+    let hgt: number = rdm(20, 35);
+    let halfHgt: number = hgt / 2;
+    let c: P5.Color = cp.colors.get(Element.STRUCTURE);
+    podBase(pt, hgt, c);
+
+    // TODO fix
+    let h: number = rdm(5, 15);
+    for (let i = 0; i < h; i++)
+        box(vec(pt.x + halfHgt + i, pt.z + halfHgt + i, 10 + i),
+            vec(pt.x + halfHgt + 5 - i, pt.z + halfHgt + 5 - i, 10 + i + 1), c);
+
+    box(vec(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h),
+        vec(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
 }
 
 function populate(): void {
-    let elements: Function[] = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding, building];
-    elements = [building];
+    let elements: Function[] = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding,
+        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna];
+    elements = [eiffel];
 
     rdm(elements)(vec(40, 80));
     rdm(elements)(vec(40, 40));
@@ -278,7 +361,7 @@ function setupP5(p: P5): void {
     p5.createCanvas(width, height);
     p5.frameRate(30);
     p5.strokeWeight(2);
-    cp = new CityParameters(width, height, new Colors(), 3, .9, .6, .05);
+    cp = new CityParameters(width, height, new Colors(), 3, .9, .67, .05);
     setGeometryParameters(p5, cp);
     reset();
 }
