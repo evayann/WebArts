@@ -4,24 +4,10 @@ import * as dat from 'dat.gui';
 import * as P5 from 'p5';
 import {action, Colors, Drawer, Element, rdm, resetColor, setP5} from './drawer';
 import {
-    add,
-    box,
-    circle,
-    CityParameters,
-    cylinder,
-    Direction,
-    ellipse,
-    line,
-    near,
-    projection,
-    projectionFactor,
-    projectionVector,
-    rect,
-    rectangle,
-    rectangle_strip,
-    setGeometryParameters,
-    vec,
-    xy
+    add, box, circle, CityParameters, cylinder, Direction, ellipse, line,
+    near, projection, projectionFactor, projectionVector,
+    rect, rectangle, rectangle_strip,
+    setGeometryParameters, vec, xy
 } from './geometry';
 
 // region Attributes
@@ -283,7 +269,8 @@ function podBase(pt: P5.Vector, h: number, c: P5.Color): void {
             vec(pt.x + 5 + i, pt.z + h - i - 1, i + 1), c);
     }
     for (let i = 0; i < 10; i++)
-        box(vec(pt.x + i, pt.z + i, i), vec(pt.x + 5 + i, pt.z + 5 + i, i + 1), c);
+        box(vec(pt.x + i, pt.z + i, i),
+            vec(pt.x + 5 + i, pt.z + 5 + i, i + 1), c);
 }
 
 function parabolicAntenna(pt: P5.Vector): void {
@@ -307,20 +294,18 @@ function eiffel(pt: P5.Vector): void {
     let c: P5.Color = cp.colors.get(Element.STRUCTURE);
     podBase(pt, hgt, c);
 
-    // TODO fix
-    let h: number = rdm(5, 15);
-    for (let i = 0; i < h; i++)
-        box(vec(pt.x + halfHgt + i, pt.z + halfHgt + i, 10 + i),
-            vec(pt.x + halfHgt + 5 - i, pt.z + halfHgt + 5 - i, 10 + i + 1), c);
-
-    box(vec(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h),
-        vec(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
+    let h: number = rdm(25, 35);
+    let p: number = rdm(1, 2);
+    for (let i = 2.5 * h; i > 0; i -= p)
+        box(vec(pt.x + halfHgt + i / h, pt.z + halfHgt + i / h, 10 + i),
+            vec(pt.x + halfHgt + 5 - i / h, pt.z + halfHgt + 5 - i / h, 10 + i + p), c);
+    box(vec(pt.x + halfHgt, pt.z + halfHgt, 10),
+        vec(pt.x + halfHgt + 5, pt.z + halfHgt + 5, 10 + p), c);
 }
 
 function populate(): void {
     let elements: Function[] = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding,
-        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna];
-    elements = [eiffel];
+        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna, eiffel];
 
     rdm(elements)(vec(40, 80));
     rdm(elements)(vec(40, 40));
@@ -340,6 +325,7 @@ function city(): void {
     populate();
 
     cp.drawer.start();
+    if (pause) p5.noLoop();
 }
 
 
@@ -413,11 +399,6 @@ function setupDatGUI(): void {
             cp.colors.useColor(value);
             reset();
         });
-    // guiVisual.addColor(params, "ptColor")
-    //     .onChange(value => {
-    //         ptColor = p5.color(value);
-    //         p5.stroke(ptColor);
-    //     });
     guiVisual.open();
 
     const guiMisc = gui.addFolder("Misc");

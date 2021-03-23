@@ -180,12 +180,22 @@ export function ellipse(cx: number, cy: number, rx: number, ry: number, fillColo
     resetColor();
 }
 
-
-export function computeArc(pt: P5.Vector, rx: number, ry: number, from: number, to: number, precision: number = 25): Array<P5.Vector> {
+/**
+ * Make an arc of center pt and radius (rx, ry) with number of segment equals to precision
+ * @param pt the center of arc
+ * @param from the begin of arc in radians
+ * @param to the end of arc in radians
+ * @param rx the radius on X axis of arc
+ * @param ry the radius on X axis of arc
+ * @param precision the number of segment of arc
+ */
+export function computeArc(pt: P5.Vector, from: number, to: number,
+                           rx: number, ry: number, precision: number = 25): Array<P5.Vector> {
+    const formula: Function = (i): P5.Vector => projectionGetV(pt.x + p5.cos(i) * rx, pt.z - p5.sin(i) * ry, pt.y);
     let vertices: Array<P5.Vector> = [];
     for (let i = from; i <= to; i += (to - from) / precision)
-        vertices.push(projectionGetV(pt.x + p5.cos(i) * rx, pt.z - p5.sin(i) * ry, pt.y));
-    vertices.push(projectionGetV(pt.x + p5.cos(to) * rx, pt.z - p5.sin(to) * ry, pt.y));
+        vertices.push(formula(i));
+    vertices.push(formula(to));
     return vertices;
 }
 
@@ -322,8 +332,8 @@ export function box(p1: P5.Vector, p2: P5.Vector, boxColor?: P5.Color | string, 
  */
 export function cylinder(pt: P5.Vector, h: number, r: number, precision?: number,
                          color?: P5.Color | string, border: boolean = true, shadow: number = 3) {
-    let bottoms: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
-    let tops: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
+    let bottoms: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15)), 0, p5.TAU, r, r, precision);
+    let tops: Array<P5.Vector> = computeArc(P5.Vector.add(pt, vec(15, 15, h)), 0, p5.TAU, r, r, precision);
 
     let zip: Function = (x, y) => x.map((vx, i) => [vx, y[i]]);
     let pts: Array<[P5.Vector, P5.Vector]> = zip(tops, bottoms);

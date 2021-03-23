@@ -2810,15 +2810,15 @@ function eiffel(pt) {
     let halfHgt = hgt / 2;
     let c = cp.colors.get(_drawer__WEBPACK_IMPORTED_MODULE_2__.Element.STRUCTURE);
     podBase(pt, hgt, c);
-    let h = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(5, 15);
-    for (let i = 0; i < h; i++)
-        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + i, pt.z + halfHgt + i, 10 + i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + 5 - i, pt.z + halfHgt + 5 - i, 10 + i + 1), c);
-    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt - .5, pt.z + halfHgt - .5, 10 + h), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + .5, pt.z + halfHgt + .5, 10 + h + halfHgt), c);
+    let h = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(25, 35);
+    let p = (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(1, 2);
+    for (let i = 2.5 * h; i > 0; i -= p)
+        (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + i / h, pt.z + halfHgt + i / h, 10 + i), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + 5 - i / h, pt.z + halfHgt + 5 - i / h, 10 + i + p), c);
+    (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.box)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt, pt.z + halfHgt, 10), (0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(pt.x + halfHgt + 5, pt.z + halfHgt + 5, 10 + p), c);
 }
 function populate() {
     let elements = [forest, windowBuilding, squareBuilding, cubeBuilding, rectangleBuilding,
-        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna];
-    elements = [eiffel];
+        cylinderBuilding, cylinderOnBaseBuilding, shapeStack, parabolicAntenna, eiffel];
     (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 80));
     (0,_drawer__WEBPACK_IMPORTED_MODULE_2__.rdm)(elements)((0,_geometry__WEBPACK_IMPORTED_MODULE_3__.vec)(40, 40));
     for (let z = 9; z > 0; z--)
@@ -2833,6 +2833,8 @@ function city() {
     ground();
     populate();
     cp.drawer.start();
+    if (pause)
+        p5.noLoop();
 }
 function draw() {
     cp.drawer.call();
@@ -2900,11 +2902,6 @@ function setupDatGUI() {
         cp.colors.useColor(value);
         reset();
     });
-    // guiVisual.addColor(params, "ptColor")
-    //     .onChange(value => {
-    //         ptColor = p5.color(value);
-    //         p5.stroke(ptColor);
-    //     });
     guiVisual.open();
     const guiMisc = gui.addFolder("Misc");
     let ps = guiMisc
@@ -3250,11 +3247,21 @@ function ellipse(cx, cy, rx, ry, fillColor, nbLoop, border = true, fct) {
     p5.endShape();
     (0,_drawer__WEBPACK_IMPORTED_MODULE_1__.resetColor)();
 }
-function computeArc(pt, rx, ry, from, to, precision = 25) {
+/**
+ * Make an arc of center pt and radius (rx, ry) with number of segment equals to precision
+ * @param pt the center of arc
+ * @param from the begin of arc in radians
+ * @param to the end of arc in radians
+ * @param rx the radius on X axis of arc
+ * @param ry the radius on X axis of arc
+ * @param precision the number of segment of arc
+ */
+function computeArc(pt, from, to, rx, ry, precision = 25) {
+    const formula = (i) => projectionGetV(pt.x + p5.cos(i) * rx, pt.z - p5.sin(i) * ry, pt.y);
     let vertices = [];
     for (let i = from; i <= to; i += (to - from) / precision)
-        vertices.push(projectionGetV(pt.x + p5.cos(i) * rx, pt.z - p5.sin(i) * ry, pt.y));
-    vertices.push(projectionGetV(pt.x + p5.cos(to) * rx, pt.z - p5.sin(to) * ry, pt.y));
+        vertices.push(formula(i));
+    vertices.push(formula(to));
     return vertices;
 }
 /**
@@ -3374,8 +3381,8 @@ function box(p1, p2, boxColor, underBoxColor) {
  * @param shadow the number of facet who have shadow strip
  */
 function cylinder(pt, h, r, precision, color, border = true, shadow = 3) {
-    let bottoms = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15)), r, r, 0, p5.TAU, precision);
-    let tops = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15, h)), r, r, 0, p5.TAU, precision);
+    let bottoms = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15)), 0, p5.TAU, r, r, precision);
+    let tops = computeArc(p5__WEBPACK_IMPORTED_MODULE_0__.Vector.add(pt, vec(15, 15, h)), 0, p5.TAU, r, r, precision);
     let zip = (x, y) => x.map((vx, i) => [vx, y[i]]);
     let pts = zip(tops, bottoms);
     let [prevTop, prevBottom] = pts[pts.length - 1];
