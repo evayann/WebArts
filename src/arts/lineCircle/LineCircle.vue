@@ -1,0 +1,112 @@
+<template>
+    <P5Vue @setup="this.setupP5" @draw="this.drawP5" @windowresized="this.resizeP5"></P5Vue>
+</template>
+
+<script lang="ts">
+import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
+import {ArtVue, menu, button, color, GUIType} from "@/util";
+
+let p5: p5Instance;
+let useColor = true;
+const fColor = "#a21c1c";
+const tColor = "#3166d4";
+let fromColor: P5.Color;
+let toColor: P5.Color;
+let alpha = 255;
+
+let counter = 0;
+const fps = 60;
+let angle = 0;
+let cycle = 1;
+
+let nbSegment = 4;
+let xRadius: number = centerX;
+let yRadius: number = centerY;
+const circleSize = 20;
+
+function drawPoints(): void {
+    for (let i = 1; i <= nbSegment; i++) {
+        const theta = angle * i;
+        const sizeX = p5.cos(theta) * (xRadius - circleSize * 2);
+        const sizeY = p5.sin(theta) * (yRadius - circleSize * 2);
+
+        const startX = centerX + sizeX, startY = centerY + sizeY;
+        const endX = centerX - sizeX, endY = centerY - sizeY;
+
+        const percent = p5.map(p5.cos(theta + (counter / fps) / cycle), -1, 1, 0, 1);
+        const x = p5.lerp(startX, endX, percent);
+        const y = p5.lerp(startY, endY, percent);
+
+        useColor ? p5.fill(p5.lerpColor(fromColor, toColor, percent)) : p5.fill("white");
+        p5.circle(x, y, circleSize);
+    }
+}
+
+function draw(): void {
+    p5.fill(0, alpha);
+    p5.rect(0, 0, width, height);
+    drawPoints();
+    counter++;
+}
+
+function reset(): void {
+    angle = p5.PI / nbSegment;
+    counter = 0;
+    draw();
+}
+
+function setupP5(p: p5Instance): void {
+    p5 = p;
+    fromColor = p5.color(fColor);
+    toColor = p5.color(tColor);
+    p.noStroke();
+    p5.frameRate(fps);
+    reset();
+}
+
+export default class Art extends ArtVue {
+    setupP5(p: p5Instance): void {
+        super.setupP5(p);
+        setupP5(p);
+    }
+
+    drawP5(): void {
+        draw();
+    }
+
+    resizeP5(): void {
+        reset();
+    }
+
+    generateUI(): GUIType {
+        const params = {
+            cycle: cycle,
+            xRadius: xRadius,
+            yRadius: yRadius,
+            fromColor: fColor,
+            alpha: alpha,
+            toColor: tColor,
+            useColor: useColor,
+            nbSegment: nbSegment
+        };
+        return this.setupDatGUI({
+            params: params,
+            properties: {
+                "Effect": [
+                    menu("cycle", .1, 10, .1, value => cycle = value),
+                    menu("nbSegment", 3, 32, 1, value => { nbSegment = value; reset() }),
+                    menu("xRadius", width / 8, centerX, 1, value => xRadius = value),
+                    menu("yRadius", height / 8, centerX, 1, value => yRadius = value),
+                ],
+                "Visual & Color" : [
+                    button("useColor", value => useColor = value),
+                    color("fromColor", value => fromColor = this.p5.color(value)),
+                    color("toColor", value => toColor = this.p5.color(value)),
+                    menu("alpha", 0, 255, 1, value => alpha = value)
+                ],
+                "Misc": [this.pause(), this.reset(reset)]
+            }
+        });
+    }
+}
+</script>
