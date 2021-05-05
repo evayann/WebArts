@@ -57,7 +57,7 @@ function draw(): void {
     time++;
 }
 
-function preload(p: P5) {
+function preload(p: p5Instance) {
     p5 = p;
     shaderGraph = p5.createGraphics(width, height, p5.WEBGL);
     shaderGraph.noStroke();
@@ -131,8 +131,8 @@ export default class Art extends ArtVue {
         setupP5();
     }
 
-    drawP5(p: p5Instance): void {
-        draw(p);
+    drawP5(): void {
+        draw();
     }
 
     generateUI(): GUIType {

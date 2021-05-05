@@ -70,7 +70,7 @@ function reset(): void {
     draw();
 }
 
-function setupP5(p: P5): void {
+function setupP5(p: p5Instance): void {
     p5 = p;
     squareColor = p5.color(sColor);
     p5.frameRate(60);
