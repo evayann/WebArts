@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/util";
+import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
 
 let armLength: number = Math.min(halfWidth, halfHeight) / 2;
 

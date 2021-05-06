@@ -1,7 +1,7 @@
 <template>
     <div>
         <router-view />
-        <Logo :codePath="`https://github.com/evayann/WebArts/blob/main/src/${effectName}/${effectName}.ts`"></Logo>
+        <Logo :codePath="`https://github.com/evayann/WebArts/blob/main/src/arts/${effectName}/${effectName.charAt(0).toUpperCase() + effectName.slice(1)}.vue`"></Logo>
     </div>
 </template>
 

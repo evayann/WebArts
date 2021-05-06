@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/util";
+import {ArtVue, menu, color, GUIType} from "@/arts/util";
 // Inspired by https://www.reddit.com/r/generative/comments/ljiy5d/can_a_circle_rotate/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 
 let p5: p5Instance;

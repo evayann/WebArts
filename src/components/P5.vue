@@ -4,6 +4,7 @@ import {h, VNode} from "vue";
 import {p5InstanceExtensions} from "p5";
 import {Options, Vue} from "vue-class-component";
 
+// region Events
 const initialEvents = [
     "preload", "setup", "draw",
     "deviceMoved", "deviceTurned", "deviceShaken",
@@ -15,13 +16,16 @@ const initialEvents = [
     "touchStarted", "touchMoved", "touchEnded",
     "windowResized"
 ];
+// endregion Events
 
+// region Utilities
 export let width: number = window.innerWidth;
 export let height: number = window.innerHeight;
 export let halfWidth: number = width / 2;
 export let halfHeight: number = height / 2;
 export let quarterWidth: number = halfWidth / 2;
 export let quarterHeight: number = halfHeight / 2;
+// endregion Utilities
 
 @Options({
     name: "P5Vue",
@@ -36,16 +40,13 @@ export class P5Vue extends Vue {
     private canvas3D!: boolean;
     private p5: P5;
 
-    setup(p5: p5InstanceExtensions): void {
+    private setup(p5: p5InstanceExtensions): void {
         console.log(`Log setup canvas of size : ${width}x${height} of type ${this.canvas3D ? "3D" : "2D"}`);
-        if (this.canvas3D)
-            p5.createCanvas(width, height, p5.WEBGL);
-        else
-            p5.createCanvas(width, height);
-        this.resize(p5);
+        p5.createCanvas(width, height, this.canvas3D ? p5.WEBGL : p5.P2D);
+        P5Vue.resize(p5);
     }
 
-    resize(p5: p5InstanceExtensions): void {
+    private static resize(p5: p5InstanceExtensions): void {
         console.log("Auto resize");
 
         width = window.innerWidth;
@@ -66,8 +67,9 @@ export class P5Vue extends Vue {
 
             // Default methods
             sketch["setup"] = this.setup;
-            sketch["windowResized"] = this.resize;
+            sketch["windowResized"] = P5Vue.resize;
 
+            // Setup all events
             for (const p5EventName of initialEvents) {
                 const vueEventName: string = p5EventName.toLowerCase();
                 const savedCallback = sketch[p5EventName];

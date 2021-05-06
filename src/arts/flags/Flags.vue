@@ -4,14 +4,13 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, list, GUIType} from "@/util";
+import {ArtVue, seed, menu, list, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 
 let shaderGraph: P5.Graphics;
 let shader: P5.Shader;
 
-let seed = 0;
 let time = 0;
 let speed = 1;
 let nbWave = 2;
@@ -218,13 +217,13 @@ export default class Art extends ArtVue {
                     menu("speed", .1, 5, .1, value => speed = value),
                     list("flags", Object.keys(flagsFunction), value => {
                         currentFlag = flagsFunction[value];
-                        seed = p5.floor(p5.random() * 1500);
+                        this.randomizeSeed();
                     }),
                     menu("offset", 0, 40, .1, value => offset = value),
                     menu("nbSquareInside", 0, 4, 1, value => recursion = value),
                     menu("nbWave", 0, 5, 1, value => nbWave = value),
                 ],
-                "Misc": [this.pause()]
+                "Misc": [this.pause(), this.seed()]
             }
         });
     }

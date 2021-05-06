@@ -1,5 +1,5 @@
 <template>
-    <div class="footer">
+    <foooter class="footer">
         <div class="content">
             <a href="https://github.com/evayann">
                 <img src="@/assets/github.png" alt="logo-github"/>
@@ -18,7 +18,7 @@
             </a>
             <p> Twitter </p>
         </div>
-    </div>
+    </foooter>
 </template>
 
 <script lang="ts">
@@ -36,16 +36,16 @@ export default class Footer extends Vue {}
 
 .footer {
     display: flex;
-    padding: 2em;
+    padding: 2em 0 2em 0;
     align-items: center;
     justify-content: center;
     text-align: center;
 }
 
 .footer a img {
-    padding: 0 2em 0 2em;
-    width: 150px;
-    height: 150px;
+    padding: 0 1em 0 1em;
+    width: 5rem;
+    height: 5rem;
     background: transparent;
 }
 

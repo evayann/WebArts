@@ -26,17 +26,18 @@ export default class Logo extends Vue {
 <style scoped>
 
 div.logoImage {
-    width: 200px;
+    width: 30%;
     position: fixed;
-    bottom: 5px;
-    right: 5px;
+    bottom: .5%;
+    right: .5%;
     display: flex;
     flex-direction: row;
+    justify-content: right;
 }
 
 div.logoImage a img {
-    width: 96px;
-    height: 96px;
+    width: 5rem;
+    height: 5rem;
     opacity: 0.5;
     background: transparent;
 }

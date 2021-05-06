@@ -35,6 +35,7 @@ export default class Menu extends UtilVue {
 
 .menu {
     display: flex;
+    flex-wrap: wrap;
     padding: .6em 0 0 0;
     justify-content: center;
 }
@@ -59,6 +60,7 @@ export default class Menu extends UtilVue {
 
 .menu > a:nth-child(n) {
     transform: translateX(calc(-5% * var(--pos))); /* var(--pos) is given by vue binding */
+    margin-bottom: 1%;
 }
 
 .menu > a:hover {

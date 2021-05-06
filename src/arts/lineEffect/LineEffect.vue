@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, button, color, switchButton, GUIType} from "@/util";
+import {ArtVue, seed, menu, button, color, switchButton, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let useColor = true;

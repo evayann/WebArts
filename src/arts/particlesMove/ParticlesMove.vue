@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/util";
+import {ArtVue, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let hue = 0;

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/util";
+import {ArtVue, menu, GUIType} from "@/arts/util";
 // Implemented from https://medium.com/@r.l.bongers/visual-effect-analysis-animated-raindrops-682b83b87e09
 
 let p5: p5Instance;

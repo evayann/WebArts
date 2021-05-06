@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/util";
+import {ArtVue, seed, menu, GUIType} from "@/arts/util";
 // Inspired from https://openprocessing.org/sketch/566877
 
 let p5: p5Instance;
@@ -16,7 +16,6 @@ let maxSize = 5;
 let alpha = 5;
 let speed = 1;
 let doBg = true;
-let seed: number;
 
 class Particle {
     private pos: P5.Vector;
@@ -100,7 +99,6 @@ function setupP5(p: p5Instance): void {
     p5 = p;
     p5.noStroke();
     p5.frameRate(60);
-    seed = p5.random(0, 100000);
     reset();
 }
 
@@ -138,7 +136,7 @@ export default class Art extends ArtVue {
                     menu("maxSize", 2, 20, 1, value => maxSize = value)
                 ],
                 "Misc": [
-                    this.seed(newSeed => {seed = newSeed; reset();}, seed),
+                    this.seed(),
                     this.pause(),
                     this.reset(reset)
                 ]

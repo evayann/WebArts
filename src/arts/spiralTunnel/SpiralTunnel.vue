@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/util";
+import {ArtVue, menu, color, GUIType} from "@/arts/util";
 // Recreate from gif : https://jacobjoaquin.tumblr.com/post/108139240121/red-yellow-spiral-tunnel-built-with-processing
 
 let p5: p5Instance;

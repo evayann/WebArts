@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/util";
+import {ArtVue, menu, color, GUIType} from "@/arts/util";
 
 // Inspired by https://www.reddit.com/r/loadingicon/comments/lem7o7/tube_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 

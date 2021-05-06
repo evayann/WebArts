@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, button, color, GUIType} from "@/util";
+import {ArtVue, seed, menu, button, color, GUIType} from "@/arts/util";
 
 let widthGrid = 80;
 let heightGrid = 80;

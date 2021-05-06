@@ -47,7 +47,7 @@ export default class Effect extends UtilVue {
 <style scoped>
 a {
     display: block;
-    width: 400px;
+    width: 20em;
     color: #bf2e2e;
     text-decoration: none;
     margin: 0 30px 40px 30px;
@@ -67,8 +67,8 @@ a:hover h2 {
 
 a img, a div {
     display: block;
-    width: 400px;
-    height: 225px;
+    width: 20em;
+    height: 12em;
     background: #bf2e2e;
 }
 

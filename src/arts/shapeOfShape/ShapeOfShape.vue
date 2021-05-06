@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/util";
+import {ArtVue, menu, color, GUIType} from "@/arts/util";
 // Inspired by https://mobile.twitter.com/beesandbombs/status/1334541858366775298
 
 let p5: p5Instance;
@@ -23,9 +23,9 @@ let amplitude = 1;
 
 let nbSegment = 3;
 let elements = 60;
-let xRadius = 450;
-let yRadius = 385;
-let size = 160;
+let xRadius = 300;
+let yRadius = 300;
+let size = 70;
 
 function generatePoints(): { index: number, point: number[] }[] {
     const points: { index: number, point: number[] }[] = [];
@@ -88,6 +88,8 @@ function draw(): void {
 
 function reset(): void {
     angle = p5.TAU / nbSegment;
+    partA.resizeCanvas(width, height);
+    partB.resizeCanvas(width, height);
     draw();
 }
 

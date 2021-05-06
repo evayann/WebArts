@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/util";
+import {ArtVue, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 // Inspired from https://www.reddit.com/r/loadingicon/comments/m4yept/overlapping_waves_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
