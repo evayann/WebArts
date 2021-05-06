@@ -1,5 +1,5 @@
 <template>
-    <foooter class="footer">
+    <footer class="footer">
         <div class="content">
             <a href="https://github.com/evayann">
                 <img src="@/assets/github.png" alt="logo-github"/>
@@ -18,7 +18,7 @@
             </a>
             <p> Twitter </p>
         </div>
-    </foooter>
+    </footer>
 </template>
 
 <script lang="ts">

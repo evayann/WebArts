@@ -39,7 +39,18 @@ const routes: Array<RouteRecordRaw> = [
 
 const router = createRouter({
     history: createWebHashHistory(process.env.BASE_URL),
-    routes
+    routes,
+    scrollBehavior(to, from, savedPosition): unknown {
+        if (savedPosition) {
+            return savedPosition;
+        } else {
+            if (to.hash) {
+                const el = document.getElementById(to.hash.slice(1));
+                if (el)
+                    window.scrollTo(0, el.offsetTop);
+            }
+        }
+    }
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

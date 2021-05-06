@@ -1,8 +1,9 @@
 <template>
     <div class="menu">
-        <a v-for="(item, index) in items" :key="item" :href="`#${item}`" :style="`--pos: ${index}`">
+        <h3> {{ name }} : </h3>
+        <router-link v-for="(item, index) in items" :key="item" :to="`/#${item}`" :style="`--pos: ${index}`">
             {{ parseText(item) }}
-        </a>
+        </router-link>
     </div>
 </template>
 
@@ -13,14 +14,11 @@ import {UtilVue} from "@/util";
 @Options({
     name: "CategoriesMenu",
     props: {
+        name: String,
         items: Array
     }
 })
-
-export default class Menu extends UtilVue {
-    private items!: Array<string>;
-}
-
+export default class Menu extends UtilVue {}
 </script>
 
 <style scoped>

@@ -10,9 +10,12 @@
             </option>
         </select>
 
-        <p id="prez" v-html="t('presentation')"></p>
+        <div id="prez">
+            <h3> {{ t("welcome") }} </h3>
+            <p v-html="t('presentation')"></p>
+        </div>
 
-        <CategoriesMenu :items=this.$store.getters.categories></CategoriesMenu>
+        <CategoriesMenu :name="t('menuName')" :items=this.$store.getters.categories></CategoriesMenu>
 
         <div v-for="effect in this.$store.getters.effects" :key="effect.category">
             <Category :category=effect.category :arts=effect.arts></Category>
@@ -35,9 +38,7 @@ export default {
         Footer
     },
     setup(): unknown {
-        const { t , locale } = useI18n({
-            useScope: "local"
-        });
+        const { t , locale } = useI18n({useScope: "local"});
         const langs = [{name: "Français", id:"fr"}, {name: "English", id:"en"}];
         return {t, locale, langs };
     }
@@ -58,7 +59,6 @@ export default {
 body {
     margin: 0;
     height: 100%;
-    z-index: 20;
 }
 
 #title h1 {
@@ -67,7 +67,7 @@ body {
 }
 
 #prez {
-    margin: 3em;
+    margin: 3em 20% 3em 20%;
     padding: 2em;
     background-color: var(--a-color);
 }
@@ -82,7 +82,7 @@ body {
 }
 
 #app {
-    font-family: 'Comfortaa', cursive;
+    font-family: "Comfortaa", cursive;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
@@ -95,11 +95,15 @@ body {
 {
     "en": {
         "title": "Generative Art",
-        "presentation": "<h3>Welcome !</h3><br/>You will find here many procedural effects made with p5js in Typescript and the site is made in Vue3.<br/>I hope you will like it !<br/>To support me you can share !"
+        "menuName": "Effects type",
+        "welcome": "Welcome !",
+        "presentation": "You will find here many procedural effects made with p5js in Typescript and the site is made in Vue3.<br/>I hope you will like it !<br/>To support me you can share !"
     },
     "fr": {
         "title": "Art procédurale",
-        "presentation": "<h3>Bienvenue !</h3><br/>Vous trouverez ici de nombreux effets procéduraux fait avec p5js en Typescript et le site est fait en Vue3.<br/>J'espère que cela vous plaira !<br/>Pour me soutenir vous pouvez partager !"
+        "menuName": "Les type d'effets",
+        "welcome": "Bienvenue !",
+        "presentation": "Vous trouverez ici de nombreux effets procéduraux fait avec p5js en Typescript et le site est fait en Vue3.<br/>J'espère que cela vous plaira !<br/>Pour me soutenir vous pouvez partager !"
     }
 }
 </i18n>
