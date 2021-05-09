@@ -27,8 +27,6 @@ export default class Menu extends UtilVue {}
 /* Variables */
 * {
     --menu-item-size: 3em;
-    --dark-a-color: #175b52;
-    --white-color: rgba(255, 255, 255, 0.84);
 }
 
 .menu {

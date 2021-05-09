@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let shaderGraph: P5.Graphics;
@@ -194,15 +194,14 @@ export default class Art extends ArtVue {
             speed: speed,
         };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 10, .1, value => speed = value),
-                    menu("clamping", 1, 5, .01, value => clamping = value),
-                    button("displayCircle", value => displayCircle = value)
+                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    menu("Clamping", clamping, 1, 5, .01, value => clamping = value),
+                    switchButton("Display Radius", "Remove Radius", value => displayCircle = value)
                 ],
                 "Visual & Color" : [
-                    color("bColor", value => ballColor = this.p5.color(value)),
+                    color("Ball", bColor, value => ballColor = this.p5.color(value)),
                 ],
                 "Misc": [this.pause()]
             }

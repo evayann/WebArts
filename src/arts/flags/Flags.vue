@@ -203,25 +203,17 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            flags: "drawFlagFrench",
-            speed: speed,
-            nbWave: nbWave,
-            offset: offset,
-            nbSquareInside: recursion
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speed = value),
-                    list("flags", Object.keys(flagsFunction), value => {
+                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    list("Current Flag", "drawFlagFrench", Object.keys(flagsFunction), value => {
                         currentFlag = flagsFunction[value];
                         this.randomizeSeed();
                     }),
-                    menu("offset", 0, 40, .1, value => offset = value),
-                    menu("nbSquareInside", 0, 4, 1, value => recursion = value),
-                    menu("nbWave", 0, 5, 1, value => nbWave = value),
+                    menu("Offset", offset, 0, 40, .1, value => offset = value),
+                    menu("Number Recursion", recursion, 0, 4, 1, value => recursion = value),
+                    menu("Number Wave", nbWave, 0, 5, 1, value => nbWave = value),
                 ],
                 "Misc": [this.pause(), this.seed()]
             }

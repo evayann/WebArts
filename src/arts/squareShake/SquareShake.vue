@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 const sColor = "#35d492";
@@ -108,22 +108,15 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            cycle: cycle,
-            offset: offset,
-            squareColor: sColor,
-            rotate: rotate
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cycle", .1, 2, .1, value => cycle = value),
-                    menu("offset", 0, Math.PI * 2, .1, value => offset = value),
-                    button("rotate", value => {rotate = value; reset();})
+                    menu("Cycle", cycle, .1, 2, .1, value => cycle = value),
+                    menu("Offset", offset, 0, Math.PI * 2, .1, value => offset = value),
+                    switchButton("Rotation", "No Rotation", value => {rotate = value; reset();})
                 ],
                 "Visual & Color": [
-                    color("squareColor", value => squareColor = p5.color(value))
+                    color("Element", sColor, value => squareColor = p5.color(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

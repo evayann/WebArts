@@ -369,23 +369,13 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            nbLinesToDraw: nbLinesToDraw,
-            skyLimit: cp.skyLimit,
-            groundOff: cp.groundOff,
-            intersectPos: cp.intersectPos,
-            useColor: useColor,
-            pause: () => undefined,
-            reset: () => undefined
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("nbLinesToDraw", .1, 100, 1, value => cp.drawer.setStep(value)),
-                    menu("intersectPos", .05, .95, .01, value => { cp.intersectPos = value; reset(); }),
-                    menu("skyLimit", .5, .9, .05, value => { cp.skyLimit = value; reset(); }),
-                    menu("groundOff", 0, .2, .01, value => { cp.groundOff = value; reset(); }),
+                    menu("Line per iter", nbLinesToDraw, .1, 100, 1, value => cp.drawer.setStep(value)),
+                    menu("Intersection Position", cp.intersectPos, .05, .95, .01, value => { cp.intersectPos = value; reset(); }),
+                    menu("Limit of Sky", cp.skyLimit, .5, .9, .05, value => { cp.skyLimit = value; reset(); }),
+                    menu("Ground Position", cp.groundOff, 0, .2, .01, value => { cp.groundOff = value; reset(); }),
                 ],
                 "Visual & Color": [
                     button("useColor", value => { cp.colors.useColor(value); reset()} ),

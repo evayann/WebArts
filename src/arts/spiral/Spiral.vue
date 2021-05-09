@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 
@@ -136,33 +136,22 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            size: size,
-            zoom: zoom,
-            speed: speed,
-            nbWave: nbWave,
-            waveColor: wColor,
-            backgroundColor: bgColor,
-            amplitude: amplitude,
-            useShader: useShader
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 10, .1, value => speed = value),
-                    menu("zoom", .1, 3, .1, value => zoom = value),
-                    menu("nbWave", 1, 7, 1, value => nbWave = value),
-                    menu("amplitude", .1, 2, .1, value => amplitude = value),
+                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    menu("Zoom", zoom, .1, 3, .1, value => zoom = value),
+                    menu("Number Waves", nbWave, 1, 7, 1, value => nbWave = value),
+                    menu("Amplitude", amplitude, .1, 2, .1, value => amplitude = value),
                 ],
                 "Visual & Color": [
-                    color("waveColor", value => setWaveColor(value)),
-                    color("backgroundColor", value => setBackgroundColor(value))
+                    color("Wave", waveColor, value => setWaveColor(value)),
+                    color("Background", backgroundColor, value => setBackgroundColor(value))
                 ],
                 "Misc": [
                     this.pause(),
-                    menu("size", 1, 30, 1, value => size = value),
-                    button("useShader", value => useShader = value)
+                    menu("Block Size", size, 1, 30, 1, value => size = value),
+                    switchButton("Shader", "Canvas", value => useShader = value)
                 ]
             }
         });

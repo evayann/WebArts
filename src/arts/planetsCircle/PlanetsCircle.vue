@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, button, GUIType} from "@/arts/util";
+import {ArtVue, seed, menu, switchButton, GUIType} from "@/arts/util";
 // From https://github.com/cmllngf/planet_1/blob/master/sketch.js by cmllngf
 
 
@@ -17,7 +17,7 @@ let alpha = 90;
 let nbPlanets = 8;
 let useBelt = true;
 const beltProba = 0.5;
-let useMoon = true;
+let useMoon = false;
 const moonProba = 0.5;
 let maxSize = 100;
 let minSize = 20;
@@ -171,34 +171,22 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            nbPlanets: nbPlanets,
-            maxSize: maxSize,
-            minSize: minSize,
-            alpha: alpha,
-            seed: seed,
-            colorFactor: colorFactor,
-            rotateSpeedFactor: rotateSpeedFactor,
-            useBelt: useBelt,
-            useMoon: useMoon
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("nbPlanets", 1, 20, 1, value => { nbPlanets = value; reset(); }),
-                    menu("maxSize", 50, 100, 1, value => { maxSize = value; reset(); }),
-                    menu("minSize", 10, 50, 1, value => { minSize = value; reset(); }),
-                    button("useBelt", value => { useBelt = value; reset(); }),
-                    button("useMoon", value => { useMoon = value; reset(); }),
-                    menu("rotateSpeedFactor", .1, 5, .1, value => rotateSpeedFactor = value)
+                    menu("Number Planets", nbPlanets, 1, 20, 1, value => { nbPlanets = value; reset(); }),
+                    menu("Max Planet Size", maxSize, 50, 100, 1, value => { maxSize = value; reset(); }),
+                    menu("Min Planet Size", minSize, 10, 50, 1, value => { minSize = value; reset(); }),
+                    switchButton("No Belt", "Belt", value => { useBelt = value; reset(); }, useBelt),
+                    switchButton("Moon", "No Moon", value => { useMoon = value; reset(); }),
+                    menu("Rotation Speed", rotateSpeedFactor, .1, 5, .1, value => rotateSpeedFactor = value)
                 ],
                 "Visual & Color": [
-                    menu("alpha", 0, 255, 1, value => {
+                    menu("Alpha", alpha, 0, 255, 1, value => {
                         alpha = value;
                         backgroundColor.setAlpha(alpha);
                     }),
-                    menu("colorFactor", 0, 50, 1, value => colorFactor = value)
+                    menu("Color Factor", colorFactor, 0, 50, 1, value => colorFactor = value)
                 ],
                 "Misc": [
                     this.seed(),

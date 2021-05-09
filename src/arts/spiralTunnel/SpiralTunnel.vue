@@ -29,8 +29,6 @@ let globalDepth: number;
 let elementPerDepth = 8;
 let angleRotation: number;
 
-let pause = false;
-
 let coloredPositions: number[][] = [];
 
 function computeColor(currDepth: number, el: number): P5.Color {
@@ -122,30 +120,19 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            cycle: cycleFactor,
-            space: distanceBetweenDepth,
-            strokeSize: strokeSize,
-            fromColor: fColor,
-            toColor: tColor,
-            strokeColor: sColor,
-            nbElement: elementPerDepth,
-            move: move
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cycle", .5, 2, .01, value => {cycleFactor = value; resetPosition();}),
-                    menu("nbElement", 2, 23, 2, value => {elementPerDepth = value; reset();}),
-                    menu("space", 20, 100, 1, value => {distanceBetweenDepth = value; reset();}),
-                    menu("move", 0, 50, 1, value => {move = value; reset();}),
+                    menu("Cycle", cycleFactor, .5, 2, .01, value => {cycleFactor = value; resetPosition();}),
+                    menu("Number Wall", elementPerDepth, 2, 23, 2, value => {elementPerDepth = value; reset();}),
+                    menu("Distance", distanceBetweenDepth, 20, 100, 1, value => {distanceBetweenDepth = value; reset();}),
+                    menu("Overlap", move, 0, 50, 1, value => {move = value; reset();}),
                 ],
                 "Visual & Color": [
-                    menu("strokeSize", .1, 5, .1, value => strokeSize = value),
-                    color("fromColor", value => fromColor = p5.color(value)),
-                    color("toColor", value => toColor = p5.color(value)),
-                    color("strokeColor", value => strokeColor = p5.color(value))
+                    menu("Stroke Size", strokeSize, .1, 5, .1, value => strokeSize = value),
+                    color("From", fColor, value => fromColor = p5.color(value)),
+                    color("To", tColor, value => toColor = p5.color(value)),
+                    color("Stroke", strokeColor, value => strokeColor = p5.color(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, seed, menu, switchButton, color, GUIType} from "@/arts/util";
 let p5: p5Instance;
 
 let perlinGraph: P5.Graphics;
@@ -208,36 +208,22 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            dirX: dirX,
-            dirY: dirY,
-            lines: lines,
-            perlinScale: perlinScale,
-            color1: color1,
-            color2: color2,
-            color3: color3,
-            color4: color4,
-            color5: color5,
-            colorStroke: colorStroke
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speed = value),
-                    menu("dirX", -1, 1, 1, value => dirX = value),
-                    menu("dirY", -1, 1, 1, value => dirY = value),
-                    button("lines", value => lines = value),
-                    menu("perlinScale", 75, 1000, .1, value => perlinScale = value)
+                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("X Direction", dirX, -1, 1, 1, value => dirX = value),
+                    menu("Y Direction", dirY, -1, 1, 1, value => dirY = value),
+                    switchButton("Lines", "No lines", value => lines = value),
+                    menu("Noise Scale", perlinScale, 75, 1000, .1, value => perlinScale = value)
                 ],
                 "Visual & Color": [
-                    color("color1", value => p5Color1 = p5.color(value)),
-                    color("color2", value => p5Color2 = p5.color(value)),
-                    color("color3", value => p5Color3 = p5.color(value)),
-                    color("color4", value => p5Color4 = p5.color(value)),
-                    color("color5", value => p5Color5 = p5.color(value)),
-                    color("colorStroke", value => p5ColorStroke = p5.color(value))
+                    color("color1", color1, value => p5Color1 = p5.color(value)),
+                    color("color2", color2, value => p5Color2 = p5.color(value)),
+                    color("color3", color3, value => p5Color3 = p5.color(value)),
+                    color("color4", color4, value => p5Color4 = p5.color(value)),
+                    color("color5", color5, value => p5Color5 = p5.color(value)),
+                    color("colorStroke", colorStroke, value => p5ColorStroke = p5.color(value))
                 ],
                 "Misc": [
                     this.seed(() => reset()),

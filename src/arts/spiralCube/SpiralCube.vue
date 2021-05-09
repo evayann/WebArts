@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 // Inspiration of https://twitter.com/beesandbombs/status/1334573053053972485
 
 let p5: p5Instance;
@@ -81,28 +81,18 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speedFactor,
-            wave: waveFactor,
-            strokeSize: strokeSize,
-            strokeColor: sColor,
-            backgroundColor: bColor,
-            scaleBox: scaleBox,
-            cubeSize: cubeSize
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cubeSize", 30, 300, 1, value => {cubeSize = value; reset();}),
-                    button("scaleBox", value => scaleBox = value),
-                    menu("speed", .7, 1.3, .01, value => speedFactor = value),
-                    menu("wave", .01, 1, .01, value => waveFactor = value),
+                    menu("Speed", speedFactor, .7, 1.3, .01, value => speedFactor = value),
+                    menu("Cube Size", cubeSize, 30, 300, 1, value => {cubeSize = value; reset();}),
+                    switchButton("Different Size", "Same Size", value => scaleBox = value),
+                    menu("Wave", waveFactor, .01, 1, .01, value => waveFactor = value),
                 ],
                 "Visual & Color": [
-                    menu("strokeSize", .1, 5, .1, value => strokeSize = value),
-                    color("strokeColor", value => strokeColor = p5.color(value)),
-                    color("backgroundColor", value => backgroundColor = p5.color(value))
+                    menu("Stroke Size", strokeSize, .1, 5, .1, value => strokeSize = value),
+                    color("Stroke", strokeColor, value => strokeColor = p5.color(value)),
+                    color("Background", backgroundColor, value => backgroundColor = p5.color(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

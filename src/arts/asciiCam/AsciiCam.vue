@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, P5, p5Instance} from "@/components/P5.vue";
-import {ArtVue, GUIType, menu, button, color, switchButton} from "@/arts/util";
+import {ArtVue, GUIType, menu, button, text, color, switchButton} from "@/arts/util";
 
 const fps = 30;
 let nbColumn = 120;
@@ -119,33 +119,19 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params: Record<string, unknown> = {
-            nbRow: nbRow,
-            nbColumn: nbColumn,
-            xOffset: xOffset,
-            yOffset: yOffset,
-            useText: useText,
-            useColor: useColor,
-            backgroundColor: bColor,
-            characters: characters,
-            camOn: () => undefined,
-            pause: () =>  undefined
-        };
-
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("nbRow",10, width / 8, 1, (value) => { nbRow = value; resetParams(this.p5); }),
-                    menu("nbColumn", 10, height / 8, 1, (value) => { nbColumn = value; resetParams(this.p5); }),
-                    menu("xOffset", 0, 1, .01, (value) => xOffset = value),
-                    menu("yOffset", 0, 1, .01, (value) => yOffset = value),
-                    button("useText", (value) => { useText = value; resetParams(this.p5); }),
-                    button("characters", (value) => { characters = value; resetParams(this.p5); })
+                    menu("Number Row", nbRow, 10, width / 8, 1, (value) => { nbRow = value; resetParams(this.p5); }),
+                    menu("Number Column", nbColumn, 10, height / 8, 1, (value) => { nbColumn = value; resetParams(this.p5); }),
+                    menu("xOffset", xOffset, 0, 1, .01, (value) => xOffset = value),
+                    menu("yOffset", yOffset, 0, 1, .01, (value) => yOffset = value),
+                    switchButton("Use Text", "Use Circle", (value) => { useText = value; resetParams(this.p5); }),
+                    text("Characters", characters, (value) => { characters = value; resetParams(this.p5); })
                 ],
                 "Visual & Color": [
-                    button("useColor", (value) => { useColor = value; resetParams(this.p5); }),
-                    color("backgroundColor", (value) => {
+                    switchButton("Color", "Black & White", (value) => { useColor = value; resetParams(this.p5); }),
+                    color("backgroundColor", bColor, (value) => {
                             backgroundColor = this.p5.color(value);
                             invertColor = this.p5.color(255 - this.p5.red(backgroundColor),
                                 255 - this.p5.green(backgroundColor), 255 - this.p5.blue(backgroundColor));

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 // Recreate from gif : https://twitter.com/verytiredrobot/status/1345448387949309954?s=12
 
 let p5: p5Instance;
@@ -153,35 +153,20 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            updateTime: updateTime,
-            nbGeneration: gridHeight,
-            spaceOffset: spaceOffset,
-            rounded: rounded,
-            alpha: alpha,
-            strokeSize: 7,
-            fillColor: fColor,
-            emptyColor: eColor,
-            initSegment: initSegment,
-            pause: () => undefined,
-            reset: () => undefined
-        };
-
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("updateTime", .1, 5, .1, value => updateTime = value),
-                    menu("initSegment", 3, 7, 1, value => {initSegment = value; reset(); }),
-                    menu("nbGeneration", 5, 40, 1, value => {gridHeight = value; reset(); }),
-                    menu("spaceOffset", 15, 25, 1, value => {spaceOffset = value; setColor(); }),
+                    menu("Update Time", updateTime, .1, 5, .1, value => updateTime = value),
+                    menu("Number segment", initSegment, 3, 7, 1, value => {initSegment = value; reset(); }),
+                    menu("Number Generations", gridHeight, 5, 40, 1, value => {gridHeight = value; reset(); }),
+                    menu("Offset", spaceOffset, 15, 25, 1, value => {spaceOffset = value; setColor(); }),
                 ],
                 "Visual & Color": [
-                    button("rounded", value => {rounded = value; setDrawer(rounded)}),
-                    color("fillColor", value => fillColor = value),
-                    color("emptyColor", value => emptyColor = value),
-                    menu("alpha", 0, 255, 1, value => {alpha = value; setColor(); }),
-                    menu("strokeSize", 1, 12, .1, value => {this.p5.strokeWeight(value); setColor(); }),
+                    switchButton("Rounded", "Straight", value => {rounded = value; setDrawer(rounded)}),
+                    color("Fill", fColor,value => fillColor = value),
+                    color("Empty", eColor, value => emptyColor = value),
+                    menu("Alpha", alpha, 0, 255, 1, value => {alpha = value; setColor(); }),
+                    menu("Stroke Size", 7, 1, 12, .1, value => {this.p5.strokeWeight(value); setColor(); }),
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

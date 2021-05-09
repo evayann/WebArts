@@ -122,24 +122,14 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            opacity: opacity,
-            xOffset: xOffset,
-            yOffset: yOffset,
-            spaceOffset: spaceOffset,
-            pause: () => undefined,
-            reset: () => undefined
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 10, .1, value => speed = value),
-                    menu("spaceOffset", 1.005, 2, .005, value => spaceOffset = value),
-                    menu("xOffset", 0, 2, .1, value => xOffset = value),
-                    menu("yOffset", 0, 500, 1, value => yOffset = value),
-                    menu("opacity", .3, 1, .05, value => opacity = value),
+                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    menu("Offset", spaceOffset, 1.005, 2, .005, value => spaceOffset = value),
+                    menu("xOffset", xOffset, 0, 2, .1, value => xOffset = value),
+                    menu("yOffset", yOffset, 0, 500, 1, value => yOffset = value),
+                    menu("Opacity", opacity, .3, 1, .05, value => opacity = value),
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

@@ -88,18 +88,13 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            nbCircle: nbCircle,
-            alpha: alpha
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("nbCircle", 5, 50, 1, value => { nbCircle = value; reset(); }),
+                    menu("Number Circle", nbCircle, 5, 50, 1, value => { nbCircle = value; reset(); }),
                 ],
                 "Visual & Color": [
-                    menu("alpha", 0, 255, 1, value => alpha = value)
+                    menu("Alpha", alpha, 0, 255, 1, value => alpha = value)
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

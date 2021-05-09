@@ -50,18 +50,12 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speedFactor: speedFactor,
-            nbWater: nbWater,
-            nbDropWater: nbDropWater
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speedFactor", .1, 5, .1, value => speedFactor = value),
-                    menu("nbDropWater", 20, 400, 1, value => nbDropWater = value),
-                    menu("nbWater", 10, 200, 1, value => nbWater = value)
+                    menu("Speed", speedFactor, .1, 5, .1, value => speedFactor = value),
+                    menu("Number Drop", nbDropWater, 20, 400, 1, value => nbDropWater = value),
+                    menu("Water Explosion", nbWater, 10, 200, 1, value => nbWater = value)
                 ],
                 "Misc": [this.pause()]
             }

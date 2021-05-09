@@ -77,24 +77,16 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            tilt: tilt,
-            cycle: cycle,
-            strokeColorFrom: sfColor,
-            strokeColorTo: stColor,
-            nbSegment: nbSegment,
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cycle", .5, 5, .1, value => cycle = value),
-                    menu("nbSegment", 3, 50, 1, value => { nbSegment = value; reset(); }),
-                    menu("tilt", 200, 400, 1, value => { tilt = value; reset(); }),
+                    menu("Cycle", cycle, .5, 5, .1, value => cycle = value),
+                    menu("Number Segment", nbSegment, 3, 50, 1, value => { nbSegment = value; reset(); }),
+                    menu("Tilt", tilt, 200, 400, 1, value => { tilt = value; reset(); }),
                 ],
                 "Visual & Color": [
-                    color("strokeColorFrom", value => strokeFromColor = this.p5.color(value)),
-                    color("strokeColorTo", value => strokeToColor = this.p5.color(value)),
+                    color("From", sfColor, value => strokeFromColor = this.p5.color(value)),
+                    color("To", stColor, value => strokeToColor = this.p5.color(value)),
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

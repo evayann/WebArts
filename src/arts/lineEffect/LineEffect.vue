@@ -183,32 +183,20 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            intersect: () => undefined,
-            speed: speedFactor,
-            nbPts: nbPts,
-            distToDraw: distToDraw,
-            strokeSize: strokeSize,
-            useColor: useColor,
-            fromColor: fColor,
-            toColor: tColor,
-            backgroundColor: bColor
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speedFactor = value),
-                    menu("nbPts", 25, 300, 1, value => { nbPts = value; reset(); }),
-                    menu("strokeSize", .1, 5, .1, value => strokeSize = value),
-                    menu("distToDraw", 0, 500, 1, value => distToDraw = value),
-                    switchButton("intersect", "crossing", () => crossing = !crossing),
+                    menu("Speed", speedFactor, .1, 5, .1, value => speedFactor = value),
+                    menu("Number Points", nbPts, 25, 300, 1, value => { nbPts = value; reset(); }),
+                    menu("Stroke Size", strokeSize, .1, 5, .1, value => strokeSize = value),
+                    menu("Distance to Draw", distToDraw, 0, 500, 1, value => distToDraw = value),
+                    switchButton("Intersect", "Crossing", () => crossing = !crossing),
                 ],
                 "Visual & Color" : [
-                    button("useColor", value => useColor = value),
-                    color("fromColor", value => fromColor = this.p5.color(value)),
-                    color("toColor", value => toColor = this.p5.color(value)),
-                    color("backgroundColor", value => backgroundColor = this.p5.color(value)),
+                    switchButton("Use Color", "White", value => useColor = value),
+                    color("From", fColor, value => fromColor = this.p5.color(value)),
+                    color("To", tColor, value => toColor = this.p5.color(value)),
+                    color("Background", bColor, value => backgroundColor = this.p5.color(value)),
                 ],
                 "Misc": [this.pause(), this.seed(), this.reset(reset)]
             }

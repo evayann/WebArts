@@ -177,26 +177,17 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            sideLength: sideLength,
-            nbCube: nbCube,
-            stack: generationMethod,
-            widthOffset: widthOffset,
-            heightOffset: heightOffset,
-            bColor: bColor,
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("sideLength", 10, 200, 1, value => {sideLength = value; cubeManager.recomputeCubes(); }),
-                    menu("nbCube", 5, 200, 1, value => {nbCube = value; reset(); }),
-                    switchButton("stack", "block", value => { generationMethod = value; reset(); }),
+                    menu("Cube length", sideLength, 10, 200, 1, value => {sideLength = value; cubeManager.recomputeCubes(); }),
+                    menu("Number Cube", nbCube, 5, 200, 1, value => {nbCube = value; reset(); }),
+                    switchButton("Stack", "Block", value => { generationMethod = value; reset(); }),
                 ],
                 "Visual & Color": [
-                    color("bColor", value => computeColor(value)),
-                    menu("widthOffset", -.5, .5, .01, value => widthOffset = value),
-                    menu("heightOffset", -.5, .5, .01, value => heightOffset = value),
+                    color("Background", bColor, value => computeColor(value)),
+                    menu("X Offset", widthOffset, -.5, .5, .01, value => widthOffset = value),
+                    menu("Y Offset", heightOffset, -.5, .5, .01, value => heightOffset = value),
                 ],
                 "Misc": [this.reset(reset)]
             }

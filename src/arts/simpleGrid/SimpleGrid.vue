@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, seed, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let widthGrid = 80;
 let heightGrid = 80;
@@ -68,26 +68,19 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            width: widthGrid, height: heightGrid, useColor: useColor,
-            backgroundColor: bColor, fromColor: fColor, toColor: tColor,
-            spaceBetweenLine: spaceBetweenLine,
-            nbLines: nbLines,
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("width", 10, 500, 1, value => {widthGrid = value; draw(this.p5);}),
-                    menu("height", 10, 500, 1, value => {heightGrid = value; draw(this.p5);}),
-                    menu("spaceBetweenLine", 1, 10, 1, value => {spaceBetweenLine = value; draw(this.p5);}),
-                    menu("nbLines", 1, 5, 1, value => {nbLines = value; draw(this.p5);}),
+                    menu("Grid Width",widthGrid, 10, 500, 1, value => {widthGrid = value; draw(this.p5);}),
+                    menu("Grid Height", heightGrid, 10, 500, 1, value => {heightGrid = value; draw(this.p5);}),
+                    menu("Offset", spaceBetweenLine, 1, 10, 1, value => {spaceBetweenLine = value; draw(this.p5);}),
+                    menu("Number Lines", nbLines, 1, 5, 1, value => {nbLines = value; draw(this.p5);}),
                 ],
                 "Visual & Color": [
-                    button("useColor", value => {useColor = value; draw(this.p5);}),
-                    color("backgroundColor", value => {backgroundColor = this.p5.color(value); draw(this.p5)}),
-                    color("fromColor", value => {fromColor = this.p5.color(value); draw(this.p5)}),
-                    color("toColor", value => {toColor = this.p5.color(value); draw(this.p5)})
+                    switchButton("Use Color", "Black", value => {useColor = value; draw(this.p5);}),
+                    color("Background", bColor, value => {backgroundColor = this.p5.color(value); draw(this.p5)}),
+                    color("From", fColor, value => {fromColor = this.p5.color(value); draw(this.p5)}),
+                    color("To", tColor, value => {toColor = this.p5.color(value); draw(this.p5)})
                 ],
                 "Misc": [this.seed(() => draw(this.p5))]
             }

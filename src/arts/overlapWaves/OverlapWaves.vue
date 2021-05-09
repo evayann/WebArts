@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/arts/util";
+import {halfWidth, halfHeight, p5Instance} from "@/components/P5.vue";
+import {ArtVue, menu, switchButton, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 // Inspired from https://www.reddit.com/r/loadingicon/comments/m4yept/overlapping_waves_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
@@ -92,20 +92,13 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            nbLoop: nbLoop,
-            nbPoint: nbPoint,
-            circleWave: true
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 2, .1, value => speed = value),
-                    menu("nbLoop", 0, 10, 1, value => nbLoop = value),
-                    menu("nbPoint", 10, 1000, 1, value => nbPoint = value),
-                    menu("circleWave", 5, 50, 1, value => setWaver(value))
+                    menu("Speed", speed, .1, 2, .1, value => speed = value),
+                    menu("Number Loop", nbLoop, 0, 10, 1, value => nbLoop = value),
+                    menu("Number Point", nbPoint, 10, 1000, 1, value => nbPoint = value),
+                    switchButton("Circle", "Line", value => setWaver(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

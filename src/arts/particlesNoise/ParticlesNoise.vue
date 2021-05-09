@@ -113,27 +113,18 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            noiseScale: noiseScale,
-            nbCircle: nbCircle,
-            alpha: alpha,
-            maxSize: maxSize,
-            seed: seed
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .11, 2, .01, value => speed = value),
-                    menu("noiseScale", 10, 600, 1,
+                    menu("Speed", speed, .11, 2, .01, value => speed = value),
+                    menu("Noise Scale", noiseScale, 10, 600, 1,
                         value => { noiseScale = value; reset(); }),
-                    menu("nbCircle", 50, 1000, 1,
+                    menu("Number Circle", nbCircle, 50, 1000, 1,
                         value => { nbCircle = value; reset(); }),
                 ],
                 "Visual & Color": [
-                    menu("alpha", 0, 255, 1, value => alpha = value),
-                    menu("maxSize", 2, 20, 1, value => maxSize = value)
+                    menu("Alpha", alpha, 0, 255, 1, value => alpha = value),
+                    menu("Max size", maxSize, 2, 20, 1, value => maxSize = value)
                 ],
                 "Misc": [
                     this.seed(),

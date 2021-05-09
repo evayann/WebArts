@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, button, color, GUIType, switchButton} from "@/arts/util";
 
 let p5: p5Instance;
 let useColor = true;
@@ -79,30 +79,19 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            cycle: cycle,
-            xRadius: xRadius,
-            yRadius: yRadius,
-            fromColor: fColor,
-            alpha: alpha,
-            toColor: tColor,
-            useColor: useColor,
-            nbSegment: nbSegment
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cycle", .1, 10, .1, value => cycle = value),
-                    menu("nbSegment", 3, 32, 1, value => { nbSegment = value; reset() }),
-                    menu("xRadius", width / 8, centerX, 1, value => xRadius = value),
-                    menu("yRadius", height / 8, centerX, 1, value => yRadius = value),
+                    menu("Cycle", cycle,.1, 10, .1, value => cycle = value),
+                    menu("Number Circle", nbSegment, 3, 32, 1, value => { nbSegment = value; reset() }),
+                    menu("X Radius", xRadius, width / 8, centerX, 1, value => xRadius = value),
+                    menu("Y Radius", yRadius, height / 8, centerX, 1, value => yRadius = value),
                 ],
                 "Visual & Color" : [
-                    button("useColor", value => useColor = value),
-                    color("fromColor", value => fromColor = this.p5.color(value)),
-                    color("toColor", value => toColor = this.p5.color(value)),
-                    menu("alpha", 0, 255, 1, value => alpha = value)
+                    switchButton("Use Color", "Black & White", value => useColor = value),
+                    color("From", fColor, value => fromColor = this.p5.color(value)),
+                    color("To", tColor, value => toColor = this.p5.color(value)),
+                    menu("Alpha", alpha, 0, 255, 1, value => alpha = value)
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

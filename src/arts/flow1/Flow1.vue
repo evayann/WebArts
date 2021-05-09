@@ -47,20 +47,13 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speedFactor: speedFactor,
-            spaceOffset: spaceOffset,
-            sizeFactor: sizeFactor,
-            density: density
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speedFactor", .1, 5, .1, value => speedFactor = value),
-                    menu("sizeFactor", .1, 3, .1, value => sizeFactor = value),
-                    menu("spaceOffset", 0, 5, .1, value => spaceOffset = value),
-                    menu("density", 500, 5000, 10, value => density = value),
+                    menu("Speed", speedFactor, .1, 5, .1, value => speedFactor = value),
+                    menu("Size", sizeFactor, .1, 3, .1, value => sizeFactor = value),
+                    menu("Offset", spaceOffset, 0, 5, .1, value => spaceOffset = value),
+                    menu("Density", density, 500, 5000, 10, value => density = value),
                 ],
                 "Misc": [this.pause()]
             }

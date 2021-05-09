@@ -42,6 +42,7 @@ export class P5Vue extends Vue {
 
     private setup(p5: p5InstanceExtensions): void {
         console.log(`Log setup canvas of size : ${width}x${height} of type ${this.canvas3D ? "3D" : "2D"}`);
+        p5.pixelDensity(1);
         p5.createCanvas(width, height, this.canvas3D ? p5.WEBGL : p5.P2D);
         P5Vue.resize(p5);
     }

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, list, GUIType} from "@/arts/util";
+import {ArtVue, menu, color, list, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 const fColor = "#fafafa";
@@ -91,28 +91,18 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            offset: offset,
-            speed: speed,
-            size: size,
-            scale: scale,
-            fromColor: fColor,
-            toColor: tColor,
-            drawers: "coloredBlock2",
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 10, .1, value => speed = value),
-                    list("drawers", ["gradient", "coloredBlock1", "coloredBlock2"],
+                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    list("Draw Function", "coloredBlock2", ["gradient", "coloredBlock1", "coloredBlock2"],
                         value => drawer = drawersFunction[value]),
-                    menu("scale", 1, 25, 1, value => scale = value),
-                    menu("size", 5, 50, 1, value => size = value)
+                    menu("Scale", scale, 1, 25, 1, value => scale = value),
+                    menu("Block Size", size, 5, 50, 1, value => size = value)
                 ],
                 "Visual & Color" : [
-                    color("fromColor", value => fromColor = this.p5.color(value)),
-                    color("toColor", value => toColor = this.p5.color(value)),
+                    color("From", fColor, value => fromColor = this.p5.color(value)),
+                    color("To", tColor, value => toColor = this.p5.color(value))
                 ],
                 "Misc": [this.pause()]
             }

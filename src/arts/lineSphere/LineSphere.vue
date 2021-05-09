@@ -85,34 +85,21 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            radius: radius,
-            nbSegment: nbSegment,
-            twistFactor: twistFactor,
-            nbStroke: nbStroke,
-            inflate: inflate,
-            toColor: tColor,
-            fromColor: fColor,
-            minWeight: minWeight,
-            maxWeight: maxWeight
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speed = value),
-                    menu("radius", 75, 250, 1, value => radius = value),
-                    menu("nbSegment", 50, 1500, 10, value => nbSegment = value),
-                    menu("nbStroke", 1, 20, 2, value => nbStroke = value),
-                    menu("twistFactor", 0, 5, .1, value => twistFactor = value),
-                    menu("inflate", 0, 5, .1, value => inflate = value),
+                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Radius", radius, 75, 250, 1, value => radius = value),
+                    menu("Precision", nbSegment, 50, 1500, 10, value => nbSegment = value),
+                    menu("Number Straight", nbStroke, 1, 20, 2, value => nbStroke = value),
+                    menu("Twist", twistFactor, 0, 5, .1, value => twistFactor = value),
+                    menu("Inflate", inflate, 0, 5, .1, value => inflate = value),
                 ],
                 "Visual & Color" : [
-                    color("fromColor", value => fromColor = this.p5.color(value)),
-                    color("toColor", value => toColor = this.p5.color(value)),
-                    menu("maxWeight", 2.5, 5, .1, value => maxWeight = value),
-                    menu("minWeight", .1, 2.5, .1, value => minWeight = value),
+                    color("From", fColor, value => fromColor = this.p5.color(value)),
+                    color("To", tColor, value => toColor = this.p5.color(value)),
+                    menu("Max Stroke", maxWeight, 2.5, 5, .1, value => maxWeight = value),
+                    menu("Min Stroke", minWeight, .1, 2.5, .1, value => minWeight = value),
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

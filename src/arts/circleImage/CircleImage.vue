@@ -90,26 +90,16 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            contrast: contrast,
-            nbCircle: nbCircle,
-            nbIterByCircle: nbIterByCircle,
-            lineColor: lColor,
-            strokeWeight: strokeWeight,
-            update: () => undefined
-        };
-
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("contrast", 0, 2, .01, value => contrast = value),
-                    menu("nbCircle", 50, 250, 1, value => nbCircle = value),
-                    menu("nbIterByCircle", 50, 500, 1, value => nbIterByCircle = value),
+                    menu("Contrast", contrast, 0, 2, .01, value => contrast = value),
+                    menu("Number Circle", nbCircle, 50, 250, 1, value => nbCircle = value),
+                    menu("Circle Precision", nbIterByCircle, 50, 500, 1, value => nbIterByCircle = value),
                 ],
                 "Visual & Color": [
-                    color("lineColor", value => lineColor = value),
-                    menu("strokeWeight", 1, 5, .01, value => strokeWeight = value),
+                    color("Line", lineColor, value => lineColor = value),
+                    menu("Stroke Size", strokeWeight, 1, 5, .01, value => strokeWeight = value),
                 ],
                 "Misc": [
                     button("update", () => draw(img))

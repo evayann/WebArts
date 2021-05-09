@@ -117,32 +117,20 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            size: size,
-            cycle: cycle,
-            xRadius: xRadius,
-            yRadius: yRadius,
-            amplitude: amplitude,
-            fillColor: fColor,
-            elements: elements,
-            strokeColor: sColor,
-            nbSegment: nbSegment
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("cycle", .1, 5, .1, value => cycle = value),
-                    menu("amplitude", .1, 5, .1, value => amplitude = value),
-                    menu("nbSegment", 3, 20, 1, value => {nbSegment = value; reset();}),
-                    menu("elements", 3, 60, 1, value => {elements = value; reset();}),
-                    menu("xRadius", xRadius / 8, centerX, 1, value => xRadius = value),
-                    menu("yRadius", yRadius / 8, centerY, 1, value => yRadius = value),
-                    menu("size", size / 4, size * 2, 1, value => size = value)
+                    menu("Cycle", cycle, .1, 5, .1, value => cycle = value),
+                    menu("Amplitude", amplitude, .1, 5, .1, value => amplitude = value),
+                    menu("Number Segment", nbSegment, 3, 20, 1, value => {nbSegment = value; reset();}),
+                    menu("Elements per Segment", elements, 3, 60, 1, value => {elements = value; reset();}),
+                    menu("Element Size", size, size / 4, size * 2, 1, value => size = value),
+                    menu("X Radius", xRadius, xRadius / 8, centerX, 1, value => xRadius = value),
+                    menu("Y Radius", yRadius, yRadius / 8, centerY, 1, value => yRadius = value)
                 ],
                 "Visual & Color": [
-                    color("strokeColor", value => strokeColor = p5.color(value)),
-                    color("fillColor", value => fillColor = p5.color(value))
+                    color("Stroke", sColor, value => strokeColor = p5.color(value)),
+                    color("Fill", fColor, value => fillColor = p5.color(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

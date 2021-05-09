@@ -126,16 +126,11 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            nbCircle: nbCircle,
-            maxRadius: maxRadius
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("nbCircle", 20, 200, .1, value => nbCircle = value),
-                    menu("maxRadius", 200, 1000, 1, value => maxRadius = value)
+                    menu("Number Circle", nbCircle, 20, 200, .1, value => nbCircle = value),
+                    menu("Radius", maxRadius, 200, 1000, 1, value => maxRadius = value)
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

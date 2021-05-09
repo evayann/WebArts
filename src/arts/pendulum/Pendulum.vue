@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let armLength: number = Math.min(halfWidth, halfHeight) / 2;
 
@@ -102,24 +102,16 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            gravity: g,
-            damping: damping,
-            histLength: histLength,
-            historyColor: hColor,
-            hidePendulum: hidePendulum
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("gravity", .01, 2, .01, value => g = value),
-                    menu("damping", 0.9, 1, .001, value => damping = value),
-                    menu("histLength", 0, 1000, 1, value => histLength = value)
+                    menu("Gravity", g, .01, 2, .01, value => g = value),
+                    menu("Damping", damping, 0.9, 1, .001, value => damping = value),
+                    menu("Number Saved Point", histLength, 0, 1000, 1, value => histLength = value)
                 ],
                 "Visual & Color": [
-                    color("historyColor", value => {historyColor = p5.color(value); p5.stroke(historyColor);}),
-                    button("hidePendulum", value => {hidePendulum = value; draw();})
+                    color("Tray", historyColor, value => {historyColor = p5.color(value); p5.stroke(historyColor);}),
+                    switchButton("Show Pendulum", "Hide Pendulum", value => {hidePendulum = value; draw();})
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

@@ -103,15 +103,14 @@ export default class Art extends ArtVue {
             stroke: stroke,
         };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speed = value),
-                    menu("nbElements", 10, 40, 1, value => { nbElements = value; reset() }),
+                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Number Element", nbElements, 10, 40, 1, value => { nbElements = value; reset() }),
                 ],
                 "Visual & Color" : [
-                    color("ptColor", value => { ptColor = p5.color(value); p5.stroke(ptColor); }),
-                    menu("stroke", .1, 5, .1, value => this.p5.strokeWeight(value))
+                    color("Line", pColor, value => { ptColor = p5.color(value); p5.stroke(ptColor); }),
+                    menu("Stroke Size", stroke, .1, 5, .1, value => this.p5.strokeWeight(value))
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

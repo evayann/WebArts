@@ -57,22 +57,15 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            conicShape: conicShape,
-            inclination: inclination,
-            ptColor: pColor
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 2, .1, value => speed = value),
-                    menu("conicShape", 0, 1, .01, value => conicShape = value),
-                    menu("inclination", .8, 5, .1, value => inclination = value)
+                    menu("Speed", speed, .1, 2, .1, value => speed = value),
+                    menu("Conic Offset", conicShape, 0, 1, .01, value => conicShape = value),
+                    menu("Inclination", inclination, .8, 5, .1, value => inclination = value)
                 ],
                 "Visual & Color": [
-                    color("ptColor", value => {ptColor = p5.color(value); p5.stroke(ptColor);})
+                    color("Point", ptColor, value => {ptColor = p5.color(value); p5.stroke(ptColor);})
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

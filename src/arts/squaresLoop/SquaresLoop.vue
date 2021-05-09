@@ -106,20 +106,14 @@ export default class Art extends ArtVue {
     }
 
     generateUI(): GUIType {
-        const params = {
-            speed: speed,
-            nbElements: nbElements,
-            ptColor: pColor
-        };
         return this.setupDatGUI({
-            params: params,
             properties: {
                 "Effect": [
-                    menu("speed", .1, 5, .1, value => speed = value),
-                    menu("nbElements", 5, 20, 1, value => {nbElements = value; reset();})
+                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Number Element", nbElements, 5, 20, 1, value => {nbElements = value; reset();})
                 ],
                 "Visual & Color": [
-                    color("ptColor", value => {ptColor = p5.color(value); p5.stroke(ptColor);})
+                    color("Element", ptColor, value => {ptColor = p5.color(value); p5.stroke(ptColor);})
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }
