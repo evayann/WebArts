@@ -4,11 +4,12 @@
             <h1><span>❤</span> {{ t("title") }} <span>❤</span></h1>
         </router-link>
 
-        <select v-model="locale">
-            <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang.id">
-                {{ lang.name }}
-            </option>
-        </select>
+        <div v-for="lang in languages" :key="lang.title">
+            <button @click="locale=lang.language"  class="langs" v-if="locale !== lang.language">
+                <span :class="`flag-icon flag-icon-${lang.flag}`" />
+                {{lang.title}}
+            </button>
+        </div>
 
         <div id="prez">
             <h3> {{ t("welcome") }} </h3>
@@ -39,8 +40,11 @@ export default {
     },
     setup(): unknown {
         const { t , locale } = useI18n({useScope: "local"});
-        const langs = [{name: "Français", id:"fr"}, {name: "English", id:"en"}];
-        return {t, locale, langs };
+        const languages = [
+            {flag: "fr", language: "fr", title: "Français"},
+            {flag: "us", language: "en", title: "English"}
+        ];
+        return {t, locale, languages};
     }
 }
 </script>
@@ -50,10 +54,27 @@ export default {
 
 * {
     --a-color: #405566;
+    --dark-a-color: #175b52;
     --b-color: #099c95;
     --bg-color: #182838;
+    --white-color: rgba(255, 255, 255, 0.84);
     scrollbar-width: thin;
     scrollbar-color: #b84f30 var(--a-color);
+}
+
+.langs {
+    padding: 1%;
+    font-size: 1.1em;
+    margin: 1%;
+    font-style: italic;
+    color: var(--white-color);
+    border: 1px solid var(--b-color);
+    background-color: var(--a-color);
+}
+
+.langs:hover {
+    transition: 0.5s linear all;
+    background-color: var(--dark-a-color);
 }
 
 body {
