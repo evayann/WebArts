@@ -2,7 +2,7 @@ import * as GIF from "gif.js";
 import * as download from "downloadjs";
 import {Vue} from "vue-class-component";
 import {GUI, GUIController} from "dat.gui";
-import {p5Instance} from "@/components/P5.vue";
+import {width, height, p5Instance} from "@/components/P5.vue";
 
 // region Dat.GUI
 // region Types
@@ -116,7 +116,6 @@ export abstract class ArtVue extends Vue {
 
     // P5 elements
     protected p5: p5Instance;
-    private pauseMillis: number;
 
     // P5 records
     private canvas: CanvasRenderingContext2D;
@@ -191,26 +190,26 @@ export abstract class ArtVue extends Vue {
             this.gif = new GIF({
                 workers: 4,
                 workerScript: process.env.BASE_URL + "gif.worker.js",
-                quality: 5
+                quality: 10,
+                width: width,
+                height: height
             });
+            this.startRec = counter;
             const name = this.$route.meta.title as string;
-            this.gif.on("finished", function(blob) {
+            this.gif.on("finished", function(blob: Blob) {
                 download(blob, name);
             });
         }
         else {
             this.gif.render();
             this.gif = undefined;
+            this.startRec = -1;
         }
     }
 
     private computeIfFinish(): void {
-        if (this.startRec != -1 && loopTime != -1 &&
-            (counter - this.startRec) >= (loopTime * fps)) {
-            this.gif.render();
-            this.gif = undefined;
-            this.recordButton.name("Start Record");
-        }
+        if (this.startRec != -1 && loopTime != -1 && (counter - this.startRec) >= (loopTime * fps))
+            this.recordButton.fire();
     }
 
     pause(): DatProperties {
@@ -256,6 +255,10 @@ export function setFramerate(value: number): void {
 
 export function setLoopTime(seconds: number): void {
     loopTime = seconds;
+}
+
+export function resetTime(): void {
+    counter = 0;
 }
 
 export let pause = false;

@@ -4,14 +4,13 @@
             <h1><span>❤</span> {{ t("title") }} <span>❤</span></h1>
         </router-link>
 
-        <div v-for="lang in languages" :key="lang.title">
-            <button @click="locale=lang.language"  class="langs" v-if="locale !== lang.language">
-                <span :class="`flag-icon flag-icon-${lang.flag}`" />
-                {{lang.title}}
-            </button>
-        </div>
-
         <div id="prez">
+            <div v-for="lang in languages" :key="lang.title" class="languages">
+                <button @click="locale=lang.language"  class="lang" v-if="locale !== lang.language">
+                    <span :class="`flag-icon flag-icon-${lang.flag}`" />
+                    {{lang.title}}
+                </button>
+            </div>
             <h3> {{ t("welcome") }} </h3>
             <p v-html="t('presentation')"></p>
         </div>
@@ -20,6 +19,12 @@
 
         <div v-for="effect in this.$store.getters.effects" :key="effect.category">
             <Category :category=effect.category :arts=effect.arts></Category>
+        </div>
+
+        <div class="coffee">
+            <a href="https://www.buymeacoffee.com/evayann">
+                <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a chocolate&emoji=🍫&slug=evayann&button_colour=FF5F5F&font_colour=ffffff&font_family=Poppins&outline_colour=000000&coffee_colour=FFDD00">
+            </a>
         </div>
 
         <Footer></Footer>
@@ -62,9 +67,14 @@ export default {
     scrollbar-color: #b84f30 var(--a-color);
 }
 
-.langs {
-    padding: 1%;
-    font-size: 1.1em;
+.languages {
+    position: absolute;
+    top: 10%;
+    right: 5%;
+}
+
+.lang {
+    font-size: .75em;
     margin: 1%;
     font-style: italic;
     color: var(--white-color);
@@ -72,9 +82,15 @@ export default {
     background-color: var(--a-color);
 }
 
-.langs:hover {
+.lang:hover {
     transition: 0.5s linear all;
     background-color: var(--dark-a-color);
+}
+
+div.coffee {
+    position: fixed;
+    bottom: .5%;
+    left: .5%;
 }
 
 body {
@@ -88,9 +104,11 @@ body {
 }
 
 #prez {
-    margin: 3em 20% 3em 20%;
-    padding: 2em;
+    margin: 2em 10% 2em 10%;
+    padding: 1.25em;
     background-color: var(--a-color);
+    border-radius: 3em 3em 0 0;
+    position: relative;
 }
 
 #title {

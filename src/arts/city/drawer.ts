@@ -1,12 +1,12 @@
-import { P5 } from "@/components/P5.vue";
+import {P5, p5Instance} from "@/components/P5.vue";
 
 // region Attributes
-let p5: P5;
+let p5: p5Instance;
 
 /**
  * Useful little function
  */
-export const setP5 = (_p5) => p5 = _p5; // Need to call first
+export const setP5 = (_p5: p5Instance) => p5 = _p5; // Need to call first
 export const rdm = (min?, max?): any => p5.random(min, max);
 
 // region Colors
@@ -55,30 +55,31 @@ export function resetColor(): void {
     p5.noFill();
 }
 
-export const fill = (v): void => {
+export function fill(v): void {
     p5.fill(v);
-};
-export const stroke = (v): void => {
+}
+
+export function stroke (v): void {
     p5.stroke(v);
-};
+}
 // endregion Colors
 
 // region Draw Elements
 export class Action {
-    private readonly action: (...unknow) => void;
-    private readonly data: Array<any>;
+    private readonly action: (...unknown) => void;
+    private readonly data: Array<unknown>;
 
-    constructor(action: (unknow) => void, ...data: any[]) {
+    constructor(action: (unknow) => void, ...data: unknown[]) {
         this.action = action;
         this.data = data;
     }
 
-    do() {
+    do(): void {
         this.action(...this.data);
     }
 }
 
-export function action(fct: (...unknow) => void, ...data: any[]): Action {
+export function action(fct: (...unknown) => void, ...data: unknown[]): Action {
     return new Action(fct, ...data);
 }
 
@@ -109,10 +110,7 @@ export class Drawer extends Array<Action> {
         while (this.curr < startAt + this.step && this.curr <= this.length) {
             this.curr++;
             const a: IteratorResult<Action, any> = this.iterOn.next();
-            if (!a.done)
-                a.value.do();
-            else
-                p5.noLoop(); // End
+            !a.done ? a.value.do() : p5.noLoop(); // End
         }
     }
 }

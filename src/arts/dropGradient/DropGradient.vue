@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/arts/util";
+import {height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
+import {ArtVue, setLoopTime, time, menu, color, GUIType} from "@/arts/util";
 
 // Inspired by https://www.reddit.com/r/loadingicon/comments/lem7o7/tube_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 
@@ -20,15 +20,15 @@ let nbSegment = 4;
 let tilt = 315;
 
 let yCurrent = 0;
-const limit: number = height / 3;
+let limit: number = height / 3;
 
 function drawShape(): void {
     p5.push();
     p5.translate(0, -centerY + limit + yCurrent);
     p5.beginShape();
     for (let i = 0; i > -p5.TAB; i -= angle) {
-        const x: number = centerX + p5.cos(i) * 450;
-        const y: number = centerY + p5.sin(i) * (tilt);
+        const x: number = centerX + p5.cos(i) * p5.min(400, centerX * .75);
+        const y: number = centerY + p5.sin(i) * (centerY - tilt);
         p5.vertex(x, y);
     }
     p5.endShape();
@@ -38,9 +38,10 @@ function drawShape(): void {
 function draw(): void {
     p5.background("black");
     p5.strokeWeight(2);
+    limit = height / 3;
     yCurrent = limit;
     while (yCurrent > 0) {
-        const offsetTime: number = (p5.millis() / (1000 * cycle)) % 1;
+        const offsetTime: number = (time / cycle) % 1;
         p5.stroke(p5.lerpColor(strokeFromColor, strokeToColor, (yCurrent / limit + offsetTime) % 1));
         p5.noFill();
         drawShape();
@@ -51,6 +52,7 @@ function draw(): void {
 function reset(): void {
     p5.clear();
     angle = p5.TAU / nbSegment;
+    setLoopTime(cycle);
     draw();
 }
 
@@ -58,7 +60,6 @@ function setupP5(p: p5Instance): void {
     p5 = p;
     strokeFromColor = p5.color(sfColor);
     strokeToColor = p5.color(stColor);
-    p5.frameRate(60);
     reset();
 }
 
@@ -68,7 +69,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 

@@ -34,6 +34,7 @@ export default class Category extends UtilVue {
     padding: .5rem;
     background-color: var(--a-color);
     filter: brightness(150%);
+    border-radius: 1em 1em 0 0;
 }
 
 .arts {
@@ -49,5 +50,6 @@ export default class Category extends UtilVue {
     margin: 1.75em;
     background-color: var(--a-color);
     filter: brightness(85%);
+    border-radius: 2em;
 }
 </style>

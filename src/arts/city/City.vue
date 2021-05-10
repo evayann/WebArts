@@ -21,8 +21,8 @@ let p5: p5Instance;
 /**
 * Parameter attributes
 */
-const nbLinesToDraw = 5;
-const useColor = true;
+let nbLinesToDraw = 5;
+let useColor = true;
 
 let cp: CityParameters = new CityParameters(width, height);
 // endregion Attributes
@@ -331,7 +331,6 @@ function city(): void {
     if (pause) p5.noLoop();
 }
 
-
 function draw(): void {
     cp.drawer.call();
 }
@@ -347,7 +346,6 @@ function reset(): void {
 function setupP5(p: p5Instance): void {
     p5 = p;
     setP5(p5);
-    p5.frameRate(30);
     p5.strokeWeight(2);
     cp = new CityParameters(width, height, new Colors());
     setGeometryParameters(p5, cp);
@@ -360,7 +358,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -372,13 +371,13 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Line per iter", nbLinesToDraw, .1, 100, 1, value => cp.drawer.setStep(value)),
+                    menu("Line per iter", nbLinesToDraw, .1, 100, 1, value => {nbLinesToDraw = value; cp.drawer.setStep(value);}),
                     menu("Intersection Position", cp.intersectPos, .05, .95, .01, value => { cp.intersectPos = value; reset(); }),
                     menu("Limit of Sky", cp.skyLimit, .5, .9, .05, value => { cp.skyLimit = value; reset(); }),
                     menu("Ground Position", cp.groundOff, 0, .2, .01, value => { cp.groundOff = value; reset(); }),
                 ],
                 "Visual & Color": [
-                    button("useColor", value => { cp.colors.useColor(value); reset()} ),
+                    button("useColor", value => { useColor = value; cp.colors.useColor(value); reset()} ),
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

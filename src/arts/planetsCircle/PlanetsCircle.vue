@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, switchButton, GUIType} from "@/arts/util";
+import {ArtVue, seed, fps, time as t, menu, switchButton, GUIType, setLoopTime} from "@/arts/util";
 // From https://github.com/cmllngf/planet_1/blob/master/sketch.js by cmllngf
 
 
@@ -23,8 +23,6 @@ let maxSize = 100;
 let minSize = 20;
 let rotateSpeedFactor = 1;
 
-const fps = 60;
-let t = 0;
 let planets: Array<Planet> = new Array<Planet>();
 
 class Planet {
@@ -133,22 +131,23 @@ function draw(): void {
     p5.strokeWeight(2);
     for (const p of planets)
         p.draw();
-
-    t += 1 / fps;
 }
 
 function reset(): void {
     p5.randomSeed(seed);
     p5.noiseSeed(seed);
     planets = new Array<Planet>();
-    t = 0;
     const space: number = width / (nbPlanets);
     const halfSpace: number = space / 2;
     for (let i = 0; i < nbPlanets; i++)
         planets.push(new Planet([space * i + halfSpace, p5.random(height / 4, 3 * (height / 4))], p5.random(minSize, maxSize),
             p5.random(150, 750), p5.random(0.1, 2), p5.random(-45, 45)));
-
     draw();
+    updateTime();
+}
+
+function updateTime(): void {
+    setLoopTime(p5.TAU / rotateSpeedFactor);
 }
 
 function setupP5(p: p5Instance): void {
@@ -166,7 +165,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -179,7 +179,7 @@ export default class Art extends ArtVue {
                     menu("Min Planet Size", minSize, 10, 50, 1, value => { minSize = value; reset(); }),
                     switchButton("No Belt", "Belt", value => { useBelt = value; reset(); }, useBelt),
                     switchButton("Moon", "No Moon", value => { useMoon = value; reset(); }),
-                    menu("Rotation Speed", rotateSpeedFactor, .1, 5, .1, value => rotateSpeedFactor = value)
+                    menu("Rotation Speed", rotateSpeedFactor, .1, 5, .1, value => {rotateSpeedFactor = value; updateTime();})
                 ],
                 "Visual & Color": [
                     menu("Alpha", alpha, 0, 255, 1, value => {

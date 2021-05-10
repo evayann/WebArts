@@ -167,7 +167,6 @@ function setupP5(p: p5Instance): void {
     backgroundColor = p5.color(bColor);
     fromColor = p5.color(fColor);
     toColor = p5.color(tColor);
-    p.frameRate(60);
     reset();
     draw(p);
 }
@@ -179,6 +178,7 @@ export default class Art extends ArtVue {
     }
 
     drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw(p);
     }
 

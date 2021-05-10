@@ -3,6 +3,9 @@
         <a href="https://yann.fzcommunication.fr">
             <img src="@/assets/logo.png" alt="logo-personal-website"/>
         </a>
+        <a href="https://www.buymeacoffee.com/evayann">
+            <img src="@/assets/BMC.png" alt="logo-BMC"/>
+        </a>
         <a :href="codePath">
             <img src="@/assets/github.png" alt="logo-github"/>
         </a>

@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, time, setLoopTime, resetTime, menu, color, GUIType} from "@/arts/util";
+import {cylinder} from "@/arts/city/geometry";
 // Inspired by https://twitter.com/concinnus/status/1360831157852635136?s=12
 
 let p5: p5Instance;
@@ -12,7 +13,6 @@ const pColor = "#8738e1";
 let ptColor: P5.Color;
 
 let speed = 1;
-let time = 0;
 let nbElements = 5;
 let blockSize: number = Math.min(width, height) / nbElements;
 let size: number = blockSize / 2;
@@ -84,10 +84,9 @@ function drawCircle(x: number, y: number, value: number): void {
 
 function draw(): void {
     p5.background("black");
-    time += 0.01 * speed;
     p5.stroke(ptColor);
     p5.fill(ptColor);
-    const anim: number = time % 5;
+    const anim: number = (time * speed) % 5;
     p5.translate(width / 2, height / 2);
     for (let y = -yEl * blockSize; y <= yEl * blockSize; y += blockSize)
         for (let x = -xEl * blockSize; x <= xEl * blockSize; x += blockSize)
@@ -96,11 +95,12 @@ function draw(): void {
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    resetTime();
     blockSize = Math.min(width, height) / nbElements;
     size = blockSize / 2;
     xEl = p5.int((width / blockSize) / 2) + 2;
     yEl = p5.int((height / blockSize) / 2) + 2;
+    setLoopTime(speed * 5);
     draw();
 }
 
@@ -115,6 +115,7 @@ export default class Art extends ArtVue {
     }
 
     drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -122,7 +123,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 5, .01, value => speed = value),
+                    menu("Speed", speed, .1, 5, .01, value => {speed = value; reset();}),
                     menu("Number Circle", nbElements, 5, 20, 1, value => { nbElements = value; reset(); }),
                 ],
                 "Visual & Color": [

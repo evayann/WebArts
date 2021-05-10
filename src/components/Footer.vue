@@ -1,23 +1,21 @@
 <template>
     <footer class="footer">
-        <div class="content">
-            <a href="https://github.com/evayann">
-                <img src="@/assets/github.png" alt="logo-github"/>
-            </a>
+        <a href="https://github.com/evayann" class="content">
+            <img src="@/assets/github.png" alt="logo-github"/>
             <p> GitHub </p>
-        </div>
-        <div class="content">
-            <a href="https://yann.fzcommunication.fr">
-                <img src="@/assets/logo.png" alt="logo-personal-website"/>
-            </a>
+        </a>
+        <a href="https://yann.fzcommunication.fr" class="content">
+            <img src="@/assets/logo.png" alt="logo-personal-website"/>
             <p> My Website </p>
-        </div>
-        <div class="content">
-            <a href="https://twitter.com/_evayann_">
-                <img src="@/assets/twitter.png" alt="logo-twitter"/>
-            </a>
+        </a>
+        <a href="https://www.buymeacoffee.com/evayann" class="content">
+            <img src="@/assets/BMC.png" alt="logo-BMC"/>
+            <p> Buy me a Coffee </p>
+        </a>
+        <a href="https://twitter.com/_evayann_" class="content">
+            <img src="@/assets/twitter.png" alt="logo-twitter"/>
             <p> Twitter </p>
-        </div>
+        </a>
     </footer>
 </template>
 
@@ -32,6 +30,8 @@ export default class Footer extends Vue {}
 .footer {
     background-color: var(--a-color);
     filter: brightness(85%);
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .footer {
@@ -47,6 +47,12 @@ export default class Footer extends Vue {}
     width: 5rem;
     height: 5rem;
     background: transparent;
+}
+
+.content {
+    width: 10em;
+    text-decoration: none;
+    color: var(--white-color);
 }
 
 .content:hover {

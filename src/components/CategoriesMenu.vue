@@ -1,6 +1,6 @@
 <template>
+    <h3> {{ name }} : </h3>
     <div class="menu">
-        <h3> {{ name }} : </h3>
         <router-link v-for="(item, index) in items" :key="item" :to="`/#${item}`" :style="`--pos: ${index}`">
             {{ parseText(item) }}
         </router-link>

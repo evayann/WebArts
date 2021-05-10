@@ -4,16 +4,14 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, setLoopTime, menu, color, GUIType} from "@/arts/util";
 // Inspired by https://twitter.com/cs_kaplan/status/1359695674862895105?s=12
 
 let p5: p5Instance;
 const pColor = "#dbec42";
 let ptColor: P5.Color;
 
-let pause = false;
 let speed = 1;
-let time = 0;
 let nbElements = 5;
 let blockSize: number = Math.min(width, height) / nbElements;
 let hbSize: number = blockSize / 2;
@@ -66,10 +64,9 @@ function drawSquare(x: number, y: number, value: number): void {
 
 function draw(): void {
     p5.background("black");
-    time += 0.005 * speed;
     p5.stroke(ptColor);
     p5.fill(ptColor);
-    const anim: number = easeInQuart(time % 1);
+    const anim: number = easeInQuart(p5.map((time * speed) % 5, 0, 5, 0, 1));
     p5.translate(halfWidth, halfHeight);
     for (let y = -yEl * blockSize; y <= yEl * blockSize; y += blockSize)
         for (let x = -xEl * blockSize; x <= xEl * blockSize; x += blockSize)
@@ -78,7 +75,8 @@ function draw(): void {
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    resetTime();
+    setLoopTime((1 / speed) * 5);
     blockSize = Math.min(width, height) / nbElements;
     hbSize = blockSize / 2;
     size = blockSize * .7;
@@ -90,7 +88,6 @@ function reset(): void {
 function setupP5(p: p5Instance): void {
     p5 = p;
     ptColor = p5.color(pColor);
-    p5.frameRate(60);
     p5.strokeWeight(2);
     reset();
 }
@@ -101,7 +98,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -109,11 +107,11 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Speed", speed, .1, 5, .1, value => {speed = value; reset();}),
                     menu("Number Element", nbElements, 5, 20, 1, value => {nbElements = value; reset();})
                 ],
                 "Visual & Color": [
-                    color("Element", ptColor, value => {ptColor = p5.color(value); p5.stroke(ptColor);})
+                    color("Element", pColor, value => {ptColor = p5.color(value); p5.stroke(ptColor);})
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

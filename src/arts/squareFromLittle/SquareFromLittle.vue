@@ -4,15 +4,14 @@
 
 <script lang="ts">
 import {halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
+import {ArtVue, time, setLoopTime, menu, switchButton, color, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 const sColor = "#35d492";
 let squareColor: P5.Color;
 
-let cycle = 1;
+let cycle = .5;
 const size = 20;
-let time = 0;
 const offset = 1.7;
 let nbSquares = 20;
 let rotate = true;
@@ -54,7 +53,6 @@ function drawSquares(): void {
             free -= rdm;
         }
     }
-    time += 0.02;
 }
 
 function draw(): void {
@@ -66,14 +64,13 @@ function draw(): void {
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    setLoopTime(8 / cycle);
     draw();
 }
 
 function setupP5(p: p5Instance): void {
     p5 = p;
     squareColor = p5.color(sColor);
-    p5.frameRate(60);
     reset();
 }
 
@@ -83,7 +80,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -91,7 +89,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Cycle", cycle, .1, 2, .1, value => cycle = value),
+                    menu("Cycle", cycle, .1, 2, .1, value => {cycle = value; reset();}),
                     menu("Number elements per line", nbSquares, 5, 40, 1, value => nbSquares = value),
                     switchButton("Rotation", "No Rotation", value => {rotate = value; reset();})
                 ],

@@ -96,7 +96,7 @@ function setupP5(p: p5Instance): void {
 }
 
 function updateTime(): void {
-    setLoopTime(23 / cycle);
+    setLoopTime(p5.TAU / cycle);
 }
 
 export default class Art extends ArtVue {

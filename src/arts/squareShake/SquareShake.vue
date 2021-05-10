@@ -4,14 +4,13 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType, time, setLoopTime, resetTime} from "@/arts/util";
 
 let p5: p5Instance;
 const sColor = "#35d492";
 let squareColor: P5.Color;
 
 let cycle = 1;
-let time = 0;
 let offset = 1.7;
 const max = 3;
 let rotate = true;
@@ -81,19 +80,18 @@ function draw(): void {
     splitSquare(0, -qSize, qSize, qSize, 0.9, 0.1, -off, off, 0);
     splitSquare(0, 0, qSize, qSize, 0.9, 0.9, -off, -off, 0);
     splitSquare(-qSize, 0, qSize, qSize, 0.1, 0.9, off, -off, 0);
-    time += .02;
 }
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    setLoopTime(8 / cycle);
+    resetTime();
     draw();
 }
 
 function setupP5(p: p5Instance): void {
     p5 = p;
     squareColor = p5.color(sColor);
-    p5.frameRate(60);
     reset();
 }
 
@@ -103,7 +101,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -111,7 +110,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Cycle", cycle, .1, 2, .1, value => cycle = value),
+                    menu("Cycle", cycle, .1, 2, .1, value => {cycle = value; reset();}),
                     menu("Offset", offset, 0, Math.PI * 2, .1, value => offset = value),
                     switchButton("Rotation", "No Rotation", value => {rotate = value; reset();})
                 ],
