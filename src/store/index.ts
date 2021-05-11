@@ -29,8 +29,9 @@ export default createStore({
             {
                 category: "flow",
                 arts: [
-                    "vortex", "spiralCube", "pendulum", "lineSphere", "particlesMove",
-                    "particlesNoise", "particlesCompact", "flow", "flow1", "flow2"
+                    "vortex", "spiralCube", "pendulum", "lineSphere", "multiParticlesMove",
+                    "particlesMove", "particlesNoise", "particlesCompact",
+                    "flow", "flow1", "flow2"
                 ]
             },
             {
