@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, color, GUIType, setLoopTime} from "@/arts/util";
 // Inspired by https://mobile.twitter.com/beesandbombs/status/1334541858366775298
 
 let p5: p5Instance;
@@ -17,9 +17,7 @@ let fillColor: P5.Color;
 let strokeColor: P5.Color;
 
 let angle = 0;
-const fps = 60;
 let cycle = 1;
-let amplitude = 1;
 
 let nbSegment = 3;
 let elements = 60;
@@ -53,7 +51,7 @@ function drawSens(pts: { index: number, point: number[] }[], previous: number[],
             const x: number = p5.lerp(x1, x2, j / elements);
             const y: number = p5.lerp(y1, y2, j / elements);
             drawSquare(part, x, y,
-                (((j + pt.index * elements) / (elements * nbSegment)) * (p5.TAU * (1 / amplitude))
+                (((j + pt.index * elements) / (elements * nbSegment)) * p5.TAU
                     + (p5.millis() / 500) * (1 / cycle)));
         }
         previous = pt.point;
@@ -99,11 +97,15 @@ function setupP5(p: p5Instance): void {
     strokeColor = p5.color(sColor);
     partA = p5.createGraphics(width, height);
     partB = p5.createGraphics(width, height);
-    p5.frameRate(fps);
     p5.rectMode(p5.CENTER);
     partA.rectMode(p5.CENTER);
     partB.rectMode(p5.CENTER);
+    loop();
     reset();
+}
+
+function loop(): void {
+    setLoopTime(cycle * p5.TAU);
 }
 
 export default class Art extends ArtVue {
@@ -112,7 +114,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -120,8 +123,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Cycle", cycle, .1, 5, .1, value => cycle = value),
-                    menu("Amplitude", amplitude, .1, 5, .1, value => amplitude = value),
+                    menu("Cycle", cycle, .1, 5, .1, value => {cycle = value; loop();}),
                     menu("Number Segment", nbSegment, 3, 20, 1, value => {nbSegment = value; reset();}),
                     menu("Elements per Segment", elements, 3, 60, 1, value => {elements = value; reset();}),
                     menu("Element Size", size, size / 4, size * 2, 1, value => size = value),

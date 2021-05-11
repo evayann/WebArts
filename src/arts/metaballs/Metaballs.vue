@@ -80,10 +80,7 @@ class Balls {
     }
 
     private get(f: (b: Ball) => number): Array<number> {
-        const elements = [];
-        this.balls.forEach(b => elements.push(f(b)));
-        return elements;
-        // return this.balls.reduce((acc, b) => {acc.push(f(b))}, []);
+        return this.balls.map(b => f(b));
     }
 
     getXs(): Array<number> {
@@ -182,17 +179,12 @@ export default class Art extends ArtVue {
         setupP5();
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
     generateUI(): GUIType {
-        const params = {
-            displayCircle: displayCircle,
-            clamping: clamping,
-            bColor: bColor,
-            speed: speed,
-        };
         return this.setupDatGUI({
             properties: {
                 "Effect": [

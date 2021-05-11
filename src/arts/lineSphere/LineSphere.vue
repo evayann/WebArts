@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 
@@ -13,8 +13,7 @@ let fromColor: P5.Color;
 const tColor = "#ec0c20";
 let toColor: P5.Color;
 
-let speed = 1;
-let time = 0;
+let speed = .5;
 let radius = 230;
 let nbSegment = 50;
 let nbStroke = 8;
@@ -37,7 +36,7 @@ function twister(rot: number): void {
         const x: number = x_ * p5.cos(tw);
         const z: number = x_ * p5.sin(tw);
         p5.stroke(p5.lerpColor(fromColor, toColor,
-            p5.map(x * p5.sin(time), -radius, radius, 0, 1)));
+            p5.map(x * p5.sin(speed * time), -radius, radius, 0, 1)));
         p5.vertex(x, y_, z);
     }
     p5.endShape(p5.CLOSE);
@@ -46,20 +45,19 @@ function twister(rot: number): void {
 
 function draw(): void {
     p5.background("black");
-    time += 0.005 * speed;
     p5.translate(0, 0, radius);
 
-    let scale: number = p5.map(p5.cos(p5.TAU * time), 1, -1, 0, 1);
+    let scale: number = p5.map(p5.cos(p5.TAU * speed * time), 1, -1, 0, 1);
     scale = p5.lerp(0.5, inflate, ease(scale, 3));
     p5.scale(1, 1, scale);
-    p5.strokeWeight(p5.map(p5.sin(scale + time), -1, 1, minWeight, maxWeight));
+    p5.strokeWeight(p5.map(p5.sin(scale + speed * time), -1, 1, minWeight, maxWeight));
     for (let a = 0; a < (nbStroke / 2); a++)
-        twister(p5.TAU * (a + 2 * time) / nbStroke);
+        twister(p5.TAU * (a + 2 * speed * time) / nbStroke);
 }
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    resetTime();
     draw();
 }
 
@@ -67,8 +65,7 @@ function setupP5(p: p5Instance): void {
     p5 = p;
     toColor = p5.color(tColor);
     fromColor = p5.color(fColor);
-    p5.smooth();
-    p5.frameRate(60);
+    // p5.smooth();
     p5.strokeWeight(3);
     p5.noFill();
     reset();
@@ -80,7 +77,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -88,7 +86,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Speed", speed, .1, 3, .01, value => speed = value),
                     menu("Radius", radius, 75, 250, 1, value => radius = value),
                     menu("Precision", nbSegment, 50, 1500, 10, value => nbSegment = value),
                     menu("Number Straight", nbStroke, 1, 20, 2, value => nbStroke = value),

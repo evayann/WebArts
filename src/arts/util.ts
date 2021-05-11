@@ -139,7 +139,7 @@ export abstract class ArtVue extends Vue {
     }
 
     drawP5(p: p5Instance): void {
-        if (this.debug) console.log("Draw at", p.millis());
+        if (this.debug) console.log("Draw", p, "for frame", counter);
         this.computeIfFinish();
         if (this.gif)
             this.gif.addFrame(this.canvas, {

@@ -4,13 +4,12 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, switchButton, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, seed, menu, switchButton, color, GUIType} from "@/arts/util";
 let p5: p5Instance;
 
 let perlinGraph: P5.Graphics;
 let perlinShader: P5.Shader;
 
-let time = 0;
 let speed = 1;
 let dirX = 1;
 let dirY = 1;
@@ -37,7 +36,7 @@ function drawShader(): void {
     perlinGraph.shader(perlinShader);
     console.log(seed);
     perlinShader.setUniform("seed", seed);
-    perlinShader.setUniform("time", time / (1 / speed));
+    perlinShader.setUniform("time", time * 10 * speed);
     perlinShader.setUniform("dirX", dirX);
     perlinShader.setUniform("dirY", dirY);
     perlinShader.setUniform("lines", lines);
@@ -55,7 +54,6 @@ function drawShader(): void {
 function draw(): void {
     p5.randomSeed(seed);
     drawShader();
-    time++;
 }
 
 function preload(p: p5Instance) {
@@ -179,7 +177,7 @@ function preload(p: p5Instance) {
 }
 
 function reset(): void {
-    time = 0;
+    resetTime();
 }
 
 function setupP5(): void {
@@ -203,7 +201,8 @@ export default class Art extends ArtVue {
         setupP5();
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 

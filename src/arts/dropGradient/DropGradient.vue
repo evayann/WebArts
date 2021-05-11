@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, setLoopTime, time, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, setLoopTime, resetTime, time, menu, color, GUIType} from "@/arts/util";
 
 // Inspired by https://www.reddit.com/r/loadingicon/comments/lem7o7/tube_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 
@@ -38,12 +38,12 @@ function drawShape(): void {
 function draw(): void {
     p5.background("black");
     p5.strokeWeight(2);
+    p5.noFill()
     limit = height / 3;
     yCurrent = limit;
     while (yCurrent > 0) {
         const offsetTime: number = (time / cycle) % 1;
         p5.stroke(p5.lerpColor(strokeFromColor, strokeToColor, (yCurrent / limit + offsetTime) % 1));
-        p5.noFill();
         drawShape();
         yCurrent--;
     }
@@ -52,6 +52,7 @@ function draw(): void {
 function reset(): void {
     p5.clear();
     angle = p5.TAU / nbSegment;
+    resetTime();
     setLoopTime(cycle);
     draw();
 }

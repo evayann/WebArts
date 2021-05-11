@@ -6,7 +6,6 @@
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, menu, button, color, GUIType} from "@/arts/util";
 
-
 let p5: p5Instance;
 let contrast = 1;
 const lColor = "#1e2830";

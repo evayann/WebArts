@@ -64,7 +64,7 @@ function draw(): void {
 
 function reset(): void {
     p5.clear();
-    setLoopTime(8 / cycle);
+    setLoopTime(7 / cycle);
     draw();
 }
 
@@ -91,7 +91,7 @@ export default class Art extends ArtVue {
                 "Effect": [
                     menu("Cycle", cycle, .1, 2, .1, value => {cycle = value; reset();}),
                     menu("Number elements per line", nbSquares, 5, 40, 1, value => nbSquares = value),
-                    switchButton("Rotation", "No Rotation", value => {rotate = value; reset();})
+                    switchButton("No Rotation", "Rotation", value => {rotate = value; reset();}, rotate)
                 ],
                 "Visual & Color": [
                     color("Elements", sColor, value => squareColor = p5.color(value))

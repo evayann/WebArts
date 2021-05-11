@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width as w, height as h, p5Instance} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/arts/util";
+import {ArtVue, setLoopTime, time, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let speedFactor = 1;
@@ -22,7 +22,7 @@ function draw(): void {
     p5.background("black");
     p5.scale(0.5);
     p5.translate(w, h * .75);
-    const t: number = p5.millis() / (1000 + 1000 * (1 / speedFactor));
+    const t: number = (time * 1000) / (1000 + 5000 / speedFactor);
     for (let i = density; i--; p5.rect((w / 2) * x / z, h * 1.25 - h * y / z, s = (500 * sizeFactor) / (z * z * z), s)) {
         x = spaceOffset * C(u = t + 1000 / i) + C(v = t + i);
         y = S(density / i) + T(v) * C(v) - 5;
@@ -32,8 +32,12 @@ function draw(): void {
 
 function setupP5(p: p5Instance): void {
     p5 = p;
-    p5.frameRate(60);
     p5.noStroke();
+    loop();
+}
+
+function loop(): void {
+    setLoopTime((1 + 5 / speedFactor) * p5.TAU);
 }
 
 export default class Art extends ArtVue {
@@ -42,7 +46,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -50,7 +55,10 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speedFactor, .1, 5, .1, value => speedFactor = value),
+                    menu("Speed", speedFactor, .1, 5, .1, value => {
+                        speedFactor = value;
+                        loop();
+                    }),
                     menu("Size", sizeFactor, .1, 3, .1, value => sizeFactor = value),
                     menu("Offset", spaceOffset, 0, 5, .1, value => spaceOffset = value),
                     menu("Density", density, 500, 5000, 10, value => density = value),

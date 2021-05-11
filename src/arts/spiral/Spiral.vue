@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType, setLoopTime} from "@/arts/util";
 
 let p5: p5Instance;
 
@@ -106,6 +106,7 @@ function setupP5(): void {
     setWaveColor(wColor);
     p5.rectMode(p5.CENTER);
     p5.imageMode(p5.CENTER);
+    loop();
     draw();
 }
 
@@ -121,6 +122,10 @@ function setWaveColor(color: string) {
     p5.fill(waveColor);
 }
 
+function loop(): void {
+    setLoopTime(p5.TAU / speed);
+}
+
 export default class Art extends ArtVue {
     preloadP5(p: p5Instance): void {
         preload(p);
@@ -131,7 +136,8 @@ export default class Art extends ArtVue {
         setupP5();
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -139,14 +145,14 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    menu("Speed", speed, .1, 10, .1, value => {speed = value; loop();}),
                     menu("Zoom", zoom, .1, 3, .1, value => zoom = value),
                     menu("Number Waves", nbWave, 1, 7, 1, value => nbWave = value),
                     menu("Amplitude", amplitude, .1, 2, .1, value => amplitude = value),
                 ],
                 "Visual & Color": [
-                    color("Wave", waveColor, value => setWaveColor(value)),
-                    color("Background", backgroundColor, value => setBackgroundColor(value))
+                    color("Wave", wColor, value => setWaveColor(value)),
+                    color("Background", bgColor, value => setBackgroundColor(value))
                 ],
                 "Misc": [
                     this.pause(),

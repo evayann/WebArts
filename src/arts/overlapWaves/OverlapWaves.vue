@@ -4,13 +4,12 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance} from "@/components/P5.vue";
-import {ArtVue, menu, switchButton, GUIType} from "@/arts/util";
+import {ArtVue, time, setLoopTime, resetTime, menu, switchButton, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 // Inspired from https://www.reddit.com/r/loadingicon/comments/m4yept/overlapping_waves_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 
 let speed = 1;
-let time = 0;
 let nbLoop = 5;
 let nbPoint = 1000;
 let makeWave: (value: number, from: number, to: number) => void;
@@ -46,11 +45,11 @@ function waves(): void {
     const p: number = p5.abs(p5.cos(time / 10)) / 2;
 
     p5.stroke("yellow");
-    makeWave(time, .5 - p, .5 + p);
+    makeWave(time * speed, .5 - p, .5 + p);
     p5.stroke("blue");
-    makeWave(time + p5.TAU * .33, .5 - p, .5 + p);
+    makeWave(time * speed + p5.TAU * .33, .5 - p, .5 + p);
     p5.stroke("red");
-    makeWave(time + p5.TAU * .66, .5 - p, .5 + p);
+    makeWave(time * speed + p5.TAU * .66, .5 - p, .5 + p);
 }
 
 function draw(): void {
@@ -58,12 +57,11 @@ function draw(): void {
     p5.background("black");
     p5.translate(halfWidth, halfHeight);
     waves();
-    time += 0.05 * speed;
 }
 
 function reset(): void {
     p5.clear();
-    time = 0;
+    resetTime();
     draw();
 }
 
@@ -73,12 +71,16 @@ function setWaver(value: boolean): void {
 
 function setupP5(p: p5Instance): void {
     p5 = p;
-    p5.frameRate(60);
     p5.blendMode(p5.ADD);
     p5.noFill();
     p5.strokeWeight(5);
     setWaver(true);
+    loop();
     reset();
+}
+
+function loop(): void {
+    setLoopTime((nbLoop * p5.TAU * 2) / speed);
 }
 
 export default class Art extends ArtVue {
@@ -87,7 +89,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -95,7 +98,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 2, .1, value => speed = value),
+                    menu("Speed", speed, .1, 2, .1, value => {speed = value; loop();}),
                     menu("Number Loop", nbLoop, 0, 10, 1, value => nbLoop = value),
                     menu("Number Point", nbPoint, 10, 1000, 1, value => nbPoint = value),
                     switchButton("Circle", "Line", value => setWaver(value))

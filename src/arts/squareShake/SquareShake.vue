@@ -84,7 +84,7 @@ function draw(): void {
 
 function reset(): void {
     p5.clear();
-    setLoopTime(8 / cycle);
+    setLoopTime(7 / cycle);
     resetTime();
     draw();
 }

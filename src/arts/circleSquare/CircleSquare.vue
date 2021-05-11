@@ -64,6 +64,7 @@ export default class Art extends ArtVue {
     }
 
     drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 

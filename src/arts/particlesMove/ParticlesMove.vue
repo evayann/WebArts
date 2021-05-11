@@ -4,12 +4,11 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let hue = 0;
 let alpha = 25;
-let time = 0;
 let nbCircle = 20;
 let pManager: ParticlesManager;
 
@@ -60,20 +59,19 @@ function draw(): void {
     p5.colorMode(p5.HSB);
     p5.fill(hue, 255, 255);
     pManager.draw();
-    time += .02;
     hue = (hue + .1) % 360;
 }
 
 function reset(): void {
-    time = 0;
     pManager = new ParticlesManager(nbCircle);
+    resetTime();
     draw();
 }
 
 function setupP5(p: p5Instance): void {
     p5 = p;
     p5.noStroke();
-    p5.frameRate(60);
+    setLoopTime(p5.TAU)
     reset();
 }
 
@@ -83,7 +81,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 

@@ -4,14 +4,13 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, list, GUIType} from "@/arts/util";
+import {ArtVue, setLoopTime, time, seed, menu, list, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 
 let shaderGraph: P5.Graphics;
 let shader: P5.Shader;
 
-let time = 0;
 let speed = 1;
 let nbWave = 2;
 let offset = 20;
@@ -136,7 +135,6 @@ function draw(): void {
     drawBackground();
     drawFlags(halfWidth, halfHeight, width - offset, height - offset, 1);
     drawShader();
-    time++;
 }
 
 function preload(p: p5Instance) {
@@ -185,6 +183,8 @@ function setupP5(): void {
     p5.pixelDensity(1);
     squares = p5.createGraphics(width, height);
     squares.rectMode(p5.CENTER);
+    speed *= 10;
+    setLoopTime(100 / speed);
     draw();
 }
 
@@ -198,7 +198,8 @@ export default class Art extends ArtVue {
         setupP5();
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -206,7 +207,10 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 5, .1, value => speed = value),
+                    menu("Speed", speed, .1, 5, .1, value => {
+                        speed = value * 10;
+                        setLoopTime(100 / speed);
+                    }),
                     list("Current Flag", "drawFlagFrench", Object.keys(flagsFunction), value => {
                         currentFlag = flagsFunction[value];
                         this.randomizeSeed();

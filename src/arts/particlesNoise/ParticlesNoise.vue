@@ -98,7 +98,6 @@ function reset(): void {
 function setupP5(p: p5Instance): void {
     p5 = p;
     p5.noStroke();
-    p5.frameRate(60);
     reset();
 }
 
@@ -108,7 +107,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -127,7 +127,7 @@ export default class Art extends ArtVue {
                     menu("Max size", maxSize, 2, 20, 1, value => maxSize = value)
                 ],
                 "Misc": [
-                    this.seed(),
+                    this.seed(() => reset()),
                     this.pause(),
                     this.reset(reset)
                 ]

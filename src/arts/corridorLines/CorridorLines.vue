@@ -4,10 +4,9 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType} from "@/arts/util";
+import {ArtVue, setLoopTime, time, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
-let time = 0;
 let speed = 1;
 
 class Point {
@@ -74,10 +73,9 @@ function lines(eq1: Equation, eq2: Equation, eq3: Equation, eq4: Equation): void
 
 function getPointPosition(time: number): number[] {
     const pos: number = time % (2 * width);
-    if (pos < width)
-        return [xOffset * (pos - halfWidth), p5.cos(time / 2) * yOffset]
-    else
-        return [xOffset * (halfWidth - (pos - width)), p5.cos(time / 2 - p5.HALF_PI) * yOffset]
+    return pos < width ?
+        [xOffset * (pos - halfWidth), p5.cos(time / 2) * yOffset] :
+        [xOffset * (halfWidth - (pos - width)), p5.cos(time / 2 - p5.HALF_PI) * yOffset]
 }
 
 function draw(): void {
@@ -85,24 +83,22 @@ function draw(): void {
     p5.rect(0, 0, width, height);
     p5.translate(halfWidth, halfHeight);
     p5.stroke("white");
-    point.set(getPointPosition(time));
+    point.set(getPointPosition(15 * time * speed));
     lines(new Equation(point, new Point(halfWidth, halfHeight)),
         new Equation(point, new Point(halfWidth, -halfHeight)),
         new Equation(point, new Point(-halfWidth, -halfHeight)),
         new Equation(point, new Point(-halfWidth, halfHeight)));
-    time += speed * 10;
 }
 
 function reset(): void {
     p5.clear();
-    time = 0;
     p5.translate(-halfWidth, -halfHeight);
+    setLoopTime(100 / speed);
     draw();
 }
 
 function setupP5(p: p5Instance): void {
     p5 = p;
-    p5.frameRate(30);
     p5.angleMode(p5.DEGREES);
     reset();
 }
@@ -113,7 +109,8 @@ export default class Art extends ArtVue {
         setupP5(p);
     }
 
-    drawP5(): void {
+    drawP5(p: p5Instance): void {
+        super.drawP5(p);
         draw();
     }
 
@@ -125,7 +122,7 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speed, .1, 10, .1, value => speed = value),
+                    menu("Speed", speed, .1, 10, .1, value => {speed = value; reset();}),
                     menu("Offset", spaceOffset, 1.005, 2, .005, value => spaceOffset = value),
                     menu("xOffset", xOffset, 0, 2, .1, value => xOffset = value),
                     menu("yOffset", yOffset, 0, 500, 1, value => yOffset = value),
