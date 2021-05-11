@@ -347,7 +347,7 @@ function setupP5(p: p5Instance): void {
     p5 = p;
     setP5(p5);
     p5.strokeWeight(2);
-    cp = new CityParameters(width, height, new Colors());
+    cp = new CityParameters(width, height, new Colors(useColor));
     setGeometryParameters(p5, cp);
     reset();
 }

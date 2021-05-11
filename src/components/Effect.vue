@@ -31,11 +31,16 @@ export default class Effect extends UtilVue {
     private stat: string;
     private anim: string;
 
-    created() {
-        this.stat = require(`@/assets/effects/${this.value}.png`);
-        try { this.anim = require(`@/assets/effects/${this.value}.gif`); }
-        catch (e) { this.anim = this.stat; }
-        this.image = this.stat;
+    created(): void {
+        try {
+            this.stat = require(`@/assets/effects/${this.value}.png`);
+            try { this.anim = require(`@/assets/effects/${this.value}.gif`); }
+            catch (e) { this.anim = this.stat; }
+            this.image = this.stat;
+        }
+        catch (e) {
+            this.image = "";
+        }
     }
 
     updateImage(state: string): void {
@@ -69,6 +74,7 @@ a img, a div {
     display: block;
     width: 20em;
     height: 12em;
+    object-fit: cover;
     background: #bf2e2e;
 }
 

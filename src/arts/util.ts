@@ -115,6 +115,7 @@ export abstract class ArtVue extends Vue {
     private recordButton: GUIController;
 
     // P5 elements
+    private debug: boolean;
     protected p5: p5Instance;
 
     // P5 records
@@ -131,15 +132,20 @@ export abstract class ArtVue extends Vue {
 
     setupP5(p: p5Instance): void {
         this.p5 = p5 = p;
+        this.debug = false;
         counter = 0;
         this.fps = -1;
         this.canvas = document.getElementById("defaultCanvas0") as unknown as CanvasRenderingContext2D;
     }
 
     drawP5(p: p5Instance): void {
+        if (this.debug) console.log("Draw at", p.millis());
         this.computeIfFinish();
         if (this.gif)
-            this.gif.addFrame(this.canvas, {delay: 1000 / fps});
+            this.gif.addFrame(this.canvas, {
+                delay: 1000 / fps,
+                copy: true
+            });
         counter++;
         time = counter / fps;
     }
