@@ -3,8 +3,8 @@
 </template>
 
 <script lang="ts">
-import {width, height, p5Instance} from "@/components/P5.vue";
-import {ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/util";
+import {width, height, p5Instance, halfWidth as centerX, halfHeight as centerY} from "@/components/P5.vue";
+import {shuffle, ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/util";
 
 let p5: p5Instance;
 let alpha = 25;
@@ -30,14 +30,6 @@ const sinBase: Array<Periodic> = [
     (x) => 1 / (2 + Math.sin(x)),
     (x) => Math.sin(x) * Math.sin(x),
 ];
-
-function shuffle<T>(array: Array<T>): Array<T> {
-    for (let i = array.length - 1; i--;) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
 
 function getPeriodicFunction(array: Array<Periodic>): Periodic {
     return shuffle([...array])[0];
@@ -123,7 +115,7 @@ function draw(): void {
     p5.colorMode(p5.RGB);
     p5.fill(0, alpha);
     p5.rect(0, 0, width, height);
-    p5.translate(width / 2, height / 2);
+    p5.translate(centerX, centerY);
     p5.colorMode(p5.HSB);
     pManager.draw();
 }
@@ -137,7 +129,7 @@ function setupP5(p: p5Instance): void {
     p5 = p;
     p5.noStroke();
     pManager = new ParticlesManager();
-    setLoopTime(p5.TAU)
+    setLoopTime(p5.TAU);
     reset();
 }
 

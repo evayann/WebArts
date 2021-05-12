@@ -14,10 +14,10 @@ export default createStore({
                 category: "geometry",
                 arts: [
                     "dropGradient", "squareFromLittle", "cubeStack",
-                    "squareShake", "circleSplit", "squaresLoop",
-                    "circleSquare", "grid", "squareCircleGradient",
-                    "gridLines", "simpleGrid", "circleAutomata",
-                    "boxWaves"
+                    "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
+                    "circleSquare", "grid", "roundedRectangle",
+                    "gridLines", "simpleGrid", "squareCircleGradient",
+                    "circleAutomata", "boxWaves"
                 ]
             },
             {

@@ -4,10 +4,20 @@ import {Vue} from "vue-class-component";
 import {GUI, GUIController} from "dat.gui";
 import {width, height, p5Instance} from "@/components/P5.vue";
 
+// region Variables
+export let pause = false;
+export let seed = 1;
+export let time = 0;
+export let fps = 30;
+export let loopTime = -1;
+
+let datParams: Record<string, unknown> = {};
+type DatFunction = (...unknown) => void;
+export type GUIType = GUI;
+// endregion Variables
+
 // region Dat.GUI
 // region Types
-type DatFunction = (...unknown) => void;
-
 export class DatProperties {
     public readonly name: string;
     public readonly otherName: string;
@@ -96,8 +106,6 @@ export function list(name: string, def: unknown, values: Array<unknown>, onChang
     return new DatProperties(name, undefined, undefined, undefined, undefined, onChange, values);
 }
 
-let datParams: Record<string, unknown> = {};
-
 function addElement(name: string, value: unknown): void {
     const el = {};
     el[name] = value;
@@ -105,6 +113,7 @@ function addElement(name: string, value: unknown): void {
 }
 // endregion Dat.GUI
 
+// region Art Class
 let p5: p5Instance;
 let counter: number;
 export abstract class ArtVue extends Vue {
@@ -122,7 +131,6 @@ export abstract class ArtVue extends Vue {
     private canvas: CanvasRenderingContext2D;
     private gif: GIF;
     private startRec: number;
-    private fps: number;
     // endregion Attributes
 
     mounted(): void {
@@ -134,7 +142,7 @@ export abstract class ArtVue extends Vue {
         this.p5 = p5 = p;
         this.debug = false;
         counter = 0;
-        this.fps = -1;
+        setFramerate(30);
         this.canvas = document.getElementById("defaultCanvas0") as unknown as CanvasRenderingContext2D;
     }
 
@@ -253,6 +261,7 @@ export abstract class ArtVue extends Vue {
         this.p5.removeElements();
     }
 }
+// endregion Art Class
 
 export function setFramerate(value: number): void {
     fps = value;
@@ -267,10 +276,12 @@ export function resetTime(): void {
     counter = 0;
 }
 
-export let pause = false;
-export let seed = 1;
-export let time = 0;
-export let fps = 30;
-export let loopTime = -1;
-
-export type GUIType = GUI;
+// region Misc
+export function shuffle<T>(array: Array<T>): Array<T> {
+    for (let i = array.length - 1; i--;) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+// endregion Misc
