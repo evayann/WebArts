@@ -58,7 +58,7 @@ function drawLine(): void {
     for (let i = nbLines; i--;)
         p5.line(...vertices[(from + i) % vertices.length], ...vertices[(to + i) % vertices.length]);
 }
-let c = 0;
+
 function draw(): void {
     p5.translate(centerX, centerY);
     p5.background(bgColor);
@@ -68,8 +68,6 @@ function draw(): void {
     p5.circle(0, 0, size);
     drawHypercycloid();
     drawLine();
-    c++;
-    if (c == vertices.length) p5.noLoop();
 }
 
 function resize(): void {
