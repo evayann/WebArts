@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, switchButton, color, GUIType} from "@/arts/art";
 // Recreate from gif : https://twitter.com/verytiredrobot/status/1345448387949309954?s=12
 
 let p5: p5Instance;

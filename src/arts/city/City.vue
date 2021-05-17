@@ -5,7 +5,7 @@
 <script lang="ts">
 // Inspired from https://openprocessing.org/sketch/121526
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, pause, menu, button, GUIType} from "@/arts/util";
+import {ArtVue, pause, menu, button, GUIType} from "@/arts/art";
 import {action, Colors, Drawer, Element, rdm, resetColor, setP5} from './drawer';
 import {
 add, box, circle, CityParameters, cylinder, Direction, ellipse, line,

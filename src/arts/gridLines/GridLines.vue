@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, GUIType, color} from "@/arts/util";
+import {ArtVue, menu, GUIType, color} from "@/arts/art";
 
 // Inspired by https://twitter.com/beesandbombs/status/1361727805130760194?s=12
 

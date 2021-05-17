@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, GUIType} from "@/arts/util";
+import {ArtVue, seed, menu, GUIType} from "@/arts/art";
 // Inspired from https://openprocessing.org/sketch/566877
 
 let p5: p5Instance;

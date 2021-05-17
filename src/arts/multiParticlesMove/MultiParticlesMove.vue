@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import {width, height, p5Instance, halfWidth as centerX, halfHeight as centerY} from "@/components/P5.vue";
-import {shuffle, ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/art";
+import {shuffle} from "@/arts/util";
 
 let p5: p5Instance;
 let alpha = 25;

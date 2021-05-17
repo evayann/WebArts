@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, P5, p5Instance} from "@/components/P5.vue";
-import {ArtVue, GUIType, menu, button, text, color, switchButton} from "@/arts/util";
+import {ArtVue, GUIType, menu, text, color, switchButton} from "@/arts/art";
 
 const fps = 30;
 let nbColumn = 120;

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {halfWidth, halfHeight, p5Instance} from "@/components/P5.vue";
-import {ArtVue, time, setLoopTime, resetTime, menu, switchButton, GUIType} from "@/arts/util";
+import {ArtVue, time, setLoopTime, resetTime, menu, switchButton, GUIType} from "@/arts/art";
 
 let p5: p5Instance;
 // Inspired from https://www.reddit.com/r/loadingicon/comments/m4yept/overlapping_waves_oc/?utm_source=share&utm_medium=ios_app&utm_name=iossmf

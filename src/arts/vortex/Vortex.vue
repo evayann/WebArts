@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, menu, color, GUIType} from "@/arts/art";
 
 let p5: p5Instance;
 const pColor = "#b98a5d";

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/art";
 // Inspired by https://www.reddit.com/r/loadingicon/comments/mwalqy/straight_line_echoes_inside_deltoid_gif_loop_by/?utm_source=share&utm_medium=ios_app&utm_name=iossmf
 
 let p5: p5Instance;

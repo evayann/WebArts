@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/art";
 
 let p5: p5Instance;
 

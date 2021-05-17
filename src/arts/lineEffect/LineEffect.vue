@@ -4,7 +4,8 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, menu, color, switchButton, GUIType} from "@/arts/util";
+import {ArtVue, seed, menu, color, switchButton, GUIType} from "@/arts/art";
+import {Particle, Particles} from "@/arts/particles";
 
 let p5: p5Instance;
 let useColor = true;
@@ -25,27 +26,27 @@ let speedFactor = 1;
 
 let pm: PointManager;
 
-class PointManager {
-    private pts: Array<Point>;
+class PointManager extends Particles {
     private readonly lines: Array<Line>;
 
     constructor() {
-        this.pts = new Array<Point>();
+        super();
         this.lines = new Array<Line>();
         for (let i = 0; i < nbPts; i++)
-            this.pts.push(new Point(p5.random(width), p5.random(height)));
+            this.addParticle(new Point(p5.random(width), p5.random(height)));
+        this.run();
     }
 
     update(deltaTime: number): void {
         this.lines.length = 0; // Clear previous element
 
         // Move point
-        this.pts.forEach(p => p.update(deltaTime));
+        super.update(deltaTime);
 
         // Make lines
-        this.pts.forEach(p1 => {
-            this.pts.forEach(p2 => {
-                const pos1: P5.Vector = p1.pos, pos2: P5.Vector = p2.pos;
+        this.getParticles().forEach(p1 => {
+            this.getParticles().forEach(p2 => {
+                const pos1: P5.Vector = p1.getPos(), pos2: P5.Vector = p2.getPos();
                 const distance: number = p5.dist(pos1.x, pos1.y, pos2.x, pos2.y);
                 if (distance < distToDraw) {
                     const newLine: Line = new Line(pos1, pos2, (distance / distToDraw) * strokeSize, 1 - distance / distToDraw);
@@ -75,29 +76,27 @@ class PointManager {
     }
 }
 
-class Point {
-    pos: P5.Vector;
-    acc: P5.Vector;
-    dir: P5.Vector;
-
+class Point extends Particle {
     constructor(x: number, y: number) {
+        super(Particle.INFINITY);
         this.pos = p5.createVector(x, y);
         this.acc = p5.createVector();
-        this.dir = p5.createVector(p5.random(-1, 1), p5.random(-1, 1));
+        this.vel = p5.createVector(p5.random(-1, 1), p5.random(-1, 1));
     }
 
-    update(deltaTime: number): void {
+    update(deltaTime: number) {
         this.acc.set(2, 2);
 
         if (this.pos.x < 0 || this.pos.x > width)
-            this.dir.x *= -1;
+            this.vel.x *= -1;
         if (this.pos.y < 0 || this.pos.y > height)
-            this.dir.y *= -1;
+            this.vel.y *= -1;
 
         this.acc.setMag(20);
-        this.acc.x *= this.dir.x;
-        this.acc.y *= this.dir.y;
+        this.acc.x *= this.vel.x;
+        this.acc.y *= this.vel.y;
         this.pos.add(P5.Vector.mult(this.acc, deltaTime));
+        super.update(deltaTime);
     }
 }
 

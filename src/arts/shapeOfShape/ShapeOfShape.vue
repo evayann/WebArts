@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, menu, color, GUIType, setLoopTime} from "@/arts/util";
+import {ArtVue, menu, color, GUIType, setLoopTime} from "@/arts/art";
 // Inspired by https://mobile.twitter.com/beesandbombs/status/1334541858366775298
 
 let p5: p5Instance;

@@ -16,7 +16,7 @@ export default createStore({
                     "dropGradient", "squareFromLittle", "cubeStack",
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle",
-                    "gridLines", "simpleGrid", "squareCircleGradient",
+                    "gridLines", "squareCircleGradient", "chromaCross",
                     "circleAutomata", "boxWaves"
                 ]
             },
@@ -39,6 +39,12 @@ export default createStore({
                 arts: [
                     "shapeOfShape", "corridorLines", "spiralTunnel",
                     "lineCircle", "overlapWaves", "circleImage", "asciiCam"
+                ]
+            },
+            {
+                category: "truchet",
+                arts: [
+                    "simpleGrid"
                 ]
             }
         ]

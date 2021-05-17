@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, seed, fps, time as t, menu, switchButton, GUIType, setLoopTime} from "@/arts/util";
+import {ArtVue, seed, fps, time as t, menu, switchButton, GUIType, setLoopTime} from "@/arts/art";
 // From https://github.com/cmllngf/planet_1/blob/master/sketch.js by cmllngf
 
 

@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import {width, height, halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
-import {ArtVue, time, resetTime, setLoopTime, menu, color, GUIType} from "@/arts/util";
+import {ArtVue, time, resetTime, setLoopTime, menu, color, GUIType} from "@/arts/art";
 // Recreate from https://www.reddit.com/r/processing/comments/mxas9y/processing_art_tutorial_ep4_loop_of_hues_and/?utm_source=share&utm_medium=mweb
 
 let p5: p5Instance;
