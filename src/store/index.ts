@@ -44,7 +44,7 @@ export default createStore({
             {
                 category: "truchet",
                 arts: [
-                    "simpleGrid"
+                    "simpleGrid", "noiseTruchet"
                 ]
             }
         ]

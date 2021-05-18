@@ -44,7 +44,7 @@ export function shuffle<T>(array: Array<T>): Array<T> {
     return array;
 }
 
-export function range(end: number, start=0, step=1): Array<number> {
+export function range(end: number, step=1, start=0): Array<number> {
     function* generateRange() {
         let x = start - step;
         while(x < end - step) yield x += step;
