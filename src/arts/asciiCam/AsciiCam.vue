@@ -27,7 +27,7 @@ let cam = null;
 let xSize: number, ySize: number;
 const parsePos = (x, y) => (y * cam.width + x) * 4;
 
-function iterOn(xStart: number, yStart: number,): number[] {
+function meanOn(xStart: number, yStart: number,): number[] {
     let r = 0, g = 0, b = 0;
     let counter = 0;
     for (let x = xStart; x < xStart + xSize; x++) {
@@ -75,7 +75,7 @@ function drawP5(p: p5Instance): void {
     for (let x = 0; x < cam.width; x += xSize) {
         let y: number;
         for (y = 0; y < cam.height; y += ySize) {
-            drawer(iterOn(x, y));
+            drawer(meanOn(x, y));
             p.translate(0, ySize);
         }
         p.translate(xSize, -y);
