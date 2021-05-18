@@ -1,7 +1,8 @@
 import {P5} from "@/components/P5.vue";
+import {BoxDrawable} from "@/arts/util";
 
 // region Particles
-export abstract class Particle {
+export abstract class Particle  implements BoxDrawable {
     // region Attributes
     static INFINITY = "INFINITY";
 
@@ -31,6 +32,10 @@ export abstract class Particle {
 
     render(): void {
         console.log("Render");
+    }
+
+    renderInBox(cx: number, cy: number, size: number): void {
+        console.log("Render In Box");
     }
 
     isDead(): boolean {
@@ -83,9 +88,6 @@ export class Particles {
 
     addParticle(...p: Particle[]): void {
         this.particles = this.particles.concat(p);
-    }
-
-    run(): void {
         this.original = [...this.particles];
     }
 
@@ -104,6 +106,10 @@ export class Particles {
 
     render(): void {
         this.particles.forEach(p => p.render());
+    }
+
+    renderInBox(cx: number, cy: number, size: number): void {
+        this.particles.forEach(p => p.renderInBox(cx, cy, size));
     }
 
     // region Getters

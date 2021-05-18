@@ -5,7 +5,7 @@
 <script lang="ts">
 import {width, height, p5Instance, halfWidth as centerX, halfHeight as centerY} from "@/components/P5.vue";
 import {ArtVue, time, resetTime, setLoopTime, menu, GUIType} from "@/arts/art";
-import {shuffle} from "@/arts/util";
+import {BoxGrid, BoxDrawable, shuffle, range} from "@/arts/util";
 
 let p5: p5Instance;
 let alpha = 25;
@@ -39,7 +39,7 @@ function getPeriodicFunction(array: Array<Periodic>): Periodic {
 const getCos: () => Periodic = () => getPeriodicFunction(cosBase);
 const getSin: () => Periodic = () => getPeriodicFunction(sinBase);
 
-class Particles {
+class ExtendedParticles implements BoxDrawable {
     private readonly xFunc: Periodic;
     private readonly yFunc: Periodic;
     private readonly nbPart: number;
@@ -62,11 +62,11 @@ class Particles {
         this.colorIncrement = colorIncrement;
     }
 
-    draw(x: number, y: number, size: number): void {
+    renderInBox(tlx: number, tly: number, size: number): void {
         this.color = (this.color + this.colorIncrement) % 360;
         p5.fill(this.color, 200, 255);
         p5.push();
-        p5.translate(x, y);
+        p5.translate(tlx, tly);
         for (let i = this.nbPart; i--;) {
             p5.push();
             p5.rotate(-(i / this.nbPart) * p5.TAU);
@@ -82,33 +82,12 @@ class Particles {
     }
 }
 
-class ParticlesManager {
-    private effects: Array<Particles>;
-    private nbElements: number;
-    private halfElements: number;
-
-    constructor(maxNbPart=10, nbElements=3) {
-        this.update(maxNbPart, nbElements);
-    }
-
-    update(maxNbPart: number, nbElements: number): void {
-        this.effects = [];
-        this.nbElements = nbElements;
-        this.halfElements = ~~(nbElements / 2);
-        for (let i = nbElements * nbElements; i--;)
-            this.effects.push(new Particles(~~p5.random(5, maxNbPart),
+class ParticlesManager extends BoxGrid {
+    addDrawables(): void {
+        range(this.nbElements * this.nbElements).forEach(() => {
+            this.effects.push(new ExtendedParticles(~~p5.random(5, nbCircle),
                 ~~p5.random(360), p5.random([-2, -1, 0, 1, 2]), p5.random(8)));
-    }
-
-    draw(): void {
-        const blockSize: number = (Math.min(width, height) - 40) / this.nbElements;
-        const particleZone: number = blockSize / 3;
-        const pos: number = nbElements % 2 == 0 ? blockSize / 2 : 0;
-        for (let y = 0; y < this.nbElements; y++)
-            for (let x = 0; x < this.nbElements; x++)
-                this.effects[x * this.nbElements + y]
-                    .draw((x - this.halfElements) * blockSize + pos,
-                        (y - this.halfElements) * blockSize + pos, particleZone);
+        });
     }
 }
 
@@ -118,11 +97,11 @@ function draw(): void {
     p5.rect(0, 0, width, height);
     p5.translate(centerX, centerY);
     p5.colorMode(p5.HSB);
-    pManager.draw();
+    pManager.render();
 }
 
 function reset(): void {
-    pManager.update(nbCircle, nbElements);
+    pManager.reset(nbElements, 2/3);
     resetTime();
 }
 

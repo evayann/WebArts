@@ -34,7 +34,6 @@ class PointManager extends Particles {
         this.lines = new Array<Line>();
         for (let i = 0; i < nbPts; i++)
             this.addParticle(new Point(p5.random(width), p5.random(height)));
-        this.run();
     }
 
     update(deltaTime: number): void {

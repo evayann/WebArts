@@ -3,8 +3,9 @@
 </template>
 
 <script lang="ts">
-import {width, height, p5Instance, P5} from "@/components/P5.vue";
+import {p5Instance, P5, halfWidth as centerX, halfHeight as centerY} from "@/components/P5.vue";
 import {ArtVue, time, setLoopTime, resetTime, menu, color, GUIType} from "@/arts/art";
+import {BoxGrid, BoxDrawable, range} from "@/arts/util";
 // Inspired by https://twitter.com/loackme_/status/1391016153569546240?s=12
 
 let p5: p5Instance;
@@ -13,7 +14,9 @@ let gridColor: P5.Color;
 
 let speed = 1;
 let strokeSize = 5;
+let anim: number;
 const nbElements = 3;
+let grid: Grid;
 
 function easeOutCubic(x: number): number {
     return 1 - p5.pow(1 - x, 3);
@@ -44,39 +47,47 @@ function drawRotation(x: number, y: number, size: number, value: number): void {
     drawSquareCross(x, y, size, v, value * p5.HALF_PI);
 }
 
+class GridCross implements BoxDrawable {
+    renderInBox(cx: number, cy: number, size: number) {
+        let a: number;
+        if (anim < 10) {
+            a = p5.constrain(p5.cos((anim / 10) * p5.TAU), 0, 1);
+            p5.strokeWeight(strokeSize + 5 * a);
+            drawSquareCross(cx, cy, size, a);
+        } else if (anim < 20) {
+            a = anim < 15 ?
+                p5.constrain(p5.cos(p5.map(anim, 10, 15, 0, p5.PI)) * 2, -1, 1) :
+                p5.constrain(p5.cos(p5.map(anim, 15, 20, p5.PI, 0)) * 2, -1, 1);
+            p5.strokeWeight(strokeSize + 5 * p5.abs(a));
+            drawSquareCross(cx, cy, size, a);
+        } else {
+            a = p5.map(anim, 20, 30, 0, 1);
+            p5.strokeWeight(strokeSize + 5 - 5 * a);
+            drawRotation(cx, cy, size, easeOutCubic(1 - a));
+        }
+    }
+}
+
+class Grid extends BoxGrid {
+    addDrawables(): void {
+        range(this.nbElements * this.nbElements)
+            .forEach(() => this.effects.push(new GridCross()));
+    }
+}
+
 function draw(): void {
     p5.background("black");
     p5.stroke(gridColor);
-    const anim: number = (time * speed) % 30;
-    p5.translate(width / 2, height / 2);
-    let blockSize: number = (Math.min(width, height) - 40) / nbElements;
-    let halfSize: number = blockSize / 2;
-    for (let y = -blockSize; y <= blockSize; y += blockSize) {
-        for (let x = -blockSize; x <= blockSize; x += blockSize) {
-            let a: number;
-            if (anim < 10) {
-                a = p5.constrain(p5.cos((anim / 10) * p5.TAU), 0, 1);
-                p5.strokeWeight(strokeSize + 5 * a);
-                drawSquareCross(x, y, halfSize, a);
-            } else if (anim < 20) {
-                a = anim < 15 ?
-                    p5.constrain(p5.cos(p5.map(anim, 10, 15, 0, p5.PI)) * 2, -1, 1) :
-                    p5.constrain(p5.cos(p5.map(anim, 15, 20, p5.PI, 0)) * 2, -1, 1);
-                p5.strokeWeight(strokeSize + 5 * p5.abs(a));
-                drawSquareCross(x, y, halfSize, a);
-            } else {
-                a = p5.map(anim, 20, 30, 0, 1);
-                p5.strokeWeight(strokeSize + 5 - 5 * a);
-                drawRotation(x, y, halfSize, easeOutCubic(1 - a));
-            }
-        }
-    }
+    p5.translate(centerX, centerY);
+    anim = (time * speed) % 30;
+    grid.render();
 }
 
 function reset(): void {
     p5.clear();
     resetTime();
-    setLoopTime((1 / speed) * 30);
+    setLoopTime(30 / speed);
+    grid.reset(nbElements);
     draw();
 }
 
@@ -84,6 +95,7 @@ export default class Art extends ArtVue {
     setupP5(p: p5Instance): void {
         super.setupP5(p);
         p5 = p;
+        grid = new Grid(nbElements);
         gridColor = p5.color(gColor);
         reset();
     }
