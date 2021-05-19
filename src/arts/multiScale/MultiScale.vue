@@ -12,6 +12,7 @@ let p5: p5Instance;
 
 let offset = 0;
 let stroke = false;
+let color = false;
 let maxRec = 7;
 let tolerance = 2;
 let precision = 5;
@@ -68,7 +69,7 @@ function quadtree(x: number, y: number, w: number, h: number, currRec: number): 
 
 function toDraw(p: p5Instance, x: number, y: number, w: number, h: number, color: P5.Color): void {
     p.fill(color);
-    p.rect(x, y, w, h);
+    p.rect(x, y, w + 1, h + 1);
 }
 
 function draw(image: P5.Image): void {
@@ -94,7 +95,24 @@ function reset(): void {
     toDraws = [];
     p5.textSize(25);
     p5.text("Generate Image", centerX - 60, centerY);
-    p5.loadImage(`https://picsum.photos/${width - 2 * offset}/${height - 2 * offset}`, image => draw(image));
+    if (!color)
+        p5.loadImage(`https://picsum.photos/${width - 2 * offset}/${height - 2 * offset}`,
+            image => draw(image));
+    else {
+        let img: P5.Image = p5.createImage(width - 2 * offset, height - 2 * offset);
+        img.loadPixels();
+        const r: number = p5.random(), g: number = p5.random(), b: number = p5.random();
+            range(img.width).forEach(x => range(img.height).forEach(y => {
+            img.set(x, y, p5.color(
+                (r + x / img.width + y / img.height) % 1 * 255,
+                (g + x / img.width + y / img.height) % 1 * 255,
+                (b + x / img.width + y / img.height) % 1 * 255)
+            );
+        }));
+        img.updatePixels();
+        draw(img);
+    }
+
 }
 
 function setupP5(p: p5Instance): void {
@@ -122,9 +140,10 @@ export default class Art extends ArtVue {
                     menu("Max Rec", maxRec, 2, 15, 1, value => maxRec = value),
                     menu("Tolerance", tolerance, 1, 20, 1, value => tolerance = value),
                     menu("Offset", offset, 0, 150, 1, value => offset = value),
-                    switchButton("Stroke", "No Stroke", () => stroke = !stroke)
-                ],
-                "Misc": [button("Update", () => reset())]
+                    switchButton("Stroke", "No Stroke", () => stroke = !stroke),
+                    switchButton("Color", "Random Image", () => color = !color),
+                    button("Update", () => reset())
+                ]
             }
         });
     }
