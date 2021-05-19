@@ -89,8 +89,8 @@ export default class Art extends ArtVue {
                 ],
                 "Visual & Color" : [
                     menu("Stroke Size", strokeSize, 1, 5, .1, value => strokeSize = value),
-                    color("From", bColor, value => bgColor = this.p5.color(value)),
-                    color("To", lColor, value => lineColor = this.p5.color(value))
+                    color("Background", bColor, value => bgColor = this.p5.color(value)),
+                    color("Line", lColor, value => lineColor = this.p5.color(value))
                 ],
                 "Misc": [this.pause()]
             }
