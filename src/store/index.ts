@@ -6,7 +6,7 @@ export default createStore({
             {
                 category: "scene",
                 arts: [
-                    "planetsCircle", "city", "rain",
+                    "planetsCircle", "city", "rain", "sunrise",
                     "noiseColor", "lineEffect", "multiScale"
                 ]
             },
