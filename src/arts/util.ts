@@ -1,9 +1,8 @@
-import {height, width} from "@/components/P5.vue";
+import {height, p5Instance, width} from "@/components/P5.vue";
 
 export interface BoxDrawable {
     renderInBox(cx: number, cy: number, size: number);
 }
-
 
 export abstract class BoxGrid {
     protected effects: Array<BoxDrawable>;
@@ -35,6 +34,18 @@ export abstract class BoxGrid {
                         (y - this.halfElements) * blockSize + pos, (blockSize / 2) * this.blockSizeFactor);
     }
 }
+
+// export function randomAveragePixel(p5: p5Instance): void {
+//     const rdmAvg = (i: number) => {
+//       const r = p5.random(-30, 30);
+//       return p5.color((p5.red(p5.pixels[i]) + r) % 255,
+//           (p5.green(p5.pixels[i]) + r) % 255,
+//           (p5.blue(p5.pixels[i]) + r) % 255);
+//     };
+//     p5.loadPixels();
+//     range(p5.width * p5.height).map(i => p5.pixels[i] = rdmAvg(i));
+//     p5.updatePixels();
+// }
 
 export function shuffle<T>(array: Array<T>): Array<T> {
     for (let i = array.length - 1; i--;) {
