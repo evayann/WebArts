@@ -27,7 +27,7 @@ let cam = null;
 let xSize: number, ySize: number;
 const parsePos = (x, y) => (y * cam.width + x) * 4;
 
-function meanOn(xStart: number, yStart: number,): number[] {
+function meanOn(xStart: number, yStart: number): number[] {
     let r = 0, g = 0, b = 0;
     let counter = 0;
     for (let x = xStart; x < xStart + xSize; x++) {

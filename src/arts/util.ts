@@ -39,17 +39,31 @@ export function parseColor(colors: string, split=" "): Array<string> {
     return colors.split(split).map((value, index, array) => array[index] = "#" + value);
 }
 
-// export function randomAveragePixel(p5: p5Instance): void {
-//     const rdmAvg = (i: number) => {
-//       const r = p5.random(-30, 30);
-//       return p5.color((p5.red(p5.pixels[i]) + r) % 255,
-//           (p5.green(p5.pixels[i]) + r) % 255,
-//           (p5.blue(p5.pixels[i]) + r) % 255);
-//     };
-//     p5.loadPixels();
-//     range(p5.width * p5.height).map(i => p5.pixels[i] = rdmAvg(i));
-//     p5.updatePixels();
-// }
+function meanOn(p5: p5Instance, xStart: number, yStart: number, xSize: number, ySize: number): number[] {
+    let r = 0, g = 0, b = 0;
+    let counter = 0;
+    for (let x = xStart; x < xStart + xSize; x++) {
+        for (let y = yStart; y < yStart + ySize && y < p5.height; y++) {
+            const p = (y * p5.width + x) * 4;
+            r += p5.pixels[p];
+            g += p5.pixels[p + 1];
+            b += p5.pixels[p + 2];
+            counter++;
+        }
+    }
+    return [r / counter, g / counter, b / counter];
+}
+
+export function randomAveragePixel(p5: p5Instance, maxNoise, xSize=1, ySize=1): void {
+    p5.loadPixels();
+    const mod = v => v < 0 ? 0 : v % 255;
+    range(p5.width, xSize).forEach(x => range(p5.height, ySize).forEach(y => {
+        const [r, g, b] = meanOn(p5, x, y, xSize, ySize);
+        const rdm = p5.random(-maxNoise, maxNoise);
+        p5.set(x, y, [mod(r + rdm), mod(g + rdm), mod(b + rdm) , 255]);
+    }));
+    p5.updatePixels();
+}
 
 export function shuffle<T>(array: Array<T>): Array<T> {
     for (let i = array.length - 1; i--;) {
