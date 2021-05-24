@@ -35,6 +35,10 @@ export abstract class BoxGrid {
     }
 }
 
+export function parseColor(colors: string, split=" "): Array<string> {
+    return colors.split(split).map((value, index, array) => array[index] = "#" + value);
+}
+
 // export function randomAveragePixel(p5: p5Instance): void {
 //     const rdmAvg = (i: number) => {
 //       const r = p5.random(-30, 30);

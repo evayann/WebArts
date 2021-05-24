@@ -15,7 +15,7 @@ export default createStore({
                 arts: [
                     "dropGradient", "squareFromLittle", "cubeStack",
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
-                    "circleSquare", "grid", "roundedRectangle",
+                    "circleSquare", "grid", "roundedRectangle", "lineInCircle",
                     "gridLines", "squareCircleGradient", "chromaCross",
                     "circleAutomata", "boxWaves"
                 ]
