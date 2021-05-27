@@ -13,11 +13,11 @@ export default createStore({
             {
                 category: "geometry",
                 arts: [
-                    "dropGradient", "squareFromLittle", "cubeStack", "geometryNoise",
+                    "dropGradient", "squareFromLittle", "rotatingLine", "geometryNoise",
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle", "lineInCircle",
                     "gridLines", "squareCircleGradient", "chromaCross",
-                    "circleAutomata", "boxWaves"
+                    "circleAutomata", "cubeStack", "boxWaves"
                 ]
             },
             {
