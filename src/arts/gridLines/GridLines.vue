@@ -5,6 +5,7 @@
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, menu, GUIType, color} from "@/arts/art";
+import {easeInOutExpo} from "@/arts/easecurve";
 
 // Inspired by https://twitter.com/beesandbombs/status/1361727805130760194?s=12
 
@@ -19,15 +20,6 @@ const stroke = 2;
 let blockSize: number = Math.min(width, height) / nbElements;
 let xEl: number = Math.floor((width / blockSize) / 2) + 2;
 let yEl: number = Math.floor((height / blockSize) / 2) + 2;
-
-function easeInOutExpo(x: number): number {
-    return x === 0
-        ? 0
-        : x === 1
-            ? 1
-            : x < 0.5 ? p5.pow(2, 20 * x - 10) / 2
-                : (2 - p5.pow(2, -20 * x + 10)) / 2;
-}
 
 function drawLine(x: number, y: number, w: number, h: number): void {
     p5.line(x, y, x + w, y + h)

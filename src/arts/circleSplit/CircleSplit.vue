@@ -5,6 +5,7 @@
 <script lang="ts">
 import {width, height, p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, time, setLoopTime, resetTime, menu, color, GUIType} from "@/arts/art";
+import {easeInOutElastic, easeInOutExpo} from "@/arts/easecurve";
 // Inspired by https://twitter.com/concinnus/status/1360831157852635136?s=12
 
 let p5: p5Instance;
@@ -17,29 +18,6 @@ let blockSize: number = Math.min(width, height) / nbElements;
 let size: number = blockSize / 2;
 let xEl: number = Math.floor((width / blockSize) / 2) + 2;
 let yEl: number = Math.floor((height / blockSize) / 2) + 2;
-
-function easeInOutExpo(x: number): number {
-    return x === 0
-        ? 0
-        : x === 1
-            ? 1
-            : x < 0.5 ? p5.pow(2, 20 * x - 10) / 2
-                : (2 - p5.pow(2, -20 * x + 10)) / 2;
-
-}
-
-function easeInOutElastic(x: number): number {
-    const c5 = (2 * Math.PI) / 4.5;
-
-    return x === 0
-        ? 0
-        : x === 1
-            ? 1
-            : x < 0.5
-                ? -(p5.pow(2, 20 * x - 10) * p5.sin((20 * x - 11.125) * c5)) / 2
-                : (p5.pow(2, -20 * x + 10) * p5.sin((20 * x - 11.125) * c5)) / 2 + 1;
-
-}
 
 function drawQuarter(x: number, y: number, rotate: number): void {
     p5.push();

@@ -5,6 +5,7 @@
 <script lang="ts">
 import {width, height, halfWidth, halfHeight, p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, time, resetTime, setLoopTime, menu, color, GUIType} from "@/arts/art";
+import {easeInQuart, easeInOutExpo} from "@/arts/easecurve";
 // Inspired by https://twitter.com/cs_kaplan/status/1359695674862895105?s=12
 
 let p5: p5Instance;
@@ -18,19 +19,6 @@ let hbSize: number = blockSize / 2;
 let size: number = blockSize * .7;
 let xEl: number = Math.floor((width / blockSize) / 2) + 2;
 let yEl: number = Math.floor((height / blockSize) / 2) + 2;
-
-function easeInOutExpo(x: number): number {
-    return x === 0
-        ? 0
-        : x === 1
-            ? 1
-            : x < 0.5 ? p5.pow(2, 20 * x - 10) / 2
-                : (2 - p5.pow(2, -20 * x + 10)) / 2;
-}
-
-function easeInQuart(x: number): number {
-    return x * x * x * x;
-}
 
 function drawShape(h: number, reduce: number): void {
     p5.beginShape();

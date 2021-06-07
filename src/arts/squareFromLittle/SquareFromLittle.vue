@@ -5,6 +5,7 @@
 <script lang="ts">
 import {halfWidth as centerX, halfHeight as centerY, p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, time, setLoopTime, menu, switchButton, color, GUIType} from "@/arts/art";
+import {easeInOutElastic} from "@/arts/easecurve";
 
 let p5: p5Instance;
 const sColor = "#35d492";
@@ -15,17 +16,6 @@ const size = 20;
 const offset = 1.7;
 let nbSquares = 20;
 let rotate = true;
-
-function easeInOutElastic(x: number): number {
-    const c5 = (2 * Math.PI) / 4.5;
-    return x === 0 ? 0
-        : x === 1
-            ? 1
-            : x < 0.5
-                ? -(Math.pow(2, 20 * x - 10) * Math.sin((20 * x - 11.125) * c5)) / 2
-                : (Math.pow(2, -20 * x + 10) * Math.sin((20 * x - 11.125) * c5)) / 2 + 1;
-
-}
 
 function cmpPos(from: number, to: number, time: number): number {
     const val = easeInOutElastic(p5.map(time, -1, 1, 0, 1));

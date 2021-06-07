@@ -17,6 +17,7 @@ export default createStore({
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle", "lineInCircle",
                     "gridLines", "squareCircleGradient", "chromaCross",
+                    "multipleEllipse", "hexaNeighbour",
                     "circleAutomata", "cubeStack", "boxWaves"
                 ]
             },
@@ -31,7 +32,7 @@ export default createStore({
                 arts: [
                     "vortex", "spiralCube", "pendulum", "lineSphere", "multiParticlesMove",
                     "particlesMove", "particlesNoise", "particlesCompact",
-                    "flow", "flow1", "flow2"
+                    "donut", "flow", "flow1", "flow2"
                 ]
             },
             {

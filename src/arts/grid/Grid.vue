@@ -6,6 +6,7 @@
 import {p5Instance, P5, halfWidth as centerX, halfHeight as centerY} from "@/components/P5.vue";
 import {ArtVue, time, setLoopTime, resetTime, menu, color, GUIType} from "@/arts/art";
 import {BoxGrid, BoxDrawable, range} from "@/arts/util";
+import {easeOutCubic} from "@/arts/easecurve";
 // Inspired by https://twitter.com/loackme_/status/1391016153569546240?s=12
 
 let p5: p5Instance;
@@ -17,10 +18,6 @@ let strokeSize = 5;
 let anim: number;
 const nbElements = 3;
 let grid: Grid;
-
-function easeOutCubic(x: number): number {
-    return 1 - p5.pow(1 - x, 3);
-}
 
 function drawSquareCross(x: number, y: number, size: number, value: number, rot=0): void {
     p5.push();

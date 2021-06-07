@@ -5,6 +5,7 @@
 <script lang="ts">
 import {p5Instance, P5} from "@/components/P5.vue";
 import {ArtVue, time, resetTime, menu, color, GUIType} from "@/arts/art";
+import {ease} from "@/arts/easecurve";
 
 let p5: p5Instance;
 
@@ -21,9 +22,6 @@ let twistFactor = 0.5;
 let inflate = 3;
 let maxWeight = 2.5;
 let minWeight = 2.5;
-
-const ease = (p: number, g: number) =>
-    (p < 0.5) ? 0.5 * p5.pow(2 * p, g) : 1 - 0.5 * p5.pow(2 * (1 - p), g);
 
 function twister(rot: number): void {
     p5.push();

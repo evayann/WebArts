@@ -7,15 +7,17 @@ export interface BoxDrawable {
 export abstract class BoxGrid {
     protected effects: Array<BoxDrawable>;
     protected nbElements: number;
-    protected halfElements: number;
-    protected blockSizeFactor: number;
+    private offset: boolean;
+    private halfElements: number;
+    private blockSizeFactor: number;
 
-    constructor(nbElements=3, blockSizeFactor=1) {
-        this.reset(nbElements, blockSizeFactor);
+    constructor(nbElements=3, blockSizeFactor=1, offset=false) {
+        this.reset(nbElements, blockSizeFactor, offset);
     }
 
-    reset(nbElements: number, blockSizeFactor=1): void {
+    reset(nbElements: number, blockSizeFactor=1, offset=false): void {
         this.effects = [];
+        this.offset = offset;
         this.nbElements = nbElements;
         this.halfElements = ~~(nbElements / 2);
         this.blockSizeFactor = blockSizeFactor;
@@ -31,7 +33,8 @@ export abstract class BoxGrid {
             for (let x = 0; x < this.nbElements; x++)
                 this.effects[x * this.nbElements + y]
                     .renderInBox((x - this.halfElements) * blockSize + pos,
-                        (y - this.halfElements) * blockSize + pos, (blockSize / 2) * this.blockSizeFactor);
+                        (y - this.halfElements) * blockSize + pos + (this.offset && x % 2 == 0 ? blockSize / 2 : 0),
+                        (blockSize / 2) * this.blockSizeFactor);
     }
 }
 
