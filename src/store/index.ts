@@ -17,7 +17,7 @@ export default createStore({
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle", "lineInCircle",
                     "gridLines", "squareCircleGradient", "chromaCross",
-                    "multipleEllipse", "hexaNeighbour",
+                    "multipleCircle", "hexaNeighbour",
                     "circleAutomata", "cubeStack", "boxWaves"
                 ]
             },

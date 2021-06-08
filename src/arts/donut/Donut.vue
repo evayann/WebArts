@@ -7,7 +7,6 @@ import {halfWidth as cx, halfHeight as cy, p5Instance, P5} from "@/components/P5
 import {ArtVue, setLoopTime, time, menu, GUIType} from "@/arts/art";
 
 let p5: p5Instance;
-let speedFactor = 1;
 let sizeFactor = 1;
 let nbCircle = 30;
 let density = 60;
@@ -27,7 +26,7 @@ function draw(): void {
         p5.rotate(rad);
         p5.translate(pos, 0);
         for (let j = density; j--;) {
-            const rad: number = (speedFactor * (j + time) + (j * p5.QUARTER_PI) / density) % p5.TAU;
+            const rad: number = ((j + time) + (j * p5.QUARTER_PI) / density) % p5.TAU;
             p5.fill(rad < p5.PI ? topColor(rad) : bottomColor(rad));
             p5.circle(p5.cos(rad) * size, p5.sin(rad) * size, 10 * sizeFactor);
         }
@@ -42,7 +41,7 @@ function setupP5(p: p5Instance): void {
 }
 
 function loop(): void {
-    setLoopTime((1 + 5 / speedFactor) * p5.TAU);
+    setLoopTime(p5.TAU);
 }
 
 export default class Art extends ArtVue {
@@ -60,10 +59,6 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
-                    menu("Speed", speedFactor, .1, 5, .1, value => {
-                        speedFactor = value;
-                        loop();
-                    }),
                     menu("Size", sizeFactor, .1, 3, .1, value => sizeFactor = value),
                     menu("Offset", offset, 0, 100, .1, value => offset = value),
                     menu("Density", density, 20, 500, 1, value => density = value),
