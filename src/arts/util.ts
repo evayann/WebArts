@@ -83,3 +83,34 @@ export function range(end: number, step=1, start=0): Array<number> {
     }
     return [...generateRange()];
 }
+
+export function array<T>(size: number, fct: () => T): T[] {
+    const array = [];
+    for (let i = size; i--;)
+        array.push(fct());
+    return array;
+}
+
+type Iterableify<T> = { [K in keyof T]: Iterable<T[K]> }
+
+/**
+ * Zip multiples array. Stole to https://dev.to/chrismilson/zip-iterator-in-typescript-ldm?signin=true
+ * @param toZip
+ */
+export function* zip<T extends Array<any>>(...toZip: Iterableify<T>): Generator<T> {
+    // Get iterators for all of the iterables.
+    const iterators = toZip.map(i => i[Symbol.iterator]());
+
+    while (true) {
+        // Advance all of the iterators.
+        const results = iterators.map(i => i.next());
+
+        // If any of the iterators are done, we should stop.
+        if (results.some(({ done }) => done))
+            break;
+
+        // We can assert the yield type, since we know none
+        // of the iterators are done.
+        yield results.map(({ value }) => value) as T;
+    }
+}

@@ -6,7 +6,7 @@ export default createStore({
             {
                 category: "scene",
                 arts: [
-                    "planetsCircle", "city", "rain", "sunrise",
+                    "planetsCircle", "city", "rain", "sunrise", "eggs",
                     "noiseColor", "lineEffect", "multiScale", "kiss"
                 ]
             },
@@ -31,7 +31,7 @@ export default createStore({
                 category: "flow",
                 arts: [
                     "vortex", "spiralCube", "pendulum", "lineSphere", "multiParticlesMove",
-                    "particlesMove", "particlesNoise", "particlesCompact",
+                    "particlesMove", "particlesNoise", "particlesCompact", "roundedTunnel",
                     "donut", "flow", "flow1", "flow2"
                 ]
             },

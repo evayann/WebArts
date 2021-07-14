@@ -75,7 +75,7 @@ a img, a div {
     width: 20em;
     height: 12em;
     object-fit: cover;
-    background: #bf2e2e;
+    background: #000000;
 }
 
 .effectName {
