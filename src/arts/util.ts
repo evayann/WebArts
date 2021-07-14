@@ -57,7 +57,7 @@ function meanOn(p5: p5Instance, xStart: number, yStart: number, xSize: number, y
     return [r / counter, g / counter, b / counter];
 }
 
-export function randomAveragePixel(p5: p5Instance, maxNoise, xSize=1, ySize=1): void {
+export function randomAveragePixel(p5: p5Instance, maxNoise: number, xSize=1, ySize=1): void {
     p5.loadPixels();
     const mod = v => v < 0 ? 0 : v % 255;
     range(p5.width, xSize).forEach(x => range(p5.height, ySize).forEach(y => {
@@ -97,7 +97,7 @@ type Iterableify<T> = { [K in keyof T]: Iterable<T[K]> }
  * Zip multiples array. Stole to https://dev.to/chrismilson/zip-iterator-in-typescript-ldm?signin=true
  * @param toZip
  */
-export function* zip<T extends Array<any>>(...toZip: Iterableify<T>): Generator<T> {
+export function* zip<T extends Array<unknown>>(...toZip: Iterableify<T>): Generator<T> {
     // Get iterators for all of the iterables.
     const iterators = toZip.map(i => i[Symbol.iterator]());
 
