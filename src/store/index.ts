@@ -7,7 +7,7 @@ export default createStore({
                 category: "scene",
                 arts: [
                     "planetsCircle", "city", "rain", "sunrise", "eggs",
-                    "noiseColor", "lineEffect", "multiScale", "kiss"
+                    "noiseColor", "lineEffect", "multiScale", "compass","kiss"
                 ]
             },
             {
@@ -17,7 +17,7 @@ export default createStore({
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle", "lineInCircle",
                     "gridLines", "squareCircleGradient", "chromaCross",
-                    "multipleCircle", "hexaNeighbour", "triangleMoves", "shuriken",
+                    "multipleCircle", "hexaNeighbour", "triangleMoves",
                     "circleAutomata", "cubeStack", "boxWaves", "circleMetaballs"
                 ]
             },
