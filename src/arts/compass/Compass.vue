@@ -4,28 +4,33 @@
 
 <script lang="ts">
 import {width, height, p5Instance, halfWidth as centerX, halfHeight as centerY, P5} from "@/components/P5.vue";
-import {ArtVue, time, setLoopTime, menu, color, GUIType} from "@/arts/art";
+import {ArtVue, time, setLoopTime, menu, list, GUIType} from "@/arts/art";
 import {BoxGrid, BoxDrawable, range} from "@/arts/util";
 
 let p5: p5Instance;
 let alpha = 255;
-const stroke = 20;
+let stroke = 20;
 let nbElements = 5;
 let sColor = "#b2ecec";
 let strokeColor: P5.Color;
+let prctRadius = .9;
+let speedFactor = .1;
 let cm: CompassManager;
-
 
 type Target = () => [number, number];
 const mouse: Target = (): [number, number] => [p5.mouseY - centerY, p5.mouseX - centerX];
-const ellipse: Target = (): [number, number] => [p5.sin(time) * (centerY * .5), p5.cos(time) * (centerX * .5)];
+const ellipse: Target = (): [number, number] => [
+    p5.sin(p5.TAU * time * speedFactor) * (centerY * prctRadius),
+    p5.cos(p5.TAU * time * speedFactor) * (centerX * prctRadius)];
 const circle: Target = (): [number, number] => {
-    const min = p5.min(centerX, centerY);
-    return [p5.sin(time) * min, p5.cos(time) * min];
+    const min = p5.min(centerX, centerY) * prctRadius;
+    return [p5.sin(p5.TAU * time * speedFactor) * min, p5.cos(p5.TAU * time * speedFactor) * min];
 }
 
-const targets: Target[] = [mouse, ellipse, circle];
-const target: Target = targets[1];
+const targets: { [id: string]: Target } = {
+    mouse: mouse, ellipse: ellipse, circle: circle
+};
+let target: Target = circle;
 
 class Compass implements BoxDrawable {
     private px = 0;
@@ -99,10 +104,17 @@ export default class Art extends ArtVue {
         return this.setupDatGUI({
             properties: {
                 "Effect": [
+                    menu("Speed", 1, .1, 3, .1, value => {
+                        speedFactor = value / 10;
+                        setLoopTime(1 / speedFactor)
+                    }),
                     menu("Grid Size", nbElements, 2, 50, 1, value => { nbElements = value; reset(); }),
+                    list("Draw Function", "circle", Object.keys(targets), value => target = targets[value]),
+                    menu("Percent Radius", prctRadius, .05, 1, .01, value => prctRadius = value)
                 ],
                 "Visual & Color": [
                     menu("Alpha", alpha, 0, 255, 1, value => alpha = value),
+                    menu("Stroke Size", stroke, 0, 30, 1, value => stroke = value)
                 ],
                 "Misc": [this.pause(), this.reset(reset)]
             }

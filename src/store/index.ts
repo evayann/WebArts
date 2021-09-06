@@ -32,7 +32,7 @@ export default createStore({
                 arts: [
                     "vortex", "spiralCube", "pendulum", "lineSphere", "multiParticlesMove",
                     "particlesMove", "particlesNoise", "particlesCompact", "roundedTunnel",
-                    "donut", "flow", "flow1", "flow2"
+                    "donut", "flow", "flow1", "flow2", "flow3"
                 ]
             },
             {
