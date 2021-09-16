@@ -2,7 +2,7 @@ import {P5} from "@/components/P5.vue";
 import {BoxDrawable} from "@/arts/util";
 
 // region Particles
-export abstract class Particle  implements BoxDrawable {
+export abstract class Particle implements BoxDrawable {
     // region Attributes
     static INFINITY = "INFINITY";
 

@@ -18,7 +18,7 @@ class Particle {
     readonly pos: P5.Vector;
     private readonly vel: P5.Vector;
     private readonly acc: P5.Vector;
-    readonly size: number;
+    size: number;
 
     constructor(x: number, y: number, size: number) {
         this.pos = p5.createVector(x, y);
@@ -38,7 +38,7 @@ class Particle {
     draw(particles: Array<Particle>): void {
         this.movement(particles);
         this.update();
-        p5.circle(this.pos.x, this.pos.y, this.size);
+        p5.circle(this.pos.x, this.pos.y, (this.size > 0 ? this.size -= .1 : this.size));
     }
 
     movement(targets: Array<Particle>): void {
