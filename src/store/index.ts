@@ -6,7 +6,7 @@ export default createStore({
             {
                 category: "scene",
                 arts: [
-                    "planetsCircle", "city", "nightBridge", "rain", "sunrise", "eggs",
+                    "planetsCircle", "city", "nightBridge", "rain", "starDoor", "sunrise", "eggs",
                     "noiseColor", "lineEffect", "multiScale", "compass","kiss"
                 ]
             },
@@ -16,7 +16,7 @@ export default createStore({
                     "dropGradient", "squareFromLittle", "rotatingLine", "geometryNoise",
                     "squareShake", "circleSplit", "squaresLoop", "hypocycloid",
                     "circleSquare", "grid", "roundedRectangle", "lineInCircle",
-                    "gridLines", "squareCircleGradient", "chromaCross",
+                    "gridLines", "squareCircleGradient", "polygonLoop", "chromaCross",
                     "multipleCircle", "hexaNeighbour", "triangleMoves",
                     "circleAutomata", "cubeStack", "boxWaves", "circleMetaballs"
                 ]

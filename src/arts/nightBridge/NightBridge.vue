@@ -13,7 +13,7 @@ let p5: p5Instance;
 let precision = 200;
 let nbPilar = 10;
 let seed = 599889989; // 412424451
-let waveAmp = 1;
+let waveAmp = .3;
 let waveSpeed = 10;
 let nbStar = 500;
 
